@@ -1,34 +1,66 @@
 package glimmer
 
-type authInfo struct {
-	apiKey      string
-	apiSecret   string
-	accessToken string
-	oauthToken  string
-	oauthSecret string
+import (
+	"fmt"
+
+	"gopkg.in/masci/flickr.v3"
+)
+
+type Secrets struct {
+	ApiKey      string
+	ApiSecret   string
+	AccessToken string
+	OAuthToken  string
+	OAuthSecret string
 }
 
-func (a authInfo) NeedsAuthentication() bool {
-	return len(a.apiKey) == 0 ||
-		len(a.apiSecret) == 0 ||
-		len(a.oauthToken) == 0 ||
-		len(a.oauthSecret) == 0
-}
-func (a authInfo) GetAuthorizeUrl() (string, error) {
-	return "", nil
+type Authorizer interface {
+	GetRequestToken(client *flickr.FlickrClient) (*flickr.RequestToken, error)
+	GetAuthorizeUrl(client *flickr.FlickrClient, reqToken *flickr.RequestToken) (string, error)
 }
 
-// // first, get a request token
-// requestTok, err := flickr.GetRequestToken(client)
-// if err != nil {
-// 	fmt.Println("GetRequestToken: ", err)
-// 	return
+type Authorize struct {
+	secrets    Secrets
+	client     *flickr.FlickrClient
+	authorizer Authorizer
+}
+
+type flickrAuthorizer struct{}
+
+func (a flickrAuthorizer) GetRequestToken(client *flickr.FlickrClient) (*flickr.RequestToken, error) {
+	return flickr.GetRequestToken(client)
+}
+
+func (a flickrAuthorizer) GetAuthorizeUrl(client *flickr.FlickrClient, reqToken *flickr.RequestToken) (string, error) {
+	return flickr.GetAuthorizeUrl(client, reqToken)
+}
+
+func NewAuth(secrets Secrets) *Authorize {
+	return &Authorize{
+		secrets:    secrets,
+		client:     flickr.NewFlickrClient(secrets.ApiKey, secrets.ApiSecret),
+		authorizer: flickrAuthorizer{},
+	}
+}
+
+// func NeedsAuthentication(a AuthInfo) bool {
+// 	return len(a.ApiKey) == 0 ||
+// 		len(a.ApiSecret) == 0 ||
+// 		len(a.OAuthToken) == 0 ||
+// 		len(a.OAuthSecret) == 0
 // }
 
-// url, err := flickr.GetAuthorizeUrl(client, requestTok)
-// if err != nil {
-// 	fmt.Println("GetAuthorizeUrl: ", err)
-// 	return
-// }
+func (a *Authorize) GetUrl() (string, error) {
+	// a.client = flickr.NewFlickrClient(a.apiKey, a.apiSecret)
+	requestTok, err := a.authorizer.GetRequestToken(a.client)
+	if err != nil {
+		return "", fmt.Errorf("getting request token: %w", err)
+	}
 
-// fmt.Println("Authorize at ", url)
+	url, err := a.authorizer.GetAuthorizeUrl(a.client, requestTok)
+	if err != nil {
+		return "", fmt.Errorf("getting authorization URL: %s", err)
+	}
+
+	return url, nil
+}
