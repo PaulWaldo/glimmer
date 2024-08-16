@@ -17,12 +17,14 @@ type Secrets struct {
 type Authorizer interface {
 	GetRequestToken(client *flickr.FlickrClient) (*flickr.RequestToken, error)
 	GetAuthorizeUrl(client *flickr.FlickrClient, reqToken *flickr.RequestToken) (string, error)
+	GetAccessToken(client *flickr.FlickrClient, reqToken *flickr.RequestToken, oauthVerifier string) (*flickr.OAuthToken, error)
 }
 
 type Authorize struct {
-	secrets    Secrets
-	client     *flickr.FlickrClient
-	authorizer Authorizer
+	secrets      Secrets
+	Client       *flickr.FlickrClient
+	authorizer   Authorizer
+	requestToken *flickr.RequestToken
 }
 
 type flickrAuthorizer struct{}
@@ -35,10 +37,14 @@ func (a flickrAuthorizer) GetAuthorizeUrl(client *flickr.FlickrClient, reqToken 
 	return flickr.GetAuthorizeUrl(client, reqToken)
 }
 
+func (a flickrAuthorizer) GetAccessToken(client *flickr.FlickrClient, reqToken *flickr.RequestToken, oauthVerifier string) (*flickr.OAuthToken, error) {
+	return flickr.GetAccessToken(client, reqToken, oauthVerifier)
+}
+
 func NewAuth(secrets Secrets) *Authorize {
 	return &Authorize{
 		secrets:    secrets,
-		client:     flickr.NewFlickrClient(secrets.ApiKey, secrets.ApiSecret),
+		Client:     flickr.NewFlickrClient(secrets.ApiKey, secrets.ApiSecret),
 		authorizer: flickrAuthorizer{},
 	}
 }
@@ -51,16 +57,27 @@ func NewAuth(secrets Secrets) *Authorize {
 // }
 
 func (a *Authorize) GetUrl() (string, error) {
-	// a.client = flickr.NewFlickrClient(a.apiKey, a.apiSecret)
-	requestTok, err := a.authorizer.GetRequestToken(a.client)
+	var err error
+	a.requestToken, err = a.authorizer.GetRequestToken(a.Client)
 	if err != nil {
 		return "", fmt.Errorf("getting request token: %w", err)
 	}
 
-	url, err := a.authorizer.GetAuthorizeUrl(a.client, requestTok)
+	url, err := a.authorizer.GetAuthorizeUrl(a.Client, a.requestToken)
 	if err != nil {
 		return "", fmt.Errorf("getting authorization URL: %s", err)
 	}
 
 	return url, nil
+}
+
+func (a *Authorize) GetAccessToken(confirmationCode string) error {
+	accessTok, err := a.authorizer.GetAccessToken(a.Client, a.requestToken, confirmationCode)
+	if err != nil {
+		return fmt.Errorf("getting access token: %w", err)
+	}
+	a.Client.OAuthToken = accessTok.OAuthToken
+	a.Client.OAuthTokenSecret = accessTok.OAuthTokenSecret
+	return nil
+
 }

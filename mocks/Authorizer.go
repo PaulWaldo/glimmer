@@ -21,6 +21,66 @@ func (_m *Authorizer) EXPECT() *Authorizer_Expecter {
 	return &Authorizer_Expecter{mock: &_m.Mock}
 }
 
+// GetAccessToken provides a mock function with given fields: client, reqToken, oauthVerifier
+func (_m *Authorizer) GetAccessToken(client *flickr.FlickrClient, reqToken *flickr.RequestToken, oauthVerifier string) (*flickr.OAuthToken, error) {
+	ret := _m.Called(client, reqToken, oauthVerifier)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAccessToken")
+	}
+
+	var r0 *flickr.OAuthToken
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*flickr.FlickrClient, *flickr.RequestToken, string) (*flickr.OAuthToken, error)); ok {
+		return rf(client, reqToken, oauthVerifier)
+	}
+	if rf, ok := ret.Get(0).(func(*flickr.FlickrClient, *flickr.RequestToken, string) *flickr.OAuthToken); ok {
+		r0 = rf(client, reqToken, oauthVerifier)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*flickr.OAuthToken)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*flickr.FlickrClient, *flickr.RequestToken, string) error); ok {
+		r1 = rf(client, reqToken, oauthVerifier)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Authorizer_GetAccessToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAccessToken'
+type Authorizer_GetAccessToken_Call struct {
+	*mock.Call
+}
+
+// GetAccessToken is a helper method to define mock.On call
+//   - client *flickr.FlickrClient
+//   - reqToken *flickr.RequestToken
+//   - oauthVerifier string
+func (_e *Authorizer_Expecter) GetAccessToken(client interface{}, reqToken interface{}, oauthVerifier interface{}) *Authorizer_GetAccessToken_Call {
+	return &Authorizer_GetAccessToken_Call{Call: _e.mock.On("GetAccessToken", client, reqToken, oauthVerifier)}
+}
+
+func (_c *Authorizer_GetAccessToken_Call) Run(run func(client *flickr.FlickrClient, reqToken *flickr.RequestToken, oauthVerifier string)) *Authorizer_GetAccessToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(*flickr.FlickrClient), args[1].(*flickr.RequestToken), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *Authorizer_GetAccessToken_Call) Return(_a0 *flickr.OAuthToken, _a1 error) *Authorizer_GetAccessToken_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *Authorizer_GetAccessToken_Call) RunAndReturn(run func(*flickr.FlickrClient, *flickr.RequestToken, string) (*flickr.OAuthToken, error)) *Authorizer_GetAccessToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAuthorizeUrl provides a mock function with given fields: client, reqToken
 func (_m *Authorizer) GetAuthorizeUrl(client *flickr.FlickrClient, reqToken *flickr.RequestToken) (string, error) {
 	ret := _m.Called(client, reqToken)

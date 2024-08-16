@@ -1,10 +1,12 @@
 package glimmer
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/PaulWaldo/glimmer/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/masci/flickr.v3"
 )
 
@@ -83,7 +85,7 @@ func TestAuth_GetAuthorizeUrl(t *testing.T) {
 			mockAuthorizer.EXPECT().GetRequestToken(client).Return(expectedRequestToken, nil)
 			mockAuthorizer.EXPECT().GetAuthorizeUrl(client, expectedRequestToken).Return(tC.expectedURL, nil)
 
-			authorize := Authorize{secrets: tC.authorize.secrets, authorizer: mockAuthorizer, client: client}
+			authorize := Authorize{secrets: tC.authorize.secrets, authorizer: mockAuthorizer, Client: client}
 
 			url, err := authorize.GetUrl()
 			if tC.expectError == true {
@@ -92,6 +94,50 @@ func TestAuth_GetAuthorizeUrl(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, tC.expectedURL, url)
 			}
+		})
+	}
+}
+
+func TestGetAccessToken(t *testing.T) {
+	testCases := []struct {
+		desc        string
+		expectError bool
+		err         error
+		// authorize   Authorize
+	}{
+		{
+			desc:        "Successful Token",
+			expectError: false,
+			err:         nil,
+		},
+		{
+			desc:        "Unsuccessful Token",
+			expectError: true,
+			err:         errors.New("test error"),
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			client := flickr.NewFlickrClient("", "")
+			confirmationCode := "abc123"
+
+			authorize := Authorize{}
+			mockAuthorizer := mocks.NewAuthorizer(t)
+			expectedRequestToken := &flickr.RequestToken{OauthToken: "token", OauthTokenSecret: "secret"}
+			authorize.requestToken = expectedRequestToken
+			authorize.Client = client
+			mockAuthorizer.EXPECT().GetAccessToken(client, expectedRequestToken, confirmationCode).Return(&flickr.OAuthToken{OAuthToken: "token", OAuthTokenSecret: "secret"}, tC.err)
+			authorize.authorizer = mockAuthorizer
+
+			err := authorize.GetAccessToken(confirmationCode)
+
+			if tC.expectError == true {
+				require.Error(t, errors.New("test error"))
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, "token", authorize.Client.OAuthToken, "expecting OAuth Token to be %q but got %q", "token", authorize.Client.OAuthToken)
+			assert.Equal(t, "secret", authorize.Client.OAuthTokenSecret, "expecting OAuth Secret to be %q but got %q", "secret", authorize.Client.OAuthTokenSecret)
 		})
 	}
 }
