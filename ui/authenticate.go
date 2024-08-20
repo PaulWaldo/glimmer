@@ -1,6 +1,10 @@
 package ui
 
-import "github.com/PaulWaldo/glimmer"
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
+	"github.com/PaulWaldo/glimmer/api"
+)
 
 const PREF_KEY_API_KEY = "ApiKey"
 const PREF_KEY_API_SECRET = "ApiSecret"
@@ -8,8 +12,8 @@ const PREF_KEY_ACCESS_TOKEN = "AccessToken"
 const PREF_KEY_OAUTH_TOKEN = "OAuthToken"
 const PREF_KEY_OAUTH_SECRET = "OAuthSecret"
 
-func (ma *myApp) LoadSecrets() glimmer.Secrets {
-	sec := glimmer.Secrets{}
+func (ma *myApp) LoadSecrets() api.Secrets {
+	sec := api.Secrets{}
 	pref := ma.app.Preferences()
 	sec.ApiKey = pref.String(PREF_KEY_API_KEY)
 	sec.ApiSecret = pref.String(PREF_KEY_API_SECRET)
@@ -17,6 +21,23 @@ func (ma *myApp) LoadSecrets() glimmer.Secrets {
 	sec.OAuthToken = pref.String(PREF_KEY_OAUTH_TOKEN)
 	sec.OAuthSecret = pref.String(PREF_KEY_OAUTH_SECRET)
 	return sec
+}
+
+type apiInfoEntry struct {
+	apiKeyEntry    *widget.Entry
+	apiSecretEntry *widget.Entry
+	form           *widget.Form
+}
+
+func (e *apiInfoEntry) makeUI() fyne.CanvasObject {
+	e.apiKeyEntry = widget.NewPasswordEntry()
+	e.apiSecretEntry = widget.NewPasswordEntry()
+	e.form = widget.NewForm(
+		widget.NewFormItem("API Key", e.apiKeyEntry),
+		widget.NewFormItem("API Secret", e.apiSecretEntry),
+	)
+	e.form.OnSubmit = func() {}
+	return e.form
 }
 
 // func (ma *myApp) authenticate() {

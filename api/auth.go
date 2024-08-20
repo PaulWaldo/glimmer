@@ -1,10 +1,16 @@
-package glimmer
+package api
 
 import (
 	"fmt"
 
 	"gopkg.in/masci/flickr.v3"
 )
+
+type Authorizer interface {
+	GetRequestToken(client *flickr.FlickrClient) (*flickr.RequestToken, error)
+	GetAuthorizeUrl(client *flickr.FlickrClient, reqToken *flickr.RequestToken) (string, error)
+	GetAccessToken(client *flickr.FlickrClient, reqToken *flickr.RequestToken, oauthVerifier string) (*flickr.OAuthToken, error)
+}
 
 type Secrets struct {
 	ApiKey      string
@@ -14,17 +20,11 @@ type Secrets struct {
 	OAuthSecret string
 }
 
-type Authorizer interface {
-	GetRequestToken(client *flickr.FlickrClient) (*flickr.RequestToken, error)
-	GetAuthorizeUrl(client *flickr.FlickrClient, reqToken *flickr.RequestToken) (string, error)
-	GetAccessToken(client *flickr.FlickrClient, reqToken *flickr.RequestToken, oauthVerifier string) (*flickr.OAuthToken, error)
-}
-
 type Authorize struct {
-	secrets      Secrets
+	Secrets      Secrets
 	Client       *flickr.FlickrClient
-	authorizer   Authorizer
-	requestToken *flickr.RequestToken
+	Authorizer   Authorizer
+	RequestToken *flickr.RequestToken
 }
 
 type flickrAuthorizer struct{}
@@ -43,9 +43,9 @@ func (a flickrAuthorizer) GetAccessToken(client *flickr.FlickrClient, reqToken *
 
 func NewAuth(secrets Secrets) *Authorize {
 	return &Authorize{
-		secrets:    secrets,
+		Secrets:    secrets,
 		Client:     flickr.NewFlickrClient(secrets.ApiKey, secrets.ApiSecret),
-		authorizer: flickrAuthorizer{},
+		Authorizer: flickrAuthorizer{},
 	}
 }
 
@@ -58,12 +58,12 @@ func NewAuth(secrets Secrets) *Authorize {
 
 func (a *Authorize) GetUrl() (string, error) {
 	var err error
-	a.requestToken, err = a.authorizer.GetRequestToken(a.Client)
+	a.RequestToken, err = a.Authorizer.GetRequestToken(a.Client)
 	if err != nil {
 		return "", fmt.Errorf("getting request token: %w", err)
 	}
 
-	url, err := a.authorizer.GetAuthorizeUrl(a.Client, a.requestToken)
+	url, err := a.Authorizer.GetAuthorizeUrl(a.Client, a.RequestToken)
 	if err != nil {
 		return "", fmt.Errorf("getting authorization URL: %s", err)
 	}
@@ -72,7 +72,7 @@ func (a *Authorize) GetUrl() (string, error) {
 }
 
 func (a *Authorize) GetAccessToken(confirmationCode string) error {
-	accessTok, err := a.authorizer.GetAccessToken(a.Client, a.requestToken, confirmationCode)
+	accessTok, err := a.Authorizer.GetAccessToken(a.Client, a.RequestToken, confirmationCode)
 	if err != nil {
 		return fmt.Errorf("getting access token: %w", err)
 	}

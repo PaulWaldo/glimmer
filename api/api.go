@@ -1,4 +1,4 @@
-package glimmer
+package api
 
 import (
 	"gopkg.in/masci/flickr.v3"

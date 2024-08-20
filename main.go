@@ -1,10 +1,11 @@
-package glimmer
+package main
 
 import (
 	"fmt"
 
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/widget"
+	"github.com/PaulWaldo/glimmer/ui"
 	"gopkg.in/masci/flickr.v3"
 	"gopkg.in/masci/flickr.v3/photosets"
 	"gopkg.in/masci/flickr.v3/test"
@@ -94,8 +95,8 @@ import (
 // 	err := authenticate(*authInfo, client)
 // }
 
-func main() {
-	a := app.NewWithID("com.github.PaulWaldo.flickr")
+func oddmain() {
+	a := app.NewWithID("com.github.PaulWaldo.glimmer")
 	// auth := NewAuthInfo(a)
 	// ma := myApp{}
 	// ma.apiKey, _ = os.LookupEnv("API_KEY")
@@ -175,4 +176,7 @@ func main() {
 	fmt.Printf("Login test response2 = %v\n", response)
 
 	w.ShowAndRun()
+}
+func main() {
+	ui.Run()
 }

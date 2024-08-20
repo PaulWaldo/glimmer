@@ -1,8 +1,9 @@
-package glimmer
+package api_test
 
 import (
 	"testing"
 
+	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/masci/flickr.v3"
 )
@@ -25,7 +26,7 @@ func TestGetContactList(t *testing.T) {
 	defer server.Close()
 	fclient.HTTPClient = client
 
-	resp, err := GetContactList(fclient)
+	resp, err := api.GetContactList(fclient)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(resp.Contacts.Contact), "Expected 3 contacts, but got %d", len(resp.Contacts.Contact))

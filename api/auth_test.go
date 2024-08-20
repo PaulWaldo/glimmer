@@ -1,9 +1,10 @@
-package glimmer
+package api_test
 
 import (
 	"errors"
 	"testing"
 
+	"github.com/PaulWaldo/glimmer/api"
 	"github.com/PaulWaldo/glimmer/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -56,14 +57,14 @@ import (
 func TestAuth_GetAuthorizeUrl(t *testing.T) {
 	testCases := []struct {
 		desc        string
-		authorize   Authorize
+		authorize   api.Authorize
 		expectedURL string
 		expectError bool
 	}{
 		{
 			desc: "URL Request success",
-			authorize: Authorize{
-				secrets: Secrets{
+			authorize: api.Authorize{
+				Secrets: api.Secrets{
 					ApiKey:      "abc",
 					ApiSecret:   "def",
 					AccessToken: "123",
@@ -78,14 +79,14 @@ func TestAuth_GetAuthorizeUrl(t *testing.T) {
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			client := flickr.NewFlickrClient(tC.authorize.secrets.ApiKey, tC.authorize.secrets.ApiSecret)
+			client := flickr.NewFlickrClient(tC.authorize.Secrets.ApiKey, tC.authorize.Secrets.ApiSecret)
 
 			mockAuthorizer := mocks.NewAuthorizer(t)
 			expectedRequestToken := &flickr.RequestToken{OauthToken: "token", OauthTokenSecret: "secret"}
 			mockAuthorizer.EXPECT().GetRequestToken(client).Return(expectedRequestToken, nil)
 			mockAuthorizer.EXPECT().GetAuthorizeUrl(client, expectedRequestToken).Return(tC.expectedURL, nil)
 
-			authorize := Authorize{secrets: tC.authorize.secrets, authorizer: mockAuthorizer, Client: client}
+			authorize := api.Authorize{Secrets: tC.authorize.Secrets, Authorizer: mockAuthorizer, Client: client}
 
 			url, err := authorize.GetUrl()
 			if tC.expectError == true {
@@ -121,13 +122,13 @@ func TestGetAccessToken(t *testing.T) {
 			client := flickr.NewFlickrClient("", "")
 			confirmationCode := "abc123"
 
-			authorize := Authorize{}
+			authorize := api.Authorize{}
 			mockAuthorizer := mocks.NewAuthorizer(t)
 			expectedRequestToken := &flickr.RequestToken{OauthToken: "token", OauthTokenSecret: "secret"}
-			authorize.requestToken = expectedRequestToken
+			authorize.RequestToken = expectedRequestToken
 			authorize.Client = client
 			mockAuthorizer.EXPECT().GetAccessToken(client, expectedRequestToken, confirmationCode).Return(&flickr.OAuthToken{OAuthToken: "token", OAuthTokenSecret: "secret"}, tC.err)
-			authorize.authorizer = mockAuthorizer
+			authorize.Authorizer = mockAuthorizer
 
 			err := authorize.GetAccessToken(confirmationCode)
 

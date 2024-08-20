@@ -3,7 +3,7 @@ package ui
 import (
 	"testing"
 
-	"github.com/PaulWaldo/glimmer"
+	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert"
 
 	"fyne.io/fyne/v2/test"
@@ -14,7 +14,7 @@ func Test_myApp_LoadSecrets(t *testing.T) {
 	ma := &myApp{
 		app: app,
 	}
-	expectedSecrets := glimmer.Secrets{
+	expectedSecrets := api.Secrets{
 		ApiKey:      "apikey",
 		ApiSecret:   "apisecret",
 		AccessToken: "accesstoken",
@@ -37,4 +37,15 @@ func Test_myApp_LoadSecrets(t *testing.T) {
 	assert.Equal(t, expectedSecrets.AccessToken, secrets.AccessToken)
 	assert.Equal(t, expectedSecrets.OAuthSecret, secrets.OAuthSecret)
 	assert.Equal(t, expectedSecrets.OAuthToken, secrets.OAuthToken)
+}
+
+func Test_apiInfoEntry_InfoHandling(t *testing.T) {
+	e := apiInfoEntry{}
+	e.makeUI()
+	test.Type(e.apiKeyEntry, "abc123")
+	test.Type(e.apiSecretEntry, "xyz789")
+
+	e.form.OnSubmit()
+	
+	assert.Equal(t, "abc123", e.apiKeyEntry.Text)
 }
