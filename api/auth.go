@@ -20,7 +20,7 @@ type Secrets struct {
 	OAuthSecret string
 }
 
-type Authorize struct {
+type Authorization struct {
 	Secrets      Secrets
 	Client       *flickr.FlickrClient
 	Authorizer   Authorizer
@@ -41,8 +41,8 @@ func (a flickrAuthorizer) GetAccessToken(client *flickr.FlickrClient, reqToken *
 	return flickr.GetAccessToken(client, reqToken, oauthVerifier)
 }
 
-func NewAuth(secrets Secrets) *Authorize {
-	return &Authorize{
+func NewAuth(secrets Secrets) *Authorization {
+	return &Authorization{
 		Secrets:    secrets,
 		Client:     flickr.NewFlickrClient(secrets.ApiKey, secrets.ApiSecret),
 		Authorizer: flickrAuthorizer{},
@@ -56,7 +56,7 @@ func NewAuth(secrets Secrets) *Authorize {
 // 		len(a.OAuthSecret) == 0
 // }
 
-func (a *Authorize) GetUrl() (string, error) {
+func (a *Authorization) GetUrl() (string, error) {
 	var err error
 	a.RequestToken, err = a.Authorizer.GetRequestToken(a.Client)
 	if err != nil {
@@ -71,7 +71,7 @@ func (a *Authorize) GetUrl() (string, error) {
 	return url, nil
 }
 
-func (a *Authorize) GetAccessToken(confirmationCode string) error {
+func (a *Authorization) GetAccessToken(confirmationCode string) error {
 	accessTok, err := a.Authorizer.GetAccessToken(a.Client, a.RequestToken, confirmationCode)
 	if err != nil {
 		return fmt.Errorf("getting access token: %w", err)
