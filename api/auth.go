@@ -21,8 +21,8 @@ type Secrets struct {
 }
 
 type Authorization struct {
-	Secrets      Secrets
-	Client       *flickr.FlickrClient
+	// Secrets      Secrets
+	// Client       *flickr.FlickrClient
 	Authorizer   Authorizer
 	RequestToken *flickr.RequestToken
 }
@@ -41,29 +41,22 @@ func (a flickrAuthorizer) GetAccessToken(client *flickr.FlickrClient, reqToken *
 	return flickr.GetAccessToken(client, reqToken, oauthVerifier)
 }
 
-func NewAuth(secrets Secrets) *Authorization {
+func NewAuthorizer(/*secrets Secrets*/) *Authorization {
 	return &Authorization{
-		Secrets:    secrets,
-		Client:     flickr.NewFlickrClient(secrets.ApiKey, secrets.ApiSecret),
+		// Secrets:    secrets,
+		// Client:     flickr.NewFlickrClient(secrets.ApiKey, secrets.ApiSecret),
 		Authorizer: flickrAuthorizer{},
 	}
 }
 
-// func NeedsAuthentication(a AuthInfo) bool {
-// 	return len(a.ApiKey) == 0 ||
-// 		len(a.ApiSecret) == 0 ||
-// 		len(a.OAuthToken) == 0 ||
-// 		len(a.OAuthSecret) == 0
-// }
-
-func (a *Authorization) GetUrl() (string, error) {
+func (a *Authorization) GetUrl(client *flickr.FlickrClient) (string, error) {
 	var err error
-	a.RequestToken, err = a.Authorizer.GetRequestToken(a.Client)
+	a.RequestToken, err = a.Authorizer.GetRequestToken(client)
 	if err != nil {
 		return "", fmt.Errorf("getting request token: %w", err)
 	}
 
-	url, err := a.Authorizer.GetAuthorizeUrl(a.Client, a.RequestToken)
+	url, err := a.Authorizer.GetAuthorizeUrl(client, a.RequestToken)
 	if err != nil {
 		return "", fmt.Errorf("getting authorization URL: %s", err)
 	}
@@ -71,13 +64,13 @@ func (a *Authorization) GetUrl() (string, error) {
 	return url, nil
 }
 
-func (a *Authorization) GetAccessToken(confirmationCode string) error {
-	accessTok, err := a.Authorizer.GetAccessToken(a.Client, a.RequestToken, confirmationCode)
+func (a *Authorization) GetAccessToken(client *flickr.FlickrClient, confirmationCode string) error {
+	accessTok, err := a.Authorizer.GetAccessToken(client, a.RequestToken, confirmationCode)
 	if err != nil {
 		return fmt.Errorf("getting access token: %w", err)
 	}
-	a.Client.OAuthToken = accessTok.OAuthToken
-	a.Client.OAuthTokenSecret = accessTok.OAuthTokenSecret
+	client.OAuthToken = accessTok.OAuthToken
+	client.OAuthTokenSecret = accessTok.OAuthTokenSecret
 	return nil
 
 }

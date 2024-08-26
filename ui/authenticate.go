@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
-	"gopkg.in/masci/flickr.v3/test"
 )
 
 type apiInfoEntry struct {
@@ -55,12 +54,15 @@ func (ma *myApp) authenticate() {
 	if ma.isAuthenticated() {
 		return
 	}
+
 	apiKeyEntry := widget.NewEntryWithData(ma.prefs.secrets.apiKey)
 	apiKeyEntry.Validator = nil
 	apiKeyEntry.Password = true
+
 	apiSecretEntry := widget.NewEntryWithData(ma.prefs.secrets.apiSecret)
 	apiSecretEntry.Validator = nil
 	apiSecretEntry.Password = true
+
 	formContents := container.NewVBox(apiKeyEntry, apiSecretEntry)
 	var auth *api.Authorization
 	form := dialog.NewCustomConfirm("Your Flickr API Credentials", "Authenticate", "Abort", formContents, func(confirmed bool) {
@@ -69,12 +71,8 @@ func (ma *myApp) authenticate() {
 			ma.prefs.secrets.apiSecret.Set(apiSecretEntry.Text)
 			ma.client = flickr.NewFlickrClient(apiKeyEntry.Text, apiSecretEntry.Text)
 
-			auth = api.NewAuth(
-				api.Secrets{
-					ApiKey:    apiKeyEntry.Text,
-					ApiSecret: apiSecretEntry.Text,
-				})
-			uri, err := auth.GetUrl()
+			auth = api.NewAuthorizer()
+			uri, err := auth.GetUrl(ma.client)
 			if err != nil {
 				fyne.LogError("Getting Auth URL: ", err)
 				dialog.NewError(err, ma.window).Show()
@@ -101,21 +99,21 @@ func (ma *myApp) authenticate() {
 					ma.prefs.secrets.apiKey.Set(apiKeyEntry.Text)
 					ma.prefs.secrets.apiSecret.Set(apiSecretEntry.Text)
 					ma.client = flickr.NewFlickrClient(apiKeyEntry.Text, apiSecretEntry.Text)
-					err := auth.GetAccessToken(confirmationEntry.Text)
+					err := auth.GetAccessToken(ma.client, confirmationEntry.Text)
 					if err != nil {
 						dialog.NewError(err, ma.window).Show()
 						fyne.LogError("calling GetAccessToken", err)
 						return
 					}
 
-					ma.prefs.secrets.accessToken.Set(auth.Secrets.AccessToken)
-					ma.prefs.secrets.oAuthToken.Set(auth.RequestToken.OauthToken)
-					ma.prefs.secrets.oAuthSecret.Set(auth.RequestToken.OauthTokenSecret)
-					ma.client.OAuthToken = auth.RequestToken.OauthToken
-					ma.client.OAuthTokenSecret = auth.RequestToken.OauthTokenSecret
-					ma.client.Id = auth.Client.Id
+					// ma.prefs.secrets.accessToken.Set(auth.Secrets.AccessToken)
+					// ma.prefs.secrets.oAuthToken.Set(auth.RequestToken.OauthToken)
+					// ma.prefs.secrets.oAuthSecret.Set(auth.RequestToken.OauthTokenSecret)
+					// ma.client.OAuthToken = auth.RequestToken.OauthToken
+					// ma.client.OAuthTokenSecret = auth.RequestToken.OauthTokenSecret
+					// ma.client.Id = auth.Client.Id
 
-					r, err := test.Login(auth.Client) //ma.client)
+					r, err := api.GetContactList(ma.client)
 					fmt.Println(r)
 					if err != nil {
 						dialog.NewError(err, ma.window).Show()
@@ -144,32 +142,33 @@ func (ma *myApp) authenticate() {
 // }
 
 // // getAuthCode allows the user to input the Authentication Token provided by Mastodon into the preferences
-// func (ma *myApp) getAuthCode() {
-// 	accessTokenEntry := widget.NewEntry()
-// 	accessTokenEntry.Validator = nil
-// 	dialog.NewForm("Authorization Code", "Save", "Cancel", []*widget.FormItem{
-// 		{
-// 			Text:     "Authorization Code",
-// 			Widget:   accessTokenEntry,
-// 			HintText: "XXX-XXX-XXX",
-// 		}},
-// 		func(confirmed bool) {
-// 			if confirmed {
-// 				c := NewClientFromPrefs(ma.prefs)
-// 				// fmt.Printf("After authorizing, client is \n%+v\n", c.Config)
-// 				err := c.AuthenticateToken(context.Background(), accessTokenEntry.Text, "urn:ietf:wg:oauth:2.0:oob")
-// 				if err != nil {
-// 					dialog.NewError(err, ma.window).Show()
-// 					fyne.LogError("Authenticating token", err)
-// 					return
-// 				}
-// 				_ = ma.prefs.AccessToken.Set(c.Config.AccessToken)
-// 				ma.setAuthMenuStatus()
-// 				ma.refreshFollowedTags()
-// 			}
-// 		},
-// 		ma.window).Show()
-// }
+//
+//	func (ma *myApp) getAuthCode() {
+//		accessTokenEntry := widget.NewEntry()
+//		accessTokenEntry.Validator = nil
+//		dialog.NewForm("Authorization Code", "Save", "Cancel", []*widget.FormItem{
+//			{
+//				Text:     "Authorization Code",
+//				Widget:   accessTokenEntry,
+//				HintText: "XXX-XXX-XXX",
+//			}},
+//			func(confirmed bool) {
+//				if confirmed {
+//					c := NewClientFromPrefs(ma.prefs)
+//					// fmt.Printf("After authorizing, client is \n%+v\n", c.Config)
+//					err := c.AuthenticateToken(context.Background(), accessTokenEntry.Text, "urn:ietf:wg:oauth:2.0:oob")
+//					if err != nil {
+//						dialog.NewError(err, ma.window).Show()
+//						fyne.LogError("Authenticating token", err)
+//						return
+//					}
+//					_ = ma.prefs.AccessToken.Set(c.Config.AccessToken)
+//					ma.setAuthMenuStatus()
+//					ma.refreshFollowedTags()
+//				}
+//			},
+//			ma.window).Show()
+//	}
 func (ma *myApp) forgetCredentials() {
 	dialog.NewConfirm("Log out", "Logging out will remove your authentication data", func(b bool) {
 		if b {
