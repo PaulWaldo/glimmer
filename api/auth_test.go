@@ -57,21 +57,11 @@ import (
 func TestAuth_GetAuthorizeUrl(t *testing.T) {
 	testCases := []struct {
 		desc        string
-		authorize   api.Authorization
 		expectedURL string
 		expectError bool
 	}{
 		{
-			desc: "URL Request success",
-			authorize: api.Authorization{
-				Secrets: api.Secrets{
-					ApiKey:      "abc",
-					ApiSecret:   "def",
-					AccessToken: "123",
-					OAuthToken:  "456",
-					OAuthSecret: "789",
-				},
-			},
+			desc:        "URL Request success",
 			expectedURL: "https://example.com/auth_here",
 			expectError: false,
 		},
@@ -79,16 +69,16 @@ func TestAuth_GetAuthorizeUrl(t *testing.T) {
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			client := flickr.NewFlickrClient(tC.authorize.Secrets.ApiKey, tC.authorize.Secrets.ApiSecret)
+			client := flickr.NewFlickrClient("", "")
 
 			mockAuthorizer := mocks.NewAuthorizer(t)
 			expectedRequestToken := &flickr.RequestToken{OauthToken: "token", OauthTokenSecret: "secret"}
 			mockAuthorizer.EXPECT().GetRequestToken(client).Return(expectedRequestToken, nil)
 			mockAuthorizer.EXPECT().GetAuthorizeUrl(client, expectedRequestToken).Return(tC.expectedURL, nil)
 
-			authorize := api.Authorization{Secrets: tC.authorize.Secrets, Authorizer: mockAuthorizer, Client: client}
+			authorize := api.Authorization{Authorizer: mockAuthorizer}
 
-			url, err := authorize.GetUrl()
+			url, err := authorize.GetUrl(client)
 			if tC.expectError == true {
 				assert.Error(t, err)
 			} else {
@@ -104,7 +94,6 @@ func TestGetAccessToken(t *testing.T) {
 		desc        string
 		expectError bool
 		err         error
-		// authorize   Authorize
 	}{
 		{
 			desc:        "Successful Token",
@@ -126,19 +115,18 @@ func TestGetAccessToken(t *testing.T) {
 			mockAuthorizer := mocks.NewAuthorizer(t)
 			expectedRequestToken := &flickr.RequestToken{OauthToken: "token", OauthTokenSecret: "secret"}
 			authorize.RequestToken = expectedRequestToken
-			authorize.Client = client
 			mockAuthorizer.EXPECT().GetAccessToken(client, expectedRequestToken, confirmationCode).Return(&flickr.OAuthToken{OAuthToken: "token", OAuthTokenSecret: "secret"}, tC.err)
 			authorize.Authorizer = mockAuthorizer
 
-			err := authorize.GetAccessToken(confirmationCode)
+			err := authorize.GetAccessToken(client, confirmationCode)
 
 			if tC.expectError == true {
 				require.Error(t, errors.New("test error"))
 				return
 			}
 			require.NoError(t, err)
-			assert.Equal(t, "token", authorize.Client.OAuthToken, "expecting OAuth Token to be %q but got %q", "token", authorize.Client.OAuthToken)
-			assert.Equal(t, "secret", authorize.Client.OAuthTokenSecret, "expecting OAuth Secret to be %q but got %q", "secret", authorize.Client.OAuthTokenSecret)
+			assert.Equal(t, "token", client.OAuthToken, "expecting OAuth Token to be %q but got %q", "token", client.OAuthToken)
+			assert.Equal(t, "secret", client.OAuthTokenSecret, "expecting OAuth Secret to be %q but got %q", "secret", client.OAuthTokenSecret)
 		})
 	}
 }

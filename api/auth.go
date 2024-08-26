@@ -12,17 +12,15 @@ type Authorizer interface {
 	GetAccessToken(client *flickr.FlickrClient, reqToken *flickr.RequestToken, oauthVerifier string) (*flickr.OAuthToken, error)
 }
 
-type Secrets struct {
-	ApiKey      string
-	ApiSecret   string
-	AccessToken string
-	OAuthToken  string
-	OAuthSecret string
-}
+// type Secrets struct {
+// 	ApiKey      string
+// 	ApiSecret   string
+// 	AccessToken string
+// 	OAuthToken  string
+// 	OAuthSecret string
+// }
 
 type Authorization struct {
-	// Secrets      Secrets
-	// Client       *flickr.FlickrClient
 	Authorizer   Authorizer
 	RequestToken *flickr.RequestToken
 }
@@ -43,8 +41,6 @@ func (a flickrAuthorizer) GetAccessToken(client *flickr.FlickrClient, reqToken *
 
 func NewAuthorizer(/*secrets Secrets*/) *Authorization {
 	return &Authorization{
-		// Secrets:    secrets,
-		// Client:     flickr.NewFlickrClient(secrets.ApiKey, secrets.ApiSecret),
 		Authorizer: flickrAuthorizer{},
 	}
 }
