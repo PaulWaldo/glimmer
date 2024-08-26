@@ -3,10 +3,9 @@ package ui
 import (
 	"testing"
 
+	"fyne.io/fyne/v2/test"
 	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert"
-
-	"fyne.io/fyne/v2/test"
 )
 
 func Test_myApp_LoadSecrets(t *testing.T) {
@@ -24,11 +23,11 @@ func Test_myApp_LoadSecrets(t *testing.T) {
 
 	// Store secrets into preferences
 	p := app.Preferences()
-	p.SetString(PREF_KEY_API_KEY, expectedSecrets.ApiKey)
-	p.SetString(PREF_KEY_API_SECRET, expectedSecrets.ApiSecret)
-	p.SetString(PREF_KEY_ACCESS_TOKEN, expectedSecrets.AccessToken)
-	p.SetString(PREF_KEY_OAUTH_TOKEN, expectedSecrets.OAuthToken)
-	p.SetString(PREF_KEY_OAUTH_SECRET, expectedSecrets.OAuthSecret)
+	p.SetString(PrefKeyAPIKey, expectedSecrets.ApiKey)
+	p.SetString(PrefKeyAPISecret, expectedSecrets.ApiSecret)
+	p.SetString(PrefKeyAccessToken, expectedSecrets.AccessToken)
+	p.SetString(PrefKeyOauthToken, expectedSecrets.OAuthToken)
+	p.SetString(PrefKeyOauthSecret, expectedSecrets.OAuthSecret)
 
 	secrets := ma.LoadSecrets()
 
@@ -46,6 +45,36 @@ func Test_apiInfoEntry_InfoHandling(t *testing.T) {
 	test.Type(e.apiSecretEntry, "xyz789")
 
 	e.form.OnSubmit()
-	
+
 	assert.Equal(t, "abc123", e.apiKeyEntry.Text)
 }
+
+// func Test_myApp_CreateSecrets(t *testing.T) {
+// 	type fields struct {
+// 		ma      *myApp
+// 	}
+// 	tests := []struct {
+// 		name    string
+// 		fields  fields
+// 		want    api.Secrets
+// 		wantErr bool
+// 	}{
+
+// 	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			ma := &myApp{
+// 				app:    tt.fields.app,
+// 				window: tt.fields.window,
+// 			}
+// 			got, err := ma.CreateSecrets()
+// 			if (err != nil) != tt.wantErr {
+// 				t.Errorf("myApp.CreateSecrets() error = %v, wantErr %v", err, tt.wantErr)
+// 				return
+// 			}
+// 			if !reflect.DeepEqual(got, tt.want) {
+// 				t.Errorf("myApp.CreateSecrets() = %v, want %v", got, tt.want)
+// 			}
+// 		})
+// 	}
+// }
