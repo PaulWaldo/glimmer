@@ -13,32 +13,6 @@ import (
 	"gopkg.in/masci/flickr.v3/test"
 )
 
-// const PREF_KEY_API_KEY = "ApiKey"
-// const PREF_KEY_API_SECRET = "ApiSecret"
-// const PREF_KEY_ACCESS_TOKEN = "AccessToken"
-// const PREF_KEY_OAUTH_TOKEN = "OAuthToken"
-// const PREF_KEY_OAUTH_SECRET = "OAuthSecret"
-
-// func (ma *myApp) LoadSecrets() api.Secrets {
-// 	sec := api.Secrets{}
-// 	pref := ma.app.Preferences()
-// 	sec.ApiKey = pref.String(PREF_KEY_API_KEY)
-// 	sec.ApiSecret = pref.String(PREF_KEY_API_SECRET)
-// 	sec.AccessToken = pref.String(PREF_KEY_ACCESS_TOKEN)
-// 	sec.OAuthToken = pref.String(PREF_KEY_OAUTH_TOKEN)
-// 	sec.OAuthSecret = pref.String(PREF_KEY_OAUTH_SECRET)
-// 	return sec
-// }
-
-// func (ma *myApp) CreateSecrets() (api.Secrets, error) {
-// 	sec := api.Secrets{}
-// 	w := ma.app.NewWindow("Authorize to Flickr")
-// 	e := apiInfoEntry{}
-// 	w.SetContent(e.makeUI(ma))
-
-// 	return sec, nil
-// }
-
 type apiInfoEntry struct {
 	apiKeyEntry    *widget.Entry
 	apiSecretEntry *widget.Entry
@@ -135,10 +109,10 @@ func (ma *myApp) authenticate() {
 					}
 
 					ma.prefs.secrets.accessToken.Set(auth.Secrets.AccessToken)
-					ma.prefs.secrets.oAuthToken.Set(auth.Secrets.OAuthToken)
-					ma.prefs.secrets.oAuthSecret.Set(auth.Secrets.OAuthSecret)
-					ma.client.OAuthToken = auth.Client.OAuthToken
-					ma.client.OAuthTokenSecret = auth.Client.OAuthTokenSecret
+					ma.prefs.secrets.oAuthToken.Set(auth.RequestToken.OauthToken)
+					ma.prefs.secrets.oAuthSecret.Set(auth.RequestToken.OauthTokenSecret)
+					ma.client.OAuthToken = auth.RequestToken.OauthToken
+					ma.client.OAuthTokenSecret = auth.RequestToken.OauthTokenSecret
 					ma.client.Id = auth.Client.Id
 
 					r, err := test.Login(auth.Client) //ma.client)
@@ -196,3 +170,11 @@ func (ma *myApp) authenticate() {
 // 		},
 // 		ma.window).Show()
 // }
+func (ma *myApp) forgetCredentials() {
+	dialog.NewConfirm("Log out", "Logging out will remove your authentication data", func(b bool) {
+		if b {
+			ClearCredentialsPrefs()
+			ma.setAuthMenuStatus()
+		}
+	}, ma.window).Show()
+}

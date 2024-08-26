@@ -13,50 +13,55 @@ type myApp struct {
 	app    fyne.App
 	window fyne.Window
 	client *flickr.FlickrClient
-	// keepTags, removeTags  []*mastodon.FollowedTag
-	// listChoices           *ListChoices
-	// unfollowButton        *widget.Button
-	// refreshButton         *widget.Button
-	// loginMenu, logoutMenu *fyne.MenuItem
-	// serverText            *canvas.Text
+	loginMenu, logoutMenu *fyne.MenuItem
 }
 
-// type prefs struct {
-// 	secrets prefSecrets
-// }
+func (ma *myApp) isLoggedIn() bool {
+	s, err := ma.prefs.secrets.apiKey.Get()
+	if err != nil || len(s) == 0 {
+		return false
+	}
+	s, err = ma.prefs.secrets.apiSecret.Get()
+	if err != nil || len(s) == 0 {
+		return false
+	}
+	s, err = ma.prefs.secrets.oAuthToken.Get()
+	if err != nil || len(s) == 0 {
+		return false
+	}
+	s, err = ma.prefs.secrets.oAuthSecret.Get()
+	if err != nil || len(s) == 0 {
+		return false
+	}
 
-// type prefSecrets struct {
-// 	apiKey      binding.String
-// 	apiSecret   binding.String
-// 	accessToken binding.String
-// 	oAuthToken  binding.String
-// 	oAuthSecret binding.String
-// }
+	return true
+}
+
 
 func Run() {
 	ma := myApp{}
 	ma.app = app.NewWithID(AppID)
 	ma.prefs = NewPreferences(ma.app)
 	ma.window = ma.app.NewWindow("Glimmer")
-	// ma.loginMenu = fyne.NewMenuItem("Log In", ma.authenticate)
-	// ma.logoutMenu = fyne.NewMenuItem("Log Out", ma.forgetCredentials)
-	// ma.window.SetMainMenu(fyne.NewMainMenu(
-	// 	fyne.NewMenu("Server", ma.loginMenu, ma.logoutMenu)),
-	// )
-	// ma.setAuthMenuStatus()
+	ma.loginMenu = fyne.NewMenuItem("Log In", ma.authenticate)
+	ma.logoutMenu = fyne.NewMenuItem("Log Out", ma.forgetCredentials)
+	ma.window.SetMainMenu(fyne.NewMainMenu(
+		fyne.NewMenu("Server", ma.loginMenu, ma.logoutMenu)),
+	)
+	ma.setAuthMenuStatus()
 	// e := apiInfoEntry{}
 	// ma.window.SetContent(e.makeUI())
 	ma.window.Resize(fyne.Size{Width: 1000, Height: 500})
-	// if ma.isLoggedIn() {
+	if ma.isLoggedIn() {
 	// 	ma.refreshFollowedTags()
-	// } else {
-	// 	ma.authenticate()
-	// }
-	ma.authenticate()
+	} else {
+		ma.authenticate()
+	}
+	// ma.authenticate()
 	ma.window.ShowAndRun()
 }
 
-// func (ma *myApp) setAuthMenuStatus() {
-// 	ma.logoutMenu.Disabled = !ma.isLoggedIn()
-// 	ma.loginMenu.Disabled = ma.isLoggedIn()
-// }
+func (ma *myApp) setAuthMenuStatus() {
+	ma.logoutMenu.Disabled = !ma.isLoggedIn()
+	ma.loginMenu.Disabled = ma.isLoggedIn()
+}
