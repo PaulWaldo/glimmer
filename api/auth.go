@@ -39,7 +39,7 @@ func (a flickrAuthorizer) GetAccessToken(client *flickr.FlickrClient, reqToken *
 	return flickr.GetAccessToken(client, reqToken, oauthVerifier)
 }
 
-func NewAuthorizer(/*secrets Secrets*/) *Authorization {
+func NewAuthorizer() *Authorization {
 	return &Authorization{
 		Authorizer: flickrAuthorizer{},
 	}
