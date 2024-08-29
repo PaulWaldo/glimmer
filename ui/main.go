@@ -9,10 +9,10 @@ import (
 const AppID = "com.github.PaulWaldo.glimmer"
 
 type myApp struct {
-	prefs  appPrefs
-	app    fyne.App
-	window fyne.Window
-	client *flickr.FlickrClient
+	prefs                 appPrefs
+	app                   fyne.App
+	window                fyne.Window
+	client                *flickr.FlickrClient
 	loginMenu, logoutMenu *fyne.MenuItem
 }
 
@@ -29,7 +29,7 @@ func (ma *myApp) isLoggedIn() bool {
 	if err != nil || len(s) == 0 {
 		return false
 	}
-	s, err = ma.prefs.secrets.oAuthSecret.Get()
+	s, err = ma.prefs.secrets.oAuthTokenSecret.Get()
 	if err != nil || len(s) == 0 {
 		return false
 	}
@@ -37,9 +37,8 @@ func (ma *myApp) isLoggedIn() bool {
 	return true
 }
 
-
 func Run() {
-	ma := myApp{}
+	ma := &myApp{}
 	ma.app = app.NewWithID(AppID)
 	ma.prefs = NewPreferences(ma.app)
 	ma.window = ma.app.NewWindow("Glimmer")
@@ -49,15 +48,13 @@ func Run() {
 		fyne.NewMenu("Server", ma.loginMenu, ma.logoutMenu)),
 	)
 	ma.setAuthMenuStatus()
-	// e := apiInfoEntry{}
-	// ma.window.SetContent(e.makeUI())
 	ma.window.Resize(fyne.Size{Width: 1000, Height: 500})
 	if ma.isLoggedIn() {
-	// 	ma.refreshFollowedTags()
 	} else {
 		ma.authenticate()
 	}
-	// ma.authenticate()
+	cp := contactPhotos{ma: ma}
+	ma.window.SetContent(cp.makeUI())
 	ma.window.ShowAndRun()
 }
 
