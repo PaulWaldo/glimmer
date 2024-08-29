@@ -12,45 +12,13 @@ import (
 	"gopkg.in/masci/flickr.v3"
 )
 
-type apiInfoEntry struct {
-	apiKeyEntry    *widget.Entry
-	apiSecretEntry *widget.Entry
-	form           *widget.Form
-	myApp          *myApp
-}
-
-func (e *apiInfoEntry) makeUI(ma *myApp) fyne.CanvasObject {
-	e.apiKeyEntry = widget.NewPasswordEntry()
-	e.apiSecretEntry = widget.NewPasswordEntry()
-	e.form = widget.NewForm(
-		widget.NewFormItem("API Key", e.apiKeyEntry),
-		widget.NewFormItem("API Secret", e.apiSecretEntry),
-	)
-	e.form.OnSubmit = func() {}
-	return e.form
-}
-
-type accessTokenEntry struct {
-	accessTokenEntry *widget.Entry
-	form             *widget.Form
-}
-
-func (e *accessTokenEntry) makeUI() fyne.CanvasObject {
-	e.accessTokenEntry = widget.NewPasswordEntry()
-	e.form = widget.NewForm(
-		widget.NewFormItem("Access Token", e.accessTokenEntry),
-	)
-	e.form.OnSubmit = func() {}
-	return e.form
-}
-
 func (ma *myApp) isAuthenticated() bool {
 	_, err := api.GetContactList(ma.client)
 	return err == nil
 }
 
 func (ma *myApp) authenticate() {
-	ma.client = NewClientFromPrefs(ma.prefs.secrets)
+	ma.client = NewClientFromPrefs(ma.prefs)
 	if ma.isAuthenticated() {
 		return
 	}
@@ -106,12 +74,7 @@ func (ma *myApp) authenticate() {
 						return
 					}
 
-					// ma.prefs.secrets.accessToken.Set(auth.Secrets.AccessToken)
-					// ma.prefs.secrets.oAuthToken.Set(auth.RequestToken.OauthToken)
-					// ma.prefs.secrets.oAuthSecret.Set(auth.RequestToken.OauthTokenSecret)
-					// ma.client.OAuthToken = auth.RequestToken.OauthToken
-					// ma.client.OAuthTokenSecret = auth.RequestToken.OauthTokenSecret
-					// ma.client.Id = auth.Client.Id
+					ma.UpdateSecrefPrefs()
 
 					r, err := api.GetContactList(ma.client)
 					fmt.Println(r)
@@ -131,44 +94,6 @@ func (ma *myApp) authenticate() {
 	form.Show()
 }
 
-// func (ma *myApp) forgetCredentials() {
-// 	dialog.NewConfirm("Log out", "Logging out will remove your authentication data", func(b bool) {
-// 		if b {
-// 			ClearCredentialsPrefs()
-// 			ma.setAuthMenuStatus()
-// 			ma.SetFollowedTags([]*mastodon.FollowedTag{})
-// 		}
-// 	}, ma.window).Show()
-// }
-
-// // getAuthCode allows the user to input the Authentication Token provided by Mastodon into the preferences
-//
-//	func (ma *myApp) getAuthCode() {
-//		accessTokenEntry := widget.NewEntry()
-//		accessTokenEntry.Validator = nil
-//		dialog.NewForm("Authorization Code", "Save", "Cancel", []*widget.FormItem{
-//			{
-//				Text:     "Authorization Code",
-//				Widget:   accessTokenEntry,
-//				HintText: "XXX-XXX-XXX",
-//			}},
-//			func(confirmed bool) {
-//				if confirmed {
-//					c := NewClientFromPrefs(ma.prefs)
-//					// fmt.Printf("After authorizing, client is \n%+v\n", c.Config)
-//					err := c.AuthenticateToken(context.Background(), accessTokenEntry.Text, "urn:ietf:wg:oauth:2.0:oob")
-//					if err != nil {
-//						dialog.NewError(err, ma.window).Show()
-//						fyne.LogError("Authenticating token", err)
-//						return
-//					}
-//					_ = ma.prefs.AccessToken.Set(c.Config.AccessToken)
-//					ma.setAuthMenuStatus()
-//					ma.refreshFollowedTags()
-//				}
-//			},
-//			ma.window).Show()
-//	}
 func (ma *myApp) forgetCredentials() {
 	dialog.NewConfirm("Log out", "Logging out will remove your authentication data", func(b bool) {
 		if b {
