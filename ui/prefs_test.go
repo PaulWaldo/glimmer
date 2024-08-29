@@ -3,81 +3,78 @@ package ui
 import (
 	"testing"
 
-	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/test"
-	"github.com/google/go-cmp/cmp"
-	"github.com/mattn/go-mastodon"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/masci/flickr.v3"
 )
 
 func TestNewClientFromPrefs(t *testing.T) {
-	type args struct {
-		p appPrefs
-	}
-	server := "server"
-	token := "token"
-	id := "id"
-	secret := "secret"
+	apiKey := "api_key"
+	apiSecret := "api_secret"
+	oAuthToken := "oauthtoken"
+	oAuthTokenSecret := "oauthsecret"
 
-	tests := []struct {
-		name string
-		args args
-		want *mastodon.Client
-	}{
-		{
-			name: "places prefs into client",
-			args: args{
-				p: appPrefs{
-					MastodonServer: binding.BindString(&server),
-					AccessToken:    binding.BindString(&token),
-					ClientID:       binding.BindString(&id),
-					ClientSecret:   binding.BindString(&secret),
-				}},
-			want: &mastodon.Client{
-				Config: &mastodon.Config{
-					Server:       "server",
-					ClientID:     "id",
-					ClientSecret: "secret",
-					AccessToken:  "token",
-				}},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewClientFromPrefs(tt.args.p); !cmp.Equal(got, tt.want) {
-				t.Errorf("NewClientFromPrefs(): %s ", cmp.Diff(got, tt.want))
-			}
-		})
-	}
+	app := test.NewTempApp(t)
+	prefs := NewPreferences(app)
+	var err error
+	err = prefs.secrets.apiKey.Set(apiKey)
+	assert.NoError(t, err)
+	err = prefs.secrets.apiSecret.Set(apiSecret)
+	assert.NoError(t, err)
+	err = prefs.secrets.oAuthToken.Set(oAuthToken)
+	assert.NoError(t, err)
+	err = prefs.secrets.oAuthTokenSecret.Set(oAuthTokenSecret)
+	assert.NoError(t, err)
+
+	client := NewClientFromPrefs(prefs)
+
+	assert.Equal(t, apiKey, client.ApiKey)
+	assert.Equal(t, apiSecret, client.ApiSecret)
+	assert.Equal(t, oAuthToken, client.OAuthToken)
+	assert.Equal(t, oAuthTokenSecret, client.OAuthTokenSecret)
 }
 
-func TestClearCredentialsPrefs_RemovesPreferenceValues(t *testing.T) {
-	ma := myApp{}
-	ma.app = test.NewApp()
-	ma.prefs = NewPreferences(ma.app)
-	_ = ma.prefs.AccessToken.Set("aaa")
-	_ = ma.prefs.ClientID.Set("bbb")
-	_ = ma.prefs.ClientSecret.Set("ccc")
-	_ = ma.prefs.MastodonServer.Set("ddd")
+func TestClearCredentialsPrefs(t *testing.T) {
+	app := test.NewTempApp(t)
+	prefs := NewPreferences(app)
+	var err error
+	err = prefs.secrets.apiKey.Set("apiKey")
+	assert.NoError(t, err)
+	err = prefs.secrets.apiSecret.Set("apiSecret")
+	assert.NoError(t, err)
+	err = prefs.secrets.oAuthToken.Set("oAuthToken")
+	assert.NoError(t, err)
+	err = prefs.secrets.oAuthTokenSecret.Set("oAuthTokenSecret")
+	assert.NoError(t, err)
 
 	ClearCredentialsPrefs()
 
-	var x string
-	var err error
+	var val string
+	val, _ = prefs.secrets.apiKey.Get()
+	assert.Equal(t, "", val)
+	val, _ = prefs.secrets.apiSecret.Get()
+	assert.Equal(t, "", val)
+	val, _ = prefs.secrets.oAuthToken.Get()
+	assert.Equal(t, "", val)
+	val, _ = prefs.secrets.oAuthTokenSecret.Get()
+	assert.Equal(t, "", val)
+}
 
-	x, err = ma.prefs.AccessToken.Get()
-	assert.NoError(t, err)
-	assert.Equal(t, "", x, "AccessToken")
+func Test_myApp_UpdateSecretsPrefs(t *testing.T) {
+	ma := myApp{prefs: NewPreferences(test.NewTempApp(t))}
+	ma.client = flickr.NewFlickrClient("apiKey", "apiSecret")
+	ma.client.OAuthToken = "oAuthToken"
+	ma.client.OAuthTokenSecret = "oAuthTokenSecret"
 
-	x, err = ma.prefs.ClientID.Get()
-	assert.NoError(t, err)
-	assert.Equal(t, "", x, "ClientID")
+	ma.UpdateSecrefPrefs()
 
-	x, err = ma.prefs.ClientSecret.Get()
-	assert.NoError(t, err)
-	assert.Equal(t, "", x, "ClientSecret")
-
-	x, err = ma.prefs.MastodonServer.Get()
-	assert.NoError(t, err)
-	assert.Equal(t, "", x, "MastodonServer")
+	var val string
+	val, _ = ma.prefs.secrets.apiKey.Get()
+	assert.Equal(t, "apiKey", val)
+	val, _ = ma.prefs.secrets.apiSecret.Get()
+	assert.Equal(t, "apiSecret", val)
+	val, _ = ma.prefs.secrets.oAuthToken.Get()
+	assert.Equal(t, "oAuthToken", val)
+	val, _ = ma.prefs.secrets.oAuthTokenSecret.Get()
+	assert.Equal(t, "oAuthTokenSecret", val)
 }
