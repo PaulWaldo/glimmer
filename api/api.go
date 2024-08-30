@@ -66,11 +66,11 @@ type Photo struct {
 }
 
 type ContactPhotos struct {
-	Page          int     `xml:"page,attr"`
-	Pages         int     `xml:"pages,attr"`
-	PerPage       int     `xml:"perpage,attr"`
-	Total         int     `xml:"total,attr"`
-	ContactPhotos []Photo `xml:"photos"`
+	Page    int     `xml:"page,attr"`
+	Pages   int     `xml:"pages,attr"`
+	PerPage int     `xml:"perpage,attr"`
+	Total   int     `xml:"total,attr"`
+	Photos  []Photo `xml:"photo"`
 }
 type GetContactPhotosResponse struct {
 	flickr.BasicResponse
