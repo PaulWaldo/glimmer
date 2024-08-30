@@ -3,6 +3,7 @@ package ui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
 )
 
@@ -41,6 +42,7 @@ func Run() {
 	ma := &myApp{}
 	ma.app = app.NewWithID(AppID)
 	ma.prefs = NewPreferences(ma.app)
+	ma.client = NewClientFromPrefs(ma.prefs)
 	ma.window = ma.app.NewWindow("Glimmer")
 	ma.loginMenu = fyne.NewMenuItem("Log In", ma.authenticate)
 	ma.logoutMenu = fyne.NewMenuItem("Log Out", ma.forgetCredentials)
@@ -54,6 +56,11 @@ func Run() {
 		ma.authenticate()
 	}
 	cp := contactPhotos{ma: ma}
+	photos, err := api.GetContactPhotos(ma.client)
+	if err != nil {
+		panic(err)
+	}
+	cp.photos = photos.Photos.Photos
 	ma.window.SetContent(cp.makeUI())
 	ma.window.ShowAndRun()
 }
