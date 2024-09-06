@@ -57,6 +57,11 @@ func Run() {
 	}
 	cp := contactPhotos{ma: ma}
 	photos, err := api.GetContactPhotos(ma.client)
+	// x, err := api.Feed(ma.client)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Printf("\n\n\nFeed:\n%#v\n", x)
 	if err != nil {
 		panic(err)
 	}
