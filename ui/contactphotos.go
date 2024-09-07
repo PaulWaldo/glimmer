@@ -2,8 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"image"
-	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -15,53 +13,51 @@ import (
 )
 
 type contactPhotos struct {
-	ma        *myApp
-	container *fyne.Container
-	title     *widget.Label
-	photoList *widget.List
-	photos    []api.Photo
+	ma         *myApp
+	container  *fyne.Container
+	title      *widget.Label
+	photoList  *fyne.Container
+	photos     []api.Photo
+	photoCards []fyne.CanvasObject
 }
 
 func (p *contactPhotos) makeUI() fyne.CanvasObject {
 	p.title = widget.NewLabel("Contact Photos")
-	m := image.NewRGBA(image.Rect(0, 0, 640, 640))
-	m.Set(5, 5, color.RGBA{255, 0, 0, 255})
-	placeholderImage := canvas.NewImageFromImage(m)
-	p.photoList = widget.NewList(
-		func() int { return len(p.photos) },
-		func() fyne.CanvasObject {
-			card := widget.NewCard("Some", "Some Subtitle", nil)
-			card.Image = placeholderImage
-			return container.NewStack(card)
-		},
-		func(index widget.ListItemID, template fyne.CanvasObject) {
-			if index > 10 {
-				return
-			}
-			cont := template.(*fyne.Container)
-			card := cont.Objects[0].(*widget.Card)
-			photo := p.photos[index]
-			card.SetTitle(photo.Title)
-			card.SetSubTitle(photo.Username)
+	// m := image.NewRGBA(image.Rect(0, 0, 640, 640))
+	// for x := range 640 {
+	// 	for y := range 640 {
+	// 		m.Set(x, y, color.RGBA{255, 0, 0, 255})
+	// 	}
+	// }
+	// placeholderImage := canvas.NewImageFromImage(m)
 
-			info, err := photos.GetInfo(p.ma.client, photo.Id, photo.Secret)
-			if err != nil {
-				fyne.LogError("Failed to get photo info", err)
-				return
-			}
-			fmt.Printf("%#v", info)
-			photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", info.Photo.Server, info.Photo.Id, info.Photo.Secret, "z")
-			uri, err := storage.ParseURI(photoUrl)
-			if err != nil {
-				fyne.LogError("parsing url", err)
-			}
-			c := canvas.NewImageFromURI(uri)
-			card.Image = c
-			card.Image.FillMode = canvas.ImageFillOriginal
-			// card.SetContent(c)
+	// Create cards for each photo
+	p.photoCards = make([]fyne.CanvasObject, len(p.photos))
+	for i, photo := range p.photos {
+		info, err := photos.GetInfo(p.ma.client, photo.Id, photo.Secret)
+		if err != nil {
+			fyne.LogError("Failed to get photo info", err)
+			continue
+		}
+		photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", info.Photo.Server, info.Photo.Id, info.Photo.Secret, "z")
+		uri, err := storage.ParseURI(photoUrl)
+		if err != nil {
+			fyne.LogError("parsing url", err)
+			continue
+		}
+		fmt.Println("Downloading ", uri)
+		c := canvas.NewImageFromURI(uri)
+		// card.Image = placeholderImage
+		card := widget.NewCard(photo.Title, photo.Username, nil)
+		card.Content = c
+		c.FillMode = canvas.ImageFillContain
+		// card.Image.FillMode = canvas.ImageFillOriginal
 
-		},
-	)
-	p.container = container.NewBorder(p.title, nil, nil, nil, p.photoList)
+		p.photoCards[i] = card
+	}
+
+	gw := container.NewGridWrap(fyne.NewSize(500, 500), p.photoCards...)
+	scrollingGrid := container.NewScroll(gw)
+	p.container = container.NewBorder(p.title, nil, nil, nil, scrollingGrid)
 	return p.container
 }
