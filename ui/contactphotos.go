@@ -50,7 +50,7 @@ func (p *contactPhotos) makeUI() fyne.CanvasObject {
 		// card.Image = placeholderImage
 		// card := widget.NewCard(photo.Title, photo.Username, nil)
 		card := newTapCard(photo.Title, photo.Username, nil, func() {
-			photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", info.Photo.Server, info.Photo.Id, info.Photo.Secret, "k")
+			photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", info.Photo.Server, info.Photo.Id, info.Photo.Secret, "b")
 			uri, err := storage.ParseURI(photoUrl)
 			if err != nil {
 				fyne.LogError("parsing url", err)
@@ -58,6 +58,7 @@ func (p *contactPhotos) makeUI() fyne.CanvasObject {
 			}
 			fmt.Println("Downloading ", uri)
 			c := canvas.NewImageFromURI(uri)
+			c.FillMode = canvas.ImageFillContain
 			cont := container.NewStack(c)
 			p.ma.window.SetContent(cont)
 		})
@@ -84,4 +85,11 @@ func newTapCard(title, subtitle string, content fyne.CanvasObject, fn func()) *t
 	i.Card = widget.NewCard(title, subtitle, content)
 	i.ExtendBaseWidget(i)
 	return i
+}
+
+func (t *tapCard) Tapped(e *fyne.PointEvent) {
+	if t.tap == nil {
+		return
+	}
+	t.tap()
 }
