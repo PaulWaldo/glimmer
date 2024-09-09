@@ -2,11 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-        "name": "Launch file",
-        "type": "go",
-        "request": "launch",
-        "mode": "debug",
-        "program": "${file}"
+      "name": "Launch file",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${file}"
     },
     {
       "name": "Launch Package",
@@ -20,7 +20,8 @@
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/main.go"
+      "program": "${workspaceFolder}/main.go",
+      // "buildFlags": ["-tags", "debug"]
     }
   ]
 }
