@@ -50,17 +50,32 @@ func (p *contactPhotos) makeUI() fyne.CanvasObject {
 		// card.Image = placeholderImage
 		// card := widget.NewCard(photo.Title, photo.Username, nil)
 		card := newTapCard(photo.Title, photo.Username, nil, func() {
-			photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", info.Photo.Server, info.Photo.Id, info.Photo.Secret, "b")
-			uri, err := storage.ParseURI(photoUrl)
+			// pai,err:=photos.GetSizes(p.ma.client, photo.Id)
+			// if err != nil {
+			// 	fyne.LogError("getting sizes", err)
+			// 	return
+			// }
+			// fmt.Printf("access Info: %+v\n", pai)
+
+			// photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", info.Photo.Server, info.Photo.Id, info.Photo.OriginalSecret, "k")
+			// uri, err := storage.ParseURI(photoUrl)
+			// if err != nil {
+			// 	fyne.LogError("parsing url", err)
+			// 	return
+			// }
+			// // gsUrl:=pai.Sizes
+			// fmt.Println("Downloading ", uri)
+			// c := canvas.NewImageFromURI(uri)
+			// c.FillMode = canvas.ImageFillContain
+			// cont := container.NewStack(c)
+			pv := photoView{info: *info}
+			ui, err := pv.makeUI()
 			if err != nil {
 				fyne.LogError("parsing url", err)
 				return
 			}
-			fmt.Println("Downloading ", uri)
-			c := canvas.NewImageFromURI(uri)
-			c.FillMode = canvas.ImageFillContain
-			cont := container.NewStack(c)
-			p.ma.window.SetContent(cont)
+
+			p.ma.window.SetContent(ui)
 		})
 		card.Content = c
 		c.FillMode = canvas.ImageFillContain
