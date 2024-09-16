@@ -96,7 +96,7 @@ func GetContactPhotos(client *flickr.FlickrClient) (*GetContactPhotosResponse, e
 
 // https://api.flickr.com/services/rest?event_types=UploadBatch%2CGroupBatch%2CContactRec&rec_pos=12&extras=all_sizes%2Cicon_urls_deep%2Cneeds_interstitial%2Csafety_level&get_user_info=1&per_batch=15&static_content_types=General%2CHelp&batchid=0&end=20&viewerNSID=98359714%40N00&method=flickr.feed.getFeed&csrf=1725422838%3Al8qicjs0tof%3A8bd6134b60026a4499491348bebac854&api_key=d94613c33c84f4de350273f9d71a6f13&format=json&hermes=1&hermesClient=1&reqId=e2f8fe77-3e6d-4fbd-bfb7-f1749a0dcdea&nojsoncallback=1
 
-func Feed(client *flickr.FlickrClient)(*GetContactPhotosResponse, error){
+func Feed(client *flickr.FlickrClient) (*GetContactPhotosResponse, error) {
 	client.Init()
 	client.EndpointUrl = flickr.API_ENDPOINT
 
