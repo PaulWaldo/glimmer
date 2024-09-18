@@ -47,30 +47,8 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 		}
 		fmt.Println("Downloading ", uri)
 		c := canvas.NewImageFromURI(uri)
-		// card.Image = placeholderImage
-		// card := widget.NewCard(photo.Title, photo.Username, nil)
 		card := newTapCard(photo.Title, photo.Username, nil, func() {
-			pai, err := photos.GetSizes(p.ma.client, photo.Id)
-			if err != nil {
-				fyne.LogError("getting sizes", err)
-				return
-			}
-			fmt.Printf("access Info: %+v\n", pai)
-			// Find the largest photo.  Assumes they are listed is ascending order
-			info := pai.Sizes[len(pai.Sizes)-1]
-			photoUrl := info.Source
-
-			// uri, err := storage.ParseURI(photoUrl)
-			// if err != nil {
-			// 	fyne.LogError("parsing url", err)
-			// 	return
-			// }
-			// c := canvas.NewImageFromURI(uri)
-			// c.FillMode = canvas.ImageFillContain
-			// cont := container.NewStack(c)
-
-			// p.ma.window.Canvas().Overlays().Add(cont)
-			pv := &photoView{url: photoUrl}
+			pv := &photoView{ma: p.ma, photo: photo}
 			cont, err := pv.makeUI()
 			if err != nil {
 				fyne.LogError("parsing url", err)
