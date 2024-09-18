@@ -13,11 +13,11 @@ import (
 type photoView struct {
 	info photos.PhotoInfoResponse
 	im   *canvas.Image
+	url  string
 }
 
 func (p photoView) makeUI() (*fyne.Container, error) {
-	photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", p.info.Photo.Server, p.info.Photo.Id, p.info.Photo.OriginalSecret, "k")
-	uri, err := storage.ParseURI(photoUrl)
+	uri, err := storage.ParseURI(p.url)
 	if err != nil {
 		fyne.LogError("parsing url", err)
 		return nil, err

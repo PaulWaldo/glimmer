@@ -21,7 +21,7 @@ type contactPhotos struct {
 	photoCards []fyne.CanvasObject
 }
 
-func (p *contactPhotos) makeUI() fyne.CanvasObject {
+func (p *contactPhotos) makeUI() *fyne.Container {
 	p.title = widget.NewLabel("Contact Photos")
 	// m := image.NewRGBA(image.Rect(0, 0, 640, 640))
 	// for x := range 640 {
@@ -50,32 +50,33 @@ func (p *contactPhotos) makeUI() fyne.CanvasObject {
 		// card.Image = placeholderImage
 		// card := widget.NewCard(photo.Title, photo.Username, nil)
 		card := newTapCard(photo.Title, photo.Username, nil, func() {
-			// pai,err:=photos.GetSizes(p.ma.client, photo.Id)
-			// if err != nil {
-			// 	fyne.LogError("getting sizes", err)
-			// 	return
-			// }
-			// fmt.Printf("access Info: %+v\n", pai)
+			pai, err := photos.GetSizes(p.ma.client, photo.Id)
+			if err != nil {
+				fyne.LogError("getting sizes", err)
+				return
+			}
+			fmt.Printf("access Info: %+v\n", pai)
+			// Find the largest photo.  Assumes they are listed is ascending order
+			info := pai.Sizes[len(pai.Sizes)-1]
+			photoUrl := info.Source
 
-			// photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", info.Photo.Server, info.Photo.Id, info.Photo.OriginalSecret, "k")
 			// uri, err := storage.ParseURI(photoUrl)
 			// if err != nil {
 			// 	fyne.LogError("parsing url", err)
 			// 	return
 			// }
-			// // gsUrl:=pai.Sizes
-			// fmt.Println("Downloading ", uri)
 			// c := canvas.NewImageFromURI(uri)
 			// c.FillMode = canvas.ImageFillContain
 			// cont := container.NewStack(c)
-			pv := photoView{info: *info}
-			ui, err := pv.makeUI()
+
+			// p.ma.window.Canvas().Overlays().Add(cont)
+			pv := &photoView{url: photoUrl}
+			cont, err := pv.makeUI()
 			if err != nil {
 				fyne.LogError("parsing url", err)
 				return
 			}
-
-			p.ma.window.SetContent(ui)
+			p.ma.vs.Push(cont)
 		})
 		card.Content = c
 		c.FillMode = canvas.ImageFillContain
@@ -86,7 +87,12 @@ func (p *contactPhotos) makeUI() fyne.CanvasObject {
 
 	gw := container.NewGridWrap(fyne.NewSize(500, 500), p.photoCards...)
 	scrollingGrid := container.NewScroll(gw)
-	p.container = container.NewBorder(p.title, nil, nil, nil, scrollingGrid)
+
+	p.container = container.NewStack(
+		container.NewStack(),
+		container.NewBorder(p.title, nil, nil, nil, scrollingGrid),
+	)
+	// p.container = container.NewBorder(p.title, nil, nil, nil, scrollingGrid)
 	return p.container
 }
 

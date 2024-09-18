@@ -15,6 +15,7 @@ type myApp struct {
 	window                fyne.Window
 	client                *flickr.FlickrClient
 	loginMenu, logoutMenu *fyne.MenuItem
+	vs                    *ViewStack
 }
 
 func (ma *myApp) isLoggedIn() bool {
@@ -46,6 +47,7 @@ func Run() {
 	ma.window = ma.app.NewWindow("Glimmer")
 	ma.loginMenu = fyne.NewMenuItem("Log In", ma.authenticate)
 	ma.logoutMenu = fyne.NewMenuItem("Log Out", ma.forgetCredentials)
+	ma.vs = NewViewStack(ma.window)
 	ma.window.SetMainMenu(fyne.NewMainMenu(
 		fyne.NewMenu("Server", ma.loginMenu, ma.logoutMenu)),
 	)
@@ -66,7 +68,9 @@ func Run() {
 		panic(err)
 	}
 	cp.photos = photos.Photos.Photos
-	ma.window.SetContent(cp.makeUI())
+	// ma.window.SetContent(cp.makeUI())
+	ma.vs.Push(cp.makeUI())
+	// ma.window.Canvas().Overlays().Add(cp.makeUI())
 	ma.window.ShowAndRun()
 }
 
