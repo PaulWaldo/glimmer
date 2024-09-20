@@ -8,6 +8,8 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3/photos"
 )
@@ -54,6 +56,12 @@ func (p photoView) makeUI() (*fyne.Container, error) {
 	fmt.Println("Downloading ", uri)
 	im := canvas.NewImageFromURI(uri)
 	im.FillMode = canvas.ImageFillContain
-	cont := container.NewStack(im)
+
+	closeButton := widget.NewButtonWithIcon("Close", theme.CancelIcon(), func() {
+		p.ma.vs.Pop()
+	})
+	buttons := container.NewHBox(closeButton)
+
+	cont := container.NewBorder(buttons, nil, nil, nil, im)
 	return cont, nil
 }
