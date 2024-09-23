@@ -59,10 +59,11 @@ func (r *photoCardRenderer) loadImage() error {
 	photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", r.photoCard.PhotoInfo.Photo.Server, r.photoCard.PhotoInfo.Photo.Id, r.photoCard.PhotoInfo.Photo.Secret, "z")
 	uri, err := storage.ParseURI(photoUrl)
 	if err != nil {
-		return fmt.Errorf("parsing photoCard image url %q: %w", err)
+		return fmt.Errorf("parsing photoCard image url %q: %w", err, err)
 	}
 	fmt.Println("Downloading ", uri)
 	r.image = canvas.NewImageFromURI(uri)
+	r.image.Refresh()
 	return nil
 }
 
@@ -74,8 +75,9 @@ func (r *photoCardRenderer) MinSize() fyne.Size {
 }
 
 func (r *photoCardRenderer) Layout(s fyne.Size) {
-	r.image.SetMinSize(fyne.NewSize(300, 300))
-	r.image.Move(fyne.NewPos(50, 50))
+	// r.image.SetMinSize(fyne.NewSize(50, 50))
+	r.image.Resize(fyne.NewSize(50, 50))
+	// r.image.Move(fyne.NewPos(50, 50))
 	r.Title.Move(fyne.NewPos(50, 50))
 	r.UserName.Move(fyne.NewPos(100, 100))
 
@@ -85,7 +87,7 @@ func (r *photoCardRenderer) Destroy() {
 }
 
 func (r *photoCardRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{r.image/*, r.Title, r.UserName*/}
+	return []fyne.CanvasObject{r.image, r.Title, r.UserName}
 }
 
 func (r *photoCardRenderer) Refresh() {
