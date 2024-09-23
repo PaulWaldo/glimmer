@@ -28,8 +28,16 @@ func (p photoView) makeUI() (*fyne.Container, error) {
 	fmt.Printf("access Info: %+v\n", pai)
 	// Find the smallest photo that is larger than the current window
 	photoIndex := -1
+	largestSizeIndex := -1
 	winSize := p.ma.window.Canvas().Size()
 	for i := range pai.Sizes {
+		if largestSizeIndex == -1 {
+			largestSizeIndex = i
+		} else {
+			if pai.Sizes[i].Width > pai.Sizes[largestSizeIndex].Width {
+				largestSizeIndex = i
+			}
+		}
 		picWidth, err := strconv.ParseFloat(pai.Sizes[i].Width, 32)
 		if err != nil {
 			return nil, fmt.Errorf("converting width '%s' to float: %w", pai.Sizes[i].Width, err)
@@ -44,7 +52,10 @@ func (p photoView) makeUI() (*fyne.Container, error) {
 		}
 	}
 	if photoIndex == -1 {
-		return nil, fmt.Errorf("no suitable photo found")
+		if largestSizeIndex == -1 {
+			return nil, fmt.Errorf("no suitable photo found")
+		}
+		photoIndex = largestSizeIndex
 	}
 	info := pai.Sizes[photoIndex]
 	url := info.Source
