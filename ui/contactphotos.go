@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3/photos"
@@ -63,6 +64,7 @@ func (r *photoCardRenderer) loadImage() error {
 	}
 	fmt.Println("Downloading ", uri)
 	r.image = canvas.NewImageFromURI(uri)
+	r.image.Resize(fyne.NewSize(300, 300))
 	r.image.Refresh()
 	return nil
 }
@@ -75,10 +77,14 @@ func (r *photoCardRenderer) MinSize() fyne.Size {
 }
 
 func (r *photoCardRenderer) Layout(s fyne.Size) {
-	// r.image.SetMinSize(fyne.NewSize(50, 50))
-	r.image.Resize(fyne.NewSize(50, 50))
-	// r.image.Move(fyne.NewPos(50, 50))
-	r.Title.Move(fyne.NewPos(50, 50))
+	padding := r.photoCard.Theme().Size(theme.SizeNamePadding)
+	cellSize := r.MinSize()
+	midX := cellSize.Width / 2
+	imageSize := r.image.MinSize()
+	r.image.Move(fyne.NewPos(midX-imageSize.Width/2, padding))
+	nextY :=
+
+		r.Title.Move(fyne.NewPos(50, 50))
 	r.UserName.Move(fyne.NewPos(100, 100))
 
 }
