@@ -25,7 +25,8 @@ func (p photoView) makeUI() (*fyne.Container, error) {
 		fyne.LogError("getting sizes", err)
 		return nil, fmt.Errorf("getting sizes: %w", err)
 	}
-	fmt.Printf("access Info: %+v\n", pai)
+	// fmt.Printf("access Info: %+v\n", pai)
+
 	// Find the smallest photo that is larger than the current window
 	photoIndex := -1
 	largestSizeIndex := -1

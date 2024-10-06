@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"github.com/PaulWaldo/glimmer/api"
@@ -16,6 +18,9 @@ type myApp struct {
 	client                *flickr.FlickrClient
 	loginMenu, logoutMenu *fyne.MenuItem
 	vs                    *ViewStack
+	// userNsID              string
+	// userName              string
+	// fullName              string
 }
 
 func (ma *myApp) isLoggedIn() bool {
@@ -57,16 +62,26 @@ func Run() {
 	} else {
 		ma.authenticate()
 	}
+
 	cp := contactPhotos{ma: ma}
 	photos, err := api.GetContactPhotos(ma.client)
-	// x, err := api.Feed(ma.client)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Printf("\n\n\nFeed:\n%#v\n", x)
 	if err != nil {
 		panic(err)
 	}
+
+	val, _ := ma.prefs.userName.Get()
+	groups, err := api.GetGroups(ma.client, val)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("\n\n\nGroups:\n%#v\n", groups)
+
+	x, err := api.Feed(ma.client)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	fmt.Printf("\n\n\nFeed:\n%#v\n", x)
+
 	cp.photos = photos.Photos.Photos
 	// ma.window.SetContent(cp.makeUI())
 	ma.vs.Push(cp.makeUI())

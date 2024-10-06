@@ -118,7 +118,7 @@ func TestGetAccessToken(t *testing.T) {
 			mockAuthorizer.EXPECT().GetAccessToken(client, expectedRequestToken, confirmationCode).Return(&flickr.OAuthToken{OAuthToken: "token", OAuthTokenSecret: "secret"}, tC.err)
 			authorize.Authorizer = mockAuthorizer
 
-			err := authorize.GetAccessToken(client, confirmationCode)
+			err := authorize.RecordAccessToken(client, confirmationCode)
 
 			if tC.expectError == true {
 				require.Error(t, errors.New("test error"))

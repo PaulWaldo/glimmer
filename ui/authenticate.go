@@ -64,10 +64,10 @@ func (ma *myApp) authenticate() {
 			formContents = container.NewVBox(confirmationEntry)
 			form := dialog.NewCustomConfirm("Your Flickr Authorization Code", "OK", "Abort", formContents, func(confirmed bool) {
 				if confirmed {
-					ma.prefs.secrets.apiKey.Set(apiKeyEntry.Text)
-					ma.prefs.secrets.apiSecret.Set(apiSecretEntry.Text)
+					// ma.prefs.secrets.apiKey.Set(apiKeyEntry.Text)
+					// ma.prefs.secrets.apiSecret.Set(apiSecretEntry.Text)
 					ma.client = flickr.NewFlickrClient(apiKeyEntry.Text, apiSecretEntry.Text)
-					err := auth.GetAccessToken(ma.client, confirmationEntry.Text)
+					err := auth.RecordAccessToken(ma.client, confirmationEntry.Text)
 					if err != nil {
 						dialog.NewError(err, ma.window).Show()
 						fyne.LogError("calling GetAccessToken", err)
@@ -75,6 +75,7 @@ func (ma *myApp) authenticate() {
 					}
 
 					ma.UpdateSecrefPrefs()
+					ma.prefs.
 
 					r, err := api.GetContactList(ma.client)
 					fmt.Println(r)

@@ -3,6 +3,7 @@ package ui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/data/binding"
+	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
 )
 
@@ -12,17 +13,23 @@ const (
 	PrefKeyAccessToken = "AccessToken"
 	PrefKeyOauthToken  = "OAuthToken"
 	PrefKeyOauthSecret = "OAuthSecret"
+	PrefKeyUserNsID    = "UserNsID"
+	PrefKeyUserName    = "UserName"
+	PrefKeyFullName    = "FullName"
 )
 
 // appPrefs stores user data locally between application runs
 type appPrefs struct {
-	secrets secrets
+	secrets  secrets
+	userNsID binding.String
+	userName binding.String
+	fullName binding.String
 }
 
 type secrets struct {
 	apiKey           binding.String
 	apiSecret        binding.String
-	accessToken      binding.String
+	// accessToken      binding.String
 	oAuthToken       binding.String
 	oAuthTokenSecret binding.String
 }
@@ -55,6 +62,9 @@ func NewPreferences(a fyne.App) appPrefs {
 			oAuthToken:       binding.BindPreferenceString(PrefKeyOauthToken, a.Preferences()),
 			oAuthTokenSecret: binding.BindPreferenceString(PrefKeyOauthSecret, a.Preferences()),
 		},
+		userNsID: binding.BindPreferenceString(PrefKeyUserNsID, a.Preferences()),
+		userName: binding.BindPreferenceString(PrefKeyUserName, a.Preferences()),
+		fullName: binding.BindPreferenceString(PrefKeyFullName, a.Preferences()),
 	}
 }
 
@@ -65,4 +75,12 @@ func ClearCredentialsPrefs() {
 	p.RemoveValue(PrefKeyAccessToken)
 	p.RemoveValue(PrefKeyOauthToken)
 	p.RemoveValue(PrefKeyOauthSecret)
+}
+
+func (ma *myApp) StoreAuthPrefs(a api.Authorization) {
+	ma.prefs.secrets.oAuthToken.Set(a.RequestToken.OauthToken)
+	ma.prefs.secrets.oAuthTokenSecret.Set(a.RequestToken.OauthTokenSecret)
+	ma.prefs.userNsID.Set(a.OAuthToken.UserNsid)
+	ma.prefs.userName.Set(a.OAuthToken.Username)
+	ma.p
 }
