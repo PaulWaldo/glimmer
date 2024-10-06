@@ -35,8 +35,8 @@ func (ma *myApp) authenticate() {
 	var auth *api.Authorization
 	form := dialog.NewCustomConfirm("Your Flickr API Credentials", "Authenticate", "Abort", formContents, func(confirmed bool) {
 		if confirmed {
-			ma.prefs.secrets.apiKey.Set(apiKeyEntry.Text)
-			ma.prefs.secrets.apiSecret.Set(apiSecretEntry.Text)
+			_ = ma.prefs.secrets.apiKey.Set(apiKeyEntry.Text)
+			_ = ma.prefs.secrets.apiSecret.Set(apiSecretEntry.Text)
 			ma.client = flickr.NewFlickrClient(apiKeyEntry.Text, apiSecretEntry.Text)
 
 			auth = api.NewAuthorizer()
@@ -75,7 +75,10 @@ func (ma *myApp) authenticate() {
 					}
 
 					ma.UpdateSecrefPrefs()
-					ma.prefs.
+					ma.prefs.StoreAuthPrefs(*auth)
+					ma.userName, _ = ma.prefs.userName.Get()
+					ma.fullName, _ = ma.prefs.fullName.Get()
+					ma.userNsID, _ = ma.prefs.userNsID.Get()
 
 					r, err := api.GetContactList(ma.client)
 					fmt.Println(r)

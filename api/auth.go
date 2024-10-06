@@ -71,4 +71,3 @@ func (a *Authorization) RecordAccessToken(client *flickr.FlickrClient, confirmat
 	a.OAuthToken = accessTok
 	return nil
 }
-

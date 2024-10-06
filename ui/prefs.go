@@ -27,8 +27,8 @@ type appPrefs struct {
 }
 
 type secrets struct {
-	apiKey           binding.String
-	apiSecret        binding.String
+	apiKey    binding.String
+	apiSecret binding.String
 	// accessToken      binding.String
 	oAuthToken       binding.String
 	oAuthTokenSecret binding.String
@@ -56,9 +56,9 @@ func (ma *myApp) UpdateSecrefPrefs() {
 func NewPreferences(a fyne.App) appPrefs {
 	return appPrefs{
 		secrets: secrets{
-			apiKey:           binding.BindPreferenceString(PrefKeyAPIKey, a.Preferences()),
-			apiSecret:        binding.BindPreferenceString(PrefKeyAPISecret, a.Preferences()),
-			accessToken:      binding.BindPreferenceString(PrefKeyAccessToken, a.Preferences()),
+			apiKey:    binding.BindPreferenceString(PrefKeyAPIKey, a.Preferences()),
+			apiSecret: binding.BindPreferenceString(PrefKeyAPISecret, a.Preferences()),
+			// accessToken:      binding.BindPreferenceString(PrefKeyAccessToken, a.Preferences()),
 			oAuthToken:       binding.BindPreferenceString(PrefKeyOauthToken, a.Preferences()),
 			oAuthTokenSecret: binding.BindPreferenceString(PrefKeyOauthSecret, a.Preferences()),
 		},
@@ -77,10 +77,10 @@ func ClearCredentialsPrefs() {
 	p.RemoveValue(PrefKeyOauthSecret)
 }
 
-func (ma *myApp) StoreAuthPrefs(a api.Authorization) {
-	ma.prefs.secrets.oAuthToken.Set(a.RequestToken.OauthToken)
-	ma.prefs.secrets.oAuthTokenSecret.Set(a.RequestToken.OauthTokenSecret)
-	ma.prefs.userNsID.Set(a.OAuthToken.UserNsid)
-	ma.prefs.userName.Set(a.OAuthToken.Username)
-	ma.p
+func (p *appPrefs) StoreAuthPrefs(a api.Authorization) {
+	_ = p.secrets.oAuthToken.Set(a.RequestToken.OauthToken)
+	_ = p.secrets.oAuthTokenSecret.Set(a.RequestToken.OauthTokenSecret)
+	_ = p.userNsID.Set(a.OAuthToken.UserNsid)
+	_ = p.userName.Set(a.OAuthToken.Username)
+	_ = p.fullName.Set(a.OAuthToken.Fullname)
 }

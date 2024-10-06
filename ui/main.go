@@ -18,9 +18,9 @@ type myApp struct {
 	client                *flickr.FlickrClient
 	loginMenu, logoutMenu *fyne.MenuItem
 	vs                    *ViewStack
-	// userNsID              string
-	// userName              string
-	// fullName              string
+	userNsID              string
+	userName              string
+	fullName              string
 }
 
 func (ma *myApp) isLoggedIn() bool {
@@ -69,12 +69,12 @@ func Run() {
 		panic(err)
 	}
 
-	val, _ := ma.prefs.userName.Get()
-	groups, err := api.GetGroups(ma.client, val)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("\n\n\nGroups:\n%#v\n", groups)
+	// val, _ := ma.prefs.userName.Get()
+	// groups, err := api.GetGroups(ma.client, val)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Printf("\n\n\nGroups:\n%#v\n", groups)
 
 	x, err := api.Feed(ma.client)
 	// if err != nil {
