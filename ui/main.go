@@ -66,26 +66,27 @@ func Run() {
 	cp := contactPhotos{ma: ma}
 	photos, err := api.GetContactPhotos(ma.client)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
+	// fmt.Printf("\n\n\nPhotos:\n%#v\n", photos)
 
-	// val, _ := ma.prefs.userName.Get()
-	// groups, err := api.GetGroups(ma.client, val)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Printf("\n\n\nGroups:\n%#v\n", groups)
+	// // val, _ := ma.prefs.userName.Get()
+	// // groups, err := api.GetGroups(ma.client, val)
+	// // if err != nil {
+	// // 	panic(err)
+	// // }
+	// // fmt.Printf("\n\n\nGroups:\n%#v\n", groups)
 
-	x, err := api.Feed(ma.client)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	fmt.Printf("\n\n\nFeed:\n%#v\n", x)
+	// x, err := api.Feed(ma.client)
+	// // if err != nil {
+	// // 	panic(err)
+	// // }
+	// fmt.Printf("\n\n\nFeed:\n%#v\n", x)
 
 	cp.photos = photos.Photos.Photos
 	// ma.window.SetContent(cp.makeUI())
 	ma.vs.Push(cp.makeUI())
-	// ma.window.Canvas().Overlays().Add(cp.makeUI())
+	// // ma.window.Canvas().Overlays().Add(cp.makeUI())
 	ma.window.ShowAndRun()
 }
 
