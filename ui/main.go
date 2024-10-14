@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"github.com/PaulWaldo/glimmer/api"
@@ -16,6 +18,27 @@ type myApp struct {
 	client                *flickr.FlickrClient
 	loginMenu, logoutMenu *fyne.MenuItem
 	vs                    *ViewStack
+	userNsID              string
+	userName              string
+	fullName              string
+}
+
+func (ma *myApp) logAuth(marker string) {
+	fmt.Printf("**********************************************\n%s\n", marker)
+	fmt.Printf("API Key: %s\n", ma.client.ApiKey)
+	fmt.Printf("API Secret: %s\n", ma.client.ApiSecret)
+	fmt.Printf("OAuthToken: %s\n", ma.client.OAuthToken)
+	fmt.Printf("OAuthTokenSecret: %s\n", ma.client.OAuthTokenSecret)
+
+	prefs := ma.prefs
+	apiKey, _ := prefs.secrets.apiKey.Get()
+	apiSecret, _ := prefs.secrets.apiSecret.Get()
+	oAuthToken, _ := prefs.secrets.oAuthToken.Get()
+	oAuthSecret, _ := prefs.secrets.oAuthTokenSecret.Get()
+	fmt.Printf("Prefs apiKey: %s\n", apiKey)
+	fmt.Printf("Prefs apiSecret: %s\n", apiSecret)
+	fmt.Printf("Prefs oAuthToken: %s\n", oAuthToken)
+	fmt.Printf("Prefs oAuthSecret: %s\n", oAuthSecret)
 }
 
 func (ma *myApp) isLoggedIn() bool {
@@ -53,24 +76,40 @@ func Run() {
 	)
 	ma.setAuthMenuStatus()
 	ma.window.Resize(fyne.Size{Width: 1000, Height: 500})
+	ma.logAuth("Before auth check")
 	if ma.isLoggedIn() {
 	} else {
 		ma.authenticate()
 	}
+
 	cp := contactPhotos{ma: ma}
 	photos, err := api.GetContactPhotos(ma.client)
-	// x, err := api.Feed(ma.client)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Printf("\n\n\nFeed:\n%#v\n", x)
+	ma.logAuth("main GetContactPhotos")
+
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
-	cp.photos = photos.Photos.Photos
-	// ma.window.SetContent(cp.makeUI())
-	ma.vs.Push(cp.makeUI())
-	// ma.window.Canvas().Overlays().Add(cp.makeUI())
+	// fmt.Printf("\n\n\nPhotos:\n%#v\n", photos)
+
+	// // val, _ := ma.prefs.userName.Get()
+	// // groups, err := api.GetGroups(ma.client, val)
+	// // if err != nil {
+	// // 	panic(err)
+	// // }
+	// // fmt.Printf("\n\n\nGroups:\n%#v\n", groups)
+
+	// x, err := api.Feed(ma.client)
+	// // if err != nil {
+	// // 	panic(err)
+	// // }
+	// fmt.Printf("\n\n\nFeed:\n%#v\n", x)
+
+	cp.photos = nil
+	if photos == nil {
+		fmt.Println("Photos is nil")
+	}
+	// cp.photos = photos.Photos.Photos
+	// ma.vs.Push(cp.makeUI())
 	ma.window.ShowAndRun()
 }
 

@@ -23,6 +23,7 @@ type Authorizer interface {
 type Authorization struct {
 	Authorizer   Authorizer
 	RequestToken *flickr.RequestToken
+	OAuthToken   *flickr.OAuthToken
 }
 
 type flickrAuthorizer struct{}
@@ -60,13 +61,13 @@ func (a *Authorization) GetUrl(client *flickr.FlickrClient) (string, error) {
 	return url, nil
 }
 
-func (a *Authorization) GetAccessToken(client *flickr.FlickrClient, confirmationCode string) error {
+func (a *Authorization) RecordAccessToken(client *flickr.FlickrClient, confirmationCode string) error {
 	accessTok, err := a.Authorizer.GetAccessToken(client, a.RequestToken, confirmationCode)
 	if err != nil {
 		return fmt.Errorf("getting access token: %w", err)
 	}
 	client.OAuthToken = accessTok.OAuthToken
 	client.OAuthTokenSecret = accessTok.OAuthTokenSecret
+	a.OAuthToken = accessTok
 	return nil
-
 }

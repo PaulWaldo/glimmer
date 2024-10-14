@@ -19,6 +19,7 @@ func (ma *myApp) isAuthenticated() bool {
 
 func (ma *myApp) authenticate() {
 	ma.client = NewClientFromPrefs(ma.prefs)
+	ma.logAuth("authenticate NewClientFromPrefs")
 	if ma.isAuthenticated() {
 		return
 	}
@@ -35,8 +36,8 @@ func (ma *myApp) authenticate() {
 	var auth *api.Authorization
 	form := dialog.NewCustomConfirm("Your Flickr API Credentials", "Authenticate", "Abort", formContents, func(confirmed bool) {
 		if confirmed {
-			ma.prefs.secrets.apiKey.Set(apiKeyEntry.Text)
-			ma.prefs.secrets.apiSecret.Set(apiSecretEntry.Text)
+			_ = ma.prefs.secrets.apiKey.Set(apiKeyEntry.Text)
+			_ = ma.prefs.secrets.apiSecret.Set(apiSecretEntry.Text)
 			ma.client = flickr.NewFlickrClient(apiKeyEntry.Text, apiSecretEntry.Text)
 
 			auth = api.NewAuthorizer()
@@ -64,17 +65,23 @@ func (ma *myApp) authenticate() {
 			formContents = container.NewVBox(confirmationEntry)
 			form := dialog.NewCustomConfirm("Your Flickr Authorization Code", "OK", "Abort", formContents, func(confirmed bool) {
 				if confirmed {
-					ma.prefs.secrets.apiKey.Set(apiKeyEntry.Text)
-					ma.prefs.secrets.apiSecret.Set(apiSecretEntry.Text)
+					// ma.prefs.secrets.apiKey.Set(apiKeyEntry.Text)
+					// ma.prefs.secrets.apiSecret.Set(apiSecretEntry.Text)
 					ma.client = flickr.NewFlickrClient(apiKeyEntry.Text, apiSecretEntry.Text)
-					err := auth.GetAccessToken(ma.client, confirmationEntry.Text)
+					err := auth.RecordAccessToken(ma.client, confirmationEntry.Text)
 					if err != nil {
 						dialog.NewError(err, ma.window).Show()
 						fyne.LogError("calling GetAccessToken", err)
 						return
 					}
 
-					ma.UpdateSecrefPrefs()
+					// ma.UpdateSecrefPrefs()
+					// ma.prefs.StoreAuthPrefs(*auth)
+					ma.SaveAuth(*auth)
+					ma.logAuth("authenticate Storing prefs")
+					ma.userName, _ = ma.prefs.userName.Get()
+					ma.fullName, _ = ma.prefs.fullName.Get()
+					ma.userNsID, _ = ma.prefs.userNsID.Get()
 
 					r, err := api.GetContactList(ma.client)
 					fmt.Println(r)
