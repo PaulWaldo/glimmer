@@ -83,7 +83,7 @@ func (ma *myApp) UpdateSecrefPrefs() {
 	_ = ma.prefs.secrets.apiSecret.Set(ma.client.ApiSecret)
 	_ = ma.prefs.secrets.oAuthToken.Set(ma.client.OAuthToken)
 	_ = ma.prefs.secrets.oAuthTokenSecret.Set(ma.client.OAuthTokenSecret)
-	ma.logAuth("UpdateSecrefPrefs")
+	// ma.logAuth("UpdateSecrefPrefs")
 }
 
 func (ma *myApp) SaveAuth(a api.Authorization) {

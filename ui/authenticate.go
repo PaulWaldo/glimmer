@@ -19,7 +19,7 @@ func (ma *myApp) isAuthenticated() bool {
 
 func (ma *myApp) authenticate() {
 	ma.client = NewClientFromPrefs(ma.prefs)
-	ma.logAuth("authenticate NewClientFromPrefs")
+	// ma.logAuth("authenticate NewClientFromPrefs")
 	if ma.isAuthenticated() {
 		return
 	}
@@ -78,7 +78,7 @@ func (ma *myApp) authenticate() {
 					// ma.UpdateSecrefPrefs()
 					// ma.prefs.StoreAuthPrefs(*auth)
 					ma.SaveAuth(*auth)
-					ma.logAuth("authenticate Storing prefs")
+					// ma.logAuth("authenticate Storing prefs")
 					ma.userName, _ = ma.prefs.userName.Get()
 					ma.fullName, _ = ma.prefs.fullName.Get()
 					ma.userNsID, _ = ma.prefs.userNsID.Get()
