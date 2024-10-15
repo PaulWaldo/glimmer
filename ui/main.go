@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/theme"
 	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
 )
@@ -75,8 +76,7 @@ func Run() {
 		fyne.NewMenu("Server", ma.loginMenu, ma.logoutMenu)),
 	)
 	ma.setAuthMenuStatus()
-	ma.window.Resize(fyne.Size{Width: 1000, Height: 500})
-	ma.logAuth("Before auth check")
+	// ma.logAuth("Before auth check")
 	if ma.isLoggedIn() {
 	} else {
 		ma.authenticate()
@@ -84,7 +84,7 @@ func Run() {
 
 	cp := contactPhotos{ma: ma}
 	photos, err := api.GetContactPhotos(ma.client)
-	ma.logAuth("main GetContactPhotos")
+	// ma.logAuth("main GetContactPhotos")
 
 	if err != nil {
 		fmt.Println(err)
@@ -104,12 +104,12 @@ func Run() {
 	// // }
 	// fmt.Printf("\n\n\nFeed:\n%#v\n", x)
 
-	cp.photos = nil
-	if photos == nil {
-		fmt.Println("Photos is nil")
-	}
-	// cp.photos = photos.Photos.Photos
-	// ma.vs.Push(cp.makeUI())
+	cp.photos = photos.Photos.Photos
+	ma.vs.Push(cp.makeUI())
+	ma.window.Resize(fyne.Size{
+		Width:  GridSizeWidth*2 + theme.Padding()*3,
+		Height: GridSizeHeight*2 + theme.Padding()*3,
+	})
 	ma.window.ShowAndRun()
 }
 

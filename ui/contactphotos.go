@@ -12,6 +12,11 @@ import (
 	"gopkg.in/masci/flickr.v3/photos"
 )
 
+const (
+	GridSizeWidth  = 500
+	GridSizeHeight = 500
+)
+
 type contactPhotos struct {
 	ma         *myApp
 	container  *fyne.Container
@@ -63,7 +68,7 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 		p.photoCards[i] = card
 	}
 
-	gw := container.NewGridWrap(fyne.NewSize(500, 500), p.photoCards...)
+	gw := container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight), p.photoCards...)
 	scrollingGrid := container.NewScroll(gw)
 
 	p.container = container.NewStack(
