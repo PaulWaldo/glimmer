@@ -88,6 +88,7 @@ func Run() {
 
 	if err != nil {
 		fmt.Println(err)
+		photos = &api.GetContactPhotosResponse{Photos: api.ContactPhotos{Photos: []api.Photo{}}}
 	}
 	// fmt.Printf("\n\n\nPhotos:\n%#v\n", photos)
 
