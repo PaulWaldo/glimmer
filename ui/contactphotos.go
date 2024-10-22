@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"fyne.io/fyne/v2"
@@ -98,10 +97,7 @@ type PhotoCard struct {
 }
 
 func NewPhotoCard(photo api.Photo /*content fyne.CanvasObject,*/, client *flickr.FlickrClient, onTapped func()) *PhotoCard {
-	clone, err := CloneClient(client)
-	if err != nil {
-		panic(err)
-	}
+	clone := CloneClient(client)
 	i := &PhotoCard{tap: onTapped, photo: photo, client: clone}
 	i.Card = widget.NewCard(photo.Title, photo.Username, nil)
 	i.ExtendBaseWidget(i)
@@ -109,18 +105,11 @@ func NewPhotoCard(photo api.Photo /*content fyne.CanvasObject,*/, client *flickr
 	return i
 }
 
-func CloneClient(orig *flickr.FlickrClient) (*flickr.FlickrClient, error) {
-	origJSON, err := json.Marshal(orig)
-	if err != nil {
-		return nil, err
-	}
-
-	clone := flickr.FlickrClient{}
-	if err = json.Unmarshal(origJSON, &clone); err != nil {
-		return nil, err
-	}
-
-	return &clone, nil
+func CloneClient(orig *flickr.FlickrClient) *flickr.FlickrClient {
+	clone := flickr.NewFlickrClient(orig.ApiKey, orig.ApiSecret)
+	clone.OAuthToken = orig.OAuthToken
+	clone.OAuthTokenSecret = orig.OAuthTokenSecret
+	return clone
 }
 
 func (c *PhotoCard) loadImage() {
