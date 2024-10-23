@@ -129,6 +129,7 @@ func (c *PhotoCard) loadImage() {
 	image := canvas.NewImageFromURI(uri)
 	c.Content = image
 	image.FillMode = canvas.ImageFillContain
+	c.Refresh()
 }
 
 func (c *PhotoCard) Tapped(e *fyne.PointEvent) {
