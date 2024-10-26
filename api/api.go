@@ -82,6 +82,7 @@ func GetContactPhotos(client *flickr.FlickrClient) (*GetContactPhotosResponse, e
 	client.EndpointUrl = flickr.API_ENDPOINT
 
 	client.Args.Set("method", "flickr.photos.getContactsPhotos")
+	client.Args.Set("per_page", "100")
 
 	client.OAuthSign()
 	response := &GetContactPhotosResponse{}

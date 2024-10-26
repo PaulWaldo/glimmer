@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -9,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
+	"gopkg.in/masci/flickr.v3"
 	"gopkg.in/masci/flickr.v3/photos"
 )
 
@@ -39,20 +41,32 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 	// Create cards for each photo
 	p.photoCards = make([]fyne.CanvasObject, len(p.photos))
 	for i, photo := range p.photos {
-		info, err := photos.GetInfo(p.ma.client, photo.Id, photo.Secret)
-		if err != nil {
-			fyne.LogError("Failed to get photo info", err)
-			continue
-		}
-		photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", info.Photo.Server, info.Photo.Id, info.Photo.Secret, "z")
-		uri, err := storage.ParseURI(photoUrl)
-		if err != nil {
-			fyne.LogError("parsing url", err)
-			continue
-		}
-		fmt.Println("Downloading ", uri)
-		c := canvas.NewImageFromURI(uri)
-		card := newTapCard(photo.Title, photo.Username, nil, func() {
+		// info, err := photos.GetInfo(p.ma.client, photo.Id, photo.Secret)
+		// if err != nil {
+		// 	fyne.LogError("Failed to get photo info", err)
+		// 	continue
+		// }
+		// photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", info.Photo.Server, info.Photo.Id, info.Photo.Secret, "z")
+		// uri, err := storage.ParseURI(photoUrl)
+		// if err != nil {
+		// 	fyne.LogError("parsing url", err)
+		// 	continue
+		// }
+		// fmt.Println("Downloading ", uri)
+		// c := canvas.NewImageFromURI(uri)
+		// card := NewPhotoCard(photo.Title, photo.Username, nil, func() {
+		// 	pv := &photoView{ma: p.ma, photo: photo}
+		// 	cont, err := pv.makeUI()
+		// 	if err != nil {
+		// 		fyne.LogError("parsing url", err)
+		// 		return
+		// 	}
+		// 	p.ma.vs.Push(cont)
+		// })
+		// card.Content = c
+		// c.FillMode = canvas.ImageFillContain
+
+		card := NewPhotoCard(photo, p.ma.client, func() {
 			pv := &photoView{ma: p.ma, photo: photo}
 			cont, err := pv.makeUI()
 			if err != nil {
@@ -61,10 +75,6 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 			}
 			p.ma.vs.Push(cont)
 		})
-		card.Content = c
-		c.FillMode = canvas.ImageFillContain
-		// card.Image.FillMode = canvas.ImageFillOriginal
-
 		p.photoCards[i] = card
 	}
 
@@ -79,21 +89,55 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 	return p.container
 }
 
-type tapCard struct {
+type PhotoCard struct {
 	*widget.Card
-	tap func()
+	info   photos.PhotoInfo
+	photo  api.Photo
+	client *flickr.FlickrClient
+	tap    func()
 }
 
-func newTapCard(title, subtitle string, content fyne.CanvasObject, fn func()) *tapCard {
-	i := &tapCard{tap: fn}
-	i.Card = widget.NewCard(title, subtitle, content)
+func NewPhotoCard(photo api.Photo /*content fyne.CanvasObject,*/, client *flickr.FlickrClient, onTapped func()) *PhotoCard {
+	clone := CloneClient(client)
+	i := &PhotoCard{tap: onTapped, photo: photo, client: clone}
+	i.Card = widget.NewCard(photo.Title, photo.Username, canvas.NewRectangle(color.Black))
 	i.ExtendBaseWidget(i)
+	go i.loadImage()
 	return i
 }
 
-func (t *tapCard) Tapped(e *fyne.PointEvent) {
-	if t.tap == nil {
+func CloneClient(orig *flickr.FlickrClient) *flickr.FlickrClient {
+	clone := flickr.NewFlickrClient(orig.ApiKey, orig.ApiSecret)
+	clone.OAuthToken = orig.OAuthToken
+	clone.OAuthTokenSecret = orig.OAuthTokenSecret
+	return clone
+}
+
+func (c *PhotoCard) loadImage() {
+	resp, err := photos.GetInfo(c.client, c.photo.Id, c.photo.Secret)
+	if err != nil {
+		fyne.LogError("Failed to get photo info", err)
 		return
 	}
-	t.tap()
+	c.info = resp.Photo
+	photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", c.info.Server, c.info.Id, c.info.Secret, "z")
+	uri, err := storage.ParseURI(photoUrl)
+	if err != nil {
+		fyne.LogError("parsing url", err)
+		c.Content = widget.NewLabel("Failed to load image")
+		return
+	}
+	fmt.Println("Downloading ", uri)
+	image := canvas.NewImageFromURI(uri)
+	fmt.Println("Got ", uri)
+	c.Content = image
+	image.FillMode = canvas.ImageFillContain
+	c.Refresh()
+}
+
+func (c *PhotoCard) Tapped(e *fyne.PointEvent) {
+	if c.tap == nil {
+		return
+	}
+	c.tap()
 }
