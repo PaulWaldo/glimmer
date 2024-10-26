@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -99,7 +100,7 @@ type PhotoCard struct {
 func NewPhotoCard(photo api.Photo /*content fyne.CanvasObject,*/, client *flickr.FlickrClient, onTapped func()) *PhotoCard {
 	clone := CloneClient(client)
 	i := &PhotoCard{tap: onTapped, photo: photo, client: clone}
-	i.Card = widget.NewCard(photo.Title, photo.Username, nil)
+	i.Card = widget.NewCard(photo.Title, photo.Username, canvas.NewRectangle(color.Black))
 	i.ExtendBaseWidget(i)
 	go i.loadImage()
 	return i
@@ -123,10 +124,12 @@ func (c *PhotoCard) loadImage() {
 	uri, err := storage.ParseURI(photoUrl)
 	if err != nil {
 		fyne.LogError("parsing url", err)
+		c.Content = widget.NewLabel("Failed to load image")
 		return
 	}
 	fmt.Println("Downloading ", uri)
 	image := canvas.NewImageFromURI(uri)
+	fmt.Println("Got ", uri)
 	c.Content = image
 	image.FillMode = canvas.ImageFillContain
 	c.Refresh()
