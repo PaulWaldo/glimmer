@@ -108,8 +108,8 @@ func Run() {
 	cp.photos = photos.Photos.Photos
 	ma.vs.Push(cp.makeUI())
 	ma.window.Resize(fyne.Size{
-		Width:  GridSizeWidth*2 + theme.Padding()*3,
-		Height: GridSizeHeight*2 + theme.Padding()*3,
+		Width:  ImageWidth*2 + theme.Padding()*3,
+		Height: ImageHeight*2 + theme.Padding()*3,
 	})
 	ma.window.ShowAndRun()
 }
