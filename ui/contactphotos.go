@@ -114,6 +114,10 @@ func CloneClient(orig *flickr.FlickrClient) *flickr.FlickrClient {
 }
 
 func (c *PhotoCard) loadImage() {
+	// fmt.Printf("Sleep start on card %p\n", c)
+	// time.Sleep(time.Second * time.Duration(rand.Int64N(4))) // Simulate a really long download
+	// fmt.Println("Waking up")
+
 	resp, err := photos.GetInfo(c.client, c.photo.Id, c.photo.Secret)
 	if err != nil {
 		fyne.LogError("Failed to get photo info", err)
@@ -129,10 +133,14 @@ func (c *PhotoCard) loadImage() {
 	}
 	fmt.Println("Downloading ", uri)
 	image := canvas.NewImageFromURI(uri)
-	fmt.Println("Got ", uri)
-	c.Content = image
+	if image == nil || image.Resource == nil {
+		panic("Image is nil")
+	}
+	fmt.Printf("Image size is %d\n", len(image.Resource.Content()))
 	image.FillMode = canvas.ImageFillContain
-	c.Refresh()
+	fmt.Println("Got ", uri)
+	c.SetContent(image)
+	// c.SetContent(canvas.NewRectangle(color.RGBA{R: 250, G: 10, B: 10, A: 255}))
 }
 
 func (c *PhotoCard) Tapped(e *fyne.PointEvent) {

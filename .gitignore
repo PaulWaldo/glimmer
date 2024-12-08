@@ -1,1 +1,4 @@
 tester/client.json
+.aider*
+.env
+.DS_Store
