@@ -92,29 +92,18 @@ func Run() {
 	}
 	// fmt.Printf("\n\n\nPhotos:\n%#v\n", photos)
 
-	// Create placeholder images for each photo
-	for _, photo := range photos.Photos.Photos {
-		img := fyne.NewImage(nil)
-		img.SetMinSize(fyne.Size{Width: 100, Height: 100}) // Set a minimum size for the placeholder
-		cp.imageContainer.Add(img)
-	}
+	// // val, _ := ma.prefs.userName.Get()
+	// // groups, err := api.GetGroups(ma.client, val)
+	// // if err != nil {
+	// // 	panic(err)
+	// // }
+	// // fmt.Printf("\n\n\nGroups:\n%#v\n", groups)
 
-	// Start a goroutine for each photo to download the image data
-	for _, photo := range photos.Photos.Photos {
-		go func(photo api.Photo) {
-			// Download the image data
-			data, err := api.DownloadImage(ma.client, photo.Url)
-			if err != nil {
-				// Handle error
-				return
-			}
-			// Request a refresh of the placeholder image
-			img := cp.imageContainer.Objects[cp.photos.IndexOf(photo)]
-			img.Refresh()
-			// Update the image data
-			img.SetData(data)
-		}(photo)
-	}
+	// x, err := api.Feed(ma.client)
+	// // if err != nil {
+	// // 	panic(err)
+	// // }
+	// fmt.Printf("\n\n\nFeed:\n%#v\n", x)
 
 	cp.photos = photos.Photos.Photos
 	ma.vs.Push(cp.makeUI())
