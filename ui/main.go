@@ -118,3 +118,41 @@ func (ma *myApp) setAuthMenuStatus() {
 	ma.logoutMenu.Disabled = !ma.isLoggedIn()
 	ma.loginMenu.Disabled = ma.isLoggedIn()
 }
+
+type customImage struct {
+	*fyne.Image
+}
+
+func (img *customImage) Refresh() {
+	// Update the image data with the newly downloaded data
+	// data, err := // get the downloaded data
+	// if err != nil {
+	// 	// Handle error
+	// 	return
+	// }
+	// img.SetData(data)
+}
+
+type contactPhotos struct {
+	ma     *myApp
+	photos []api.Photo
+}
+
+func (cp *contactPhotos) makeUI() fyne.CanvasObject {
+	// ...
+	for _, photo := range cp.photos {
+		img := &customImage{Image: fyne.NewImage(nil)}
+		img.SetMinSize(fyne.Size{Width: 100, Height: 100}) // Set a minimum size for the placeholder
+		cp.ma.vs.container.Add(img)
+		go func(photo api.Photo, img *customImage) {
+			data, err := api.DownloadImage(cp.ma.client, photo.Url)
+			if err != nil {
+				// Handle error
+				return
+			}
+			img.Refresh()
+		}(photo, img)
+	}
+	// ...
+	return cp.ma.vs.container
+}
