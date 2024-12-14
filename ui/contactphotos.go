@@ -30,11 +30,11 @@ type contactPhotos struct {
 
 func (p *contactPhotos) makeUI() *fyne.Container {
 	p.title = widget.NewLabel("Contact Photos")
-	
+
 	// Create cards for each photo
 	p.photoCards = make([]fyne.CanvasObject, len(p.photos))
 	for i, photo := range p.photos {
-		card := NewPhotoCard(photo, p.ma.client, func() {
+		card := NewPhotoCard(photo, p.ma.client, nil) /*func() {
 			pv := &photoView{ma: p.ma, photo: photo}
 			cont, err := pv.makeUI()
 			if err != nil {
@@ -42,7 +42,7 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 				return
 			}
 			p.ma.vs.Push(cont)
-		})
+		})*/
 		p.photoCards[i] = card
 	}
 
@@ -82,7 +82,7 @@ func CloneClient(orig *flickr.FlickrClient) *flickr.FlickrClient {
 
 func (c *PhotoCard) loadImage() {
 	// fmt.Printf("Sleep start on card %p\n", c)
-	// time.Sleep(time.Second * time.Duration(rand.Int64N(4))) // Simulate a really long download
+	// time.Sleep(time.Second * time.Duration(1)) // Simulate a really long download
 	// fmt.Println("Waking up")
 
 	resp, err := photos.GetInfo(c.client, c.photo.Id, c.photo.Secret)
@@ -98,14 +98,21 @@ func (c *PhotoCard) loadImage() {
 		c.Content = widget.NewLabel("Failed to load image")
 		return
 	}
-	fmt.Println("Downloading ", uri)
+	// fmt.Println("Downloading ", uri)
+	// fmt.Printf("\"%s\",\n", uri)
 	image := canvas.NewImageFromURI(uri)
 	if image == nil || image.Resource == nil {
 		panic("Image is nil")
 	}
 	fmt.Printf("Image size is %d\n", len(image.Resource.Content()))
 	image.FillMode = canvas.ImageFillContain
-	fmt.Println("Got ", uri)
+	// fmt.Println("Got ", uri)
+	// for !runloopStarted {
+	// 	fmt.Println("waiting for runloop")
+	// 	time.Sleep(time.Millisecond * time.Duration(5))
+	// }
+	// c.Content = image
+	// c.Refresh()
 	c.SetContent(image)
 	// c.SetContent(canvas.NewRectangle(color.RGBA{R: 250, G: 10, B: 10, A: 255}))
 }

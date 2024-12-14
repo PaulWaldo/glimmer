@@ -15,7 +15,7 @@ import (
 func loadImage(photoUrl string, card *widget.Card) {
 	// fmt.Println("Sleep start")
 	// time.Sleep(time.Second * time.Duration(rand.Int64N(10))) // Simulate a really long download
-	// fmt.Println("Waking up")
+	fmt.Println("Waking up")
 	uri, err := storage.ParseURI(photoUrl)
 	if err != nil {
 		fyne.LogError("parsing url", err)
