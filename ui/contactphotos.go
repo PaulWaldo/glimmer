@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"image/color"
+	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -62,6 +63,7 @@ type PhotoCard struct {
 	photo  api.Photo
 	client *flickr.FlickrClient
 	tap    func()
+	mu     sync.Mutex
 }
 
 func NewPhotoCard(photo api.Photo /*content fyne.CanvasObject,*/, client *flickr.FlickrClient, onTapped func()) *PhotoCard {
@@ -95,7 +97,9 @@ func (c *PhotoCard) loadImage() {
 	uri, err := storage.ParseURI(photoUrl)
 	if err != nil {
 		fyne.LogError("parsing url", err)
+		c.mu.Lock()
 		c.Content = widget.NewLabel("Failed to load image")
+		c.mu.Unlock()
 		return
 	}
 	// fmt.Println("Downloading ", uri)
@@ -111,10 +115,11 @@ func (c *PhotoCard) loadImage() {
 	// 	fmt.Println("waiting for runloop")
 	// 	time.Sleep(time.Millisecond * time.Duration(5))
 	// }
-	// c.Content = image
-	// c.Refresh()
-	c.SetContent(image)
+	c.mu.Lock()
+	c.Content = image
+	c.mu.Unlock()
 	// c.SetContent(canvas.NewRectangle(color.RGBA{R: 250, G: 10, B: 10, A: 255}))
+	c.Refresh()
 }
 
 func (c *PhotoCard) Tapped(e *fyne.PointEvent) {
