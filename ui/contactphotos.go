@@ -58,7 +58,7 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 }
 
 type PhotoCard struct {
-	*widget.Card
+	widget.Card
 	info   photos.PhotoInfo
 	photo  api.Photo
 	client *flickr.FlickrClient
@@ -68,8 +68,16 @@ type PhotoCard struct {
 
 func NewPhotoCard(photo api.Photo /*content fyne.CanvasObject,*/, client *flickr.FlickrClient, onTapped func()) *PhotoCard {
 	clone := CloneClient(client)
-	i := &PhotoCard{tap: onTapped, photo: photo, client: clone}
-	i.Card = &widget.Card{Title: photo.Title, Subtitle: photo.Username, Content: canvas.NewRectangle(color.Black)}
+	i := &PhotoCard{
+		Card: widget.Card{
+			Title:    photo.Title,
+			Subtitle: photo.Username,
+			Content:  canvas.NewRectangle(color.Black),
+		},
+		tap:    onTapped,
+		photo:  photo,
+		client: clone,
+	}
 	i.ExtendBaseWidget(i)
 	go i.loadImage()
 	return i
