@@ -58,7 +58,7 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 }
 
 type PhotoCard struct {
-	*widget.Card
+	widget.Card
 	info   photos.PhotoInfo
 	photo  api.Photo
 	client *flickr.FlickrClient
