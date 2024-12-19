@@ -92,8 +92,6 @@ func (ma *myApp) isLoggedIn() bool {
 // 	card.SetContent(image)
 // }
 
-var runloopStarted = false
-
 func Run() {
 	ma := &myApp{}
 	ma.app = app.NewWithID(AppID)
@@ -145,6 +143,9 @@ func Run() {
 	})
 	fmt.Println("Contact Photos container created")
 	fmt.Println("All photos scheduled")
+	go func() {
+		close(runloopStarted)
+	}()
 	ma.window.ShowAndRun()
 }
 
