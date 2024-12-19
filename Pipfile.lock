@@ -1,11 +1,10 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ee190deadacf3b1cb0ec0457976e1c6093b2be8ba2d760497cbe84b0ce01dca9"
+            "sha256": "4dfc0b64d3ddfff6ae2e28375512bf46d0ef82d2242a526a4431d3135ff6ff8a"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_full_version": "3.12.4",
             "python_version": "3.12"
         },
         "sources": [
@@ -19,12 +18,12 @@
     "default": {
         "aider-chat": {
             "hashes": [
-                "sha256:5deb030ac4b673f9d7bb8b32485b616a7dedf1592d0c7daa5a80d297d4f83ad0",
-                "sha256:a933622de7a11ba3b2edff44d44028c9e5d0a53b2643477cea58b36509d59e40"
+                "sha256:069f130cd33490bf038b3dcca9d0e9fc452586ad5512f66a21f46322b39f1f1f",
+                "sha256:0a4296ef176b6b7e62265b70fec479d16f90f8754967ab426efe6eac7f5ad31b"
             ],
             "index": "pypi",
             "markers": "python_version < '3.13' and python_version >= '3.9'",
-            "version": "==0.68.0"
+            "version": "==0.69.1"
         },
         "aiohappyeyeballs": {
             "hashes": [
