@@ -20,6 +20,11 @@ const (
 	GridSizeHeight = 500
 )
 
+var (
+	imageLoadSemaphore = make(chan struct{}, 5) // Allow up to 5 concurrent image loads
+	runloopStarted     = make(chan struct{})
+)
+
 type contactPhotos struct {
 	ma         *myApp
 	container  *fyne.Container
@@ -79,7 +84,13 @@ func NewPhotoCard(photo api.Photo /*content fyne.CanvasObject,*/, client *flickr
 		client: clone,
 	}
 	i.ExtendBaseWidget(i)
-	go i.loadImage()
+	go func() {
+		<-runloopStarted
+		imageLoadSemaphore <- struct{}{} // Acquire a semaphore slot
+		i.loadImage(func() {
+			<-imageLoadSemaphore // Release the semaphore slot
+		})
+	}()
 	return i
 }
 
@@ -90,14 +101,12 @@ func CloneClient(orig *flickr.FlickrClient) *flickr.FlickrClient {
 	return clone
 }
 
-func (c *PhotoCard) loadImage() {
-	// fmt.Printf("Sleep start on card %p\n", c)
-	// time.Sleep(time.Second * time.Duration(1)) // Simulate a really long download
-	// fmt.Println("Waking up")
-
+func (c *PhotoCard) loadImage(callback func()) {
+	// Load the image...
 	resp, err := photos.GetInfo(c.client, c.photo.Id, c.photo.Secret)
 	if err != nil {
 		fyne.LogError("Failed to get photo info", err)
+		callback() // Release the semaphore slot
 		return
 	}
 	c.info = resp.Photo
@@ -108,6 +117,7 @@ func (c *PhotoCard) loadImage() {
 		c.mu.Lock()
 		c.Content = widget.NewLabel("Failed to load image")
 		c.mu.Unlock()
+		callback() // Release the semaphore slot
 		return
 	}
 	// fmt.Println("Downloading ", uri)
@@ -116,7 +126,7 @@ func (c *PhotoCard) loadImage() {
 	if image == nil || image.Resource == nil {
 		panic("Image is nil")
 	}
-	fmt.Printf("Image size is %d\n", len(image.Resource.Content()))
+	// fmt.Printf("Image size is %d\n", len(image.Resource.Content()))
 	image.FillMode = canvas.ImageFillContain
 	// fmt.Println("Got ", uri)
 	// for !runloopStarted {
@@ -128,6 +138,7 @@ func (c *PhotoCard) loadImage() {
 	c.mu.Unlock()
 	// c.SetContent(canvas.NewRectangle(color.RGBA{R: 250, G: 10, B: 10, A: 255}))
 	c.Refresh()
+	callback() // Release the semaphore slot
 }
 
 func (c *PhotoCard) Tapped(e *fyne.PointEvent) {
