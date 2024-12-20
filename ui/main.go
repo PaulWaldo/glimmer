@@ -76,7 +76,6 @@ func Run() {
 		fyne.NewMenu("Server", ma.loginMenu, ma.logoutMenu)),
 	)
 	ma.setAuthMenuStatus()
-	// ma.logAuth("Before auth check")
 	if ma.isLoggedIn() {
 	} else {
 		ma.authenticate()
@@ -84,33 +83,24 @@ func Run() {
 
 	cp := contactPhotos{ma: ma}
 	photos, err := api.GetContactPhotos(ma.client)
-	// ma.logAuth("main GetContactPhotos")
 
 	if err != nil {
 		fmt.Println(err)
 		photos = &api.GetContactPhotosResponse{Photos: api.ContactPhotos{Photos: []api.Photo{}}}
 	}
-	// fmt.Printf("\n\n\nPhotos:\n%#v\n", photos)
-
-	// // val, _ := ma.prefs.userName.Get()
-	// // groups, err := api.GetGroups(ma.client, val)
-	// // if err != nil {
-	// // 	panic(err)
-	// // }
-	// // fmt.Printf("\n\n\nGroups:\n%#v\n", groups)
-
-	// x, err := api.Feed(ma.client)
-	// // if err != nil {
-	// // 	panic(err)
-	// // }
-	// fmt.Printf("\n\n\nFeed:\n%#v\n", x)
 
 	cp.photos = photos.Photos.Photos
+	// ma.window.SetContent(cp.makeUI())
 	ma.vs.Push(cp.makeUI())
 	ma.window.Resize(fyne.Size{
 		Width:  GridSizeWidth*2 + theme.Padding()*3,
 		Height: GridSizeHeight*2 + theme.Padding()*3,
 	})
+	fmt.Println("Contact Photos container created")
+	fmt.Println("All photos scheduled")
+	go func() {
+		close(runloopStarted)
+	}()
 	ma.window.ShowAndRun()
 }
 

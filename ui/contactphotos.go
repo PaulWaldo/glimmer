@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -19,6 +18,11 @@ const (
 	GridSizeHeight = 500
 )
 
+var (
+	imageLoadSemaphore = make(chan struct{}, 5) // Allow up to 5 concurrent image loads
+	runloopStarted     = make(chan struct{})
+)
+
 type contactPhotos struct {
 	ma         *myApp
 	container  *fyne.Container
@@ -30,42 +34,10 @@ type contactPhotos struct {
 
 func (p *contactPhotos) makeUI() *fyne.Container {
 	p.title = widget.NewLabel("Contact Photos")
-	// m := image.NewRGBA(image.Rect(0, 0, 640, 640))
-	// for x := range 640 {
-	// 	for y := range 640 {
-	// 		m.Set(x, y, color.RGBA{255, 0, 0, 255})
-	// 	}
-	// }
-	// placeholderImage := canvas.NewImageFromImage(m)
 
 	// Create cards for each photo
 	p.photoCards = make([]fyne.CanvasObject, len(p.photos))
 	for i, photo := range p.photos {
-		// info, err := photos.GetInfo(p.ma.client, photo.Id, photo.Secret)
-		// if err != nil {
-		// 	fyne.LogError("Failed to get photo info", err)
-		// 	continue
-		// }
-		// photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", info.Photo.Server, info.Photo.Id, info.Photo.Secret, "z")
-		// uri, err := storage.ParseURI(photoUrl)
-		// if err != nil {
-		// 	fyne.LogError("parsing url", err)
-		// 	continue
-		// }
-		// fmt.Println("Downloading ", uri)
-		// c := canvas.NewImageFromURI(uri)
-		// card := NewPhotoCard(photo.Title, photo.Username, nil, func() {
-		// 	pv := &photoView{ma: p.ma, photo: photo}
-		// 	cont, err := pv.makeUI()
-		// 	if err != nil {
-		// 		fyne.LogError("parsing url", err)
-		// 		return
-		// 	}
-		// 	p.ma.vs.Push(cont)
-		// })
-		// card.Content = c
-		// c.FillMode = canvas.ImageFillContain
-
 		card := NewPhotoCard(photo, p.ma.client, func() {
 			pv := &photoView{ma: p.ma, photo: photo}
 			cont, err := pv.makeUI()
@@ -85,24 +57,37 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 		container.NewStack(),
 		container.NewBorder(p.title, nil, nil, nil, scrollingGrid),
 	)
-	// p.container = container.NewBorder(p.title, nil, nil, nil, scrollingGrid)
 	return p.container
 }
 
 type PhotoCard struct {
-	*widget.Card
+	widget.Card
 	info   photos.PhotoInfo
 	photo  api.Photo
 	client *flickr.FlickrClient
 	tap    func()
 }
 
-func NewPhotoCard(photo api.Photo /*content fyne.CanvasObject,*/, client *flickr.FlickrClient, onTapped func()) *PhotoCard {
+func NewPhotoCard(photo api.Photo, client *flickr.FlickrClient, onTapped func()) *PhotoCard {
 	clone := CloneClient(client)
-	i := &PhotoCard{tap: onTapped, photo: photo, client: clone}
-	i.Card = widget.NewCard(photo.Title, photo.Username, canvas.NewRectangle(color.Black))
+	i := &PhotoCard{
+		Card: widget.Card{
+			Title:    photo.Title,
+			Subtitle: photo.Username,
+			Content:  widget.NewProgressBarInfinite(),
+		},
+		tap:    onTapped,
+		photo:  photo,
+		client: clone,
+	}
 	i.ExtendBaseWidget(i)
-	go i.loadImage()
+	go func() {
+		<-runloopStarted
+		imageLoadSemaphore <- struct{}{} // Acquire a semaphore slot
+		i.loadImage(func() {
+			<-imageLoadSemaphore // Release the semaphore slot
+		})
+	}()
 	return i
 }
 
@@ -113,14 +98,12 @@ func CloneClient(orig *flickr.FlickrClient) *flickr.FlickrClient {
 	return clone
 }
 
-func (c *PhotoCard) loadImage() {
-	// fmt.Printf("Sleep start on card %p\n", c)
-	// time.Sleep(time.Second * time.Duration(rand.Int64N(4))) // Simulate a really long download
-	// fmt.Println("Waking up")
-
+func (c *PhotoCard) loadImage(callback func()) {
+	// Load the image...
 	resp, err := photos.GetInfo(c.client, c.photo.Id, c.photo.Secret)
 	if err != nil {
 		fyne.LogError("Failed to get photo info", err)
+		callback() // Release the semaphore slot
 		return
 	}
 	c.info = resp.Photo
@@ -129,18 +112,17 @@ func (c *PhotoCard) loadImage() {
 	if err != nil {
 		fyne.LogError("parsing url", err)
 		c.Content = widget.NewLabel("Failed to load image")
+		callback() // Release the semaphore slot
 		return
 	}
-	fmt.Println("Downloading ", uri)
+
 	image := canvas.NewImageFromURI(uri)
 	if image == nil || image.Resource == nil {
 		panic("Image is nil")
 	}
-	fmt.Printf("Image size is %d\n", len(image.Resource.Content()))
 	image.FillMode = canvas.ImageFillContain
-	fmt.Println("Got ", uri)
 	c.SetContent(image)
-	// c.SetContent(canvas.NewRectangle(color.RGBA{R: 250, G: 10, B: 10, A: 255}))
+	callback() // Release the semaphore slot
 }
 
 func (c *PhotoCard) Tapped(e *fyne.PointEvent) {
