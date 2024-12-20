@@ -82,7 +82,7 @@ func Run() {
 	}
 
 	cp := contactPhotos{ma: ma}
-	photos, err := api.GetContactPhotos(ma.client)
+	photos, err := api.GetContactPhotos(ma.client, 1)
 
 	if err != nil {
 		fmt.Println(err)
