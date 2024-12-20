@@ -63,35 +63,6 @@ func (ma *myApp) isLoggedIn() bool {
 	return true
 }
 
-// func loadImage(card *PhotoCard) {
-// 	// fmt.Println("Sleep start")
-// 	time.Sleep(time.Second * time.Duration(rand.Int64N(10))) // Simulate a really long download
-// 	// fmt.Println("Waking up")
-// 	resp, err := photos.GetInfo(card.client, card.photo.Id, card.photo.Secret)
-// 	if err != nil {
-// 		fyne.LogError("Failed to get photo info", err)
-// 		return
-// 	}
-// 	card.info = resp.Photo
-// 	photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", card.info.Server, card.info.Id, card.info.Secret, "z")
-// 	uri, err := storage.ParseURI(photoUrl)
-// 	if err != nil {
-// 		fyne.LogError("parsing url", err)
-// 		card.Content = widget.NewLabel("Failed to load image")
-// 		return
-// 	}
-// 	fmt.Println("Downloading ", uri)
-// 	// fmt.Printf("\"%s\",\n", uri)
-// 	image := canvas.NewImageFromURI(uri)
-// 	if image == nil || image.Resource == nil {
-// 		panic("Image is nil")
-// 	}
-// 	// fmt.Printf("Image size is %d\n", len(image.Resource.Content()))
-// 	image.FillMode = canvas.ImageFillContain
-// 	// fmt.Println("Got ", uri)
-// 	card.SetContent(image)
-// }
-
 func Run() {
 	ma := &myApp{}
 	ma.app = app.NewWithID(AppID)
@@ -105,7 +76,6 @@ func Run() {
 		fyne.NewMenu("Server", ma.loginMenu, ma.logoutMenu)),
 	)
 	ma.setAuthMenuStatus()
-	// ma.logAuth("Before auth check")
 	if ma.isLoggedIn() {
 	} else {
 		ma.authenticate()
@@ -113,26 +83,11 @@ func Run() {
 
 	cp := contactPhotos{ma: ma}
 	photos, err := api.GetContactPhotos(ma.client)
-	// ma.logAuth("main GetContactPhotos")
 
 	if err != nil {
 		fmt.Println(err)
 		photos = &api.GetContactPhotosResponse{Photos: api.ContactPhotos{Photos: []api.Photo{}}}
 	}
-	// fmt.Printf("\n\n\nPhotos:\n%#v\n", photos)
-
-	// // val, _ := ma.prefs.userName.Get()
-	// // groups, err := api.GetGroups(ma.client, val)
-	// // if err != nil {
-	// // 	panic(err)
-	// // }
-	// // fmt.Printf("\n\n\nGroups:\n%#v\n", groups)
-
-	// x, err := api.Feed(ma.client)
-	// // if err != nil {
-	// // 	panic(err)
-	// // }
-	// fmt.Printf("\n\n\nFeed:\n%#v\n", x)
 
 	cp.photos = photos.Photos.Photos
 	ma.window.SetContent(cp.makeUI())

@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"sync"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -67,10 +66,9 @@ type PhotoCard struct {
 	photo  api.Photo
 	client *flickr.FlickrClient
 	tap    func()
-	mu     sync.Mutex
 }
 
-func NewPhotoCard(photo api.Photo /*content fyne.CanvasObject,*/, client *flickr.FlickrClient, onTapped func()) *PhotoCard {
+func NewPhotoCard(photo api.Photo, client *flickr.FlickrClient, onTapped func()) *PhotoCard {
 	clone := CloneClient(client)
 	i := &PhotoCard{
 		Card: widget.Card{
@@ -113,30 +111,17 @@ func (c *PhotoCard) loadImage(callback func()) {
 	uri, err := storage.ParseURI(photoUrl)
 	if err != nil {
 		fyne.LogError("parsing url", err)
-		c.mu.Lock()
 		c.Content = widget.NewLabel("Failed to load image")
-		c.mu.Unlock()
 		callback() // Release the semaphore slot
 		return
 	}
-	// fmt.Println("Downloading ", uri)
-	// fmt.Printf("\"%s\",\n", uri)
+
 	image := canvas.NewImageFromURI(uri)
 	if image == nil || image.Resource == nil {
 		panic("Image is nil")
 	}
-	// fmt.Printf("Image size is %d\n", len(image.Resource.Content()))
 	image.FillMode = canvas.ImageFillContain
-	// fmt.Println("Got ", uri)
-	// for !runloopStarted {
-	// 	fmt.Println("waiting for runloop")
-	// 	time.Sleep(time.Millisecond * time.Duration(5))
-	// }
-	c.mu.Lock()
-	c.Content = image
-	c.mu.Unlock()
-	// c.SetContent(canvas.NewRectangle(color.RGBA{R: 250, G: 10, B: 10, A: 255}))
-	c.Refresh()
+	c.SetContent(image)
 	callback() // Release the semaphore slot
 }
 
