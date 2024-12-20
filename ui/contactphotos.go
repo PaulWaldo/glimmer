@@ -36,6 +36,7 @@ type contactPhotos struct {
 }
 
 func (p *contactPhotos) makeUI() *fyne.Container {
+	p.loadNextPage()
 	p.title = widget.NewLabel("Contact Photos")
 
 	// Create cards for each photo
