@@ -74,7 +74,7 @@ func TestGetContactPhotos(t *testing.T) {
 	defer server.Close()
 	fclient.HTTPClient = client
 
-	resp, err := api.GetContactPhotos(fclient)
+	resp, err := api.GetContactPhotos(fclient, 1)
 
 	require.NoError(t, err)
 	assert.Equal(t, 3, len(resp.Photos.Photos), "Expected 3 contact photoss, but got %d", len(resp.Photos.Photos))
