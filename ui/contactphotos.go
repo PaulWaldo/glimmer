@@ -63,12 +63,11 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 }
 
 func (p *contactPhotos) loadNextPage() {
-	if p.page <= p.totalPages {
-		p.loadPage()
-		gw := p.container.Objects[1].(*container.Scroll).Content.(*container.GridWrap)
-		gw.Objects = append(gw.Objects, p.photoCards[len(gw.Objects):]...)
-		gw.Refresh()
-	}
+	p.page++
+	p.loadPage()
+	gw := p.container.Objects[1].(*container.Scroll).Content.(*container.GridWrap)
+	gw.Objects = append(gw.Objects, p.photoCards[len(gw.Objects):]...)
+	gw.Refresh()
 }
 
 type PhotoCard struct {

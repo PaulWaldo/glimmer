@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"gopkg.in/masci/flickr.v3"
 )
 
@@ -17,12 +18,13 @@ type GetContactPhotosResponse struct {
 	Photos ContactPhotos `xml:"photos"`
 }
 
-func GetContactPhotos(client *flickr.FlickrClient) (*GetContactPhotosResponse, error) {
+func GetContactPhotos(client *flickr.FlickrClient, page int) (*GetContactPhotosResponse, error) {
 	client.Init()
 	client.EndpointUrl = flickr.API_ENDPOINT
 
 	client.Args.Set("method", "flickr.photos.getContactsPhotos")
 	client.Args.Set("per_page", "25")
+	client.Args.Set("page", fmt.Sprintf("%d", page))
 
 	client.OAuthSign()
 	response := &GetContactPhotosResponse{}
