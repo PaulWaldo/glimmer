@@ -30,6 +30,8 @@ type contactPhotos struct {
 	photoList  *fyne.Container
 	photos     []api.Photo
 	photoCards []fyne.CanvasObject
+	page       int
+	totalPages int
 }
 
 func (p *contactPhotos) makeUI() *fyne.Container {
@@ -58,6 +60,15 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 		container.NewBorder(p.title, nil, nil, nil, scrollingGrid),
 	)
 	return p.container
+}
+
+func (p *contactPhotos) loadNextPage() {
+	if p.page <= p.totalPages {
+		p.loadPage()
+		gw := p.container.Objects[1].(*container.Scroll).Content.(*container.GridWrap)
+		gw.Objects = append(gw.Objects, p.photoCards[len(gw.Objects):]...)
+		gw.Refresh()
+	}
 }
 
 type PhotoCard struct {
