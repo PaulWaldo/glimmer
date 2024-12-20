@@ -55,6 +55,11 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 
 	p.gridWrap = container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight), p.photoCards...)
 	scrollingGrid := container.NewScroll(p.gridWrap)
+	scrollingGrid.OnScrolled = func(dy float32) {
+		if scrollingGrid.Offset.Y+scrollingGrid.Size().Height >= p.gridWrap.Size().Height {
+			p.loadNextPage()
+		}
+	}
 
 	p.container = container.NewStack(
 		container.NewStack(),
@@ -64,11 +69,32 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 }
 
 func (p *contactPhotos) loadNextPage() {
-	if p.page <= p.totalPages {
-		p.loadNextPage()
-		p.gridWrap.Objects = append(p.gridWrap.Objects, p.photoCards[len(p.gridWrap.Objects):]...)
-		p.gridWrap.Refresh()
+	p.page++
+	photos, err := api.GetContactPhotos(p.ma.client, p.page)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
+	p.photos = append(p.photos, photos.Photos.Photos...)
+	p.gridWrap.Objects = append(p.gridWrap.Objects, p.makePhotoCards(photos.Photos.Photos)...)
+	p.gridWrap.Refresh()
+}
+
+func (p *contactPhotos) makePhotoCards(photos []api.Photo) []fyne.CanvasObject {
+	cards := make([]fyne.CanvasObject, len(photos))
+	for i, photo := range photos {
+		card := NewPhotoCard(photo, p.ma.client, func() {
+			pv := &photoView{ma: p.ma, photo: photo}
+			cont, err := pv.makeUI()
+			if err != nil {
+				fyne.LogError("parsing url", err)
+				return
+			}
+			p.ma.vs.Push(cont)
+		})
+		cards[i] = card
+	}
+	return cards
 }
 
 type PhotoCard struct {
