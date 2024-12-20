@@ -28,6 +28,7 @@ type contactPhotos struct {
 	container  *fyne.Container
 	title      *widget.Label
 	photoList  *fyne.Container
+	gridWrap   *fyne.Container
 	photos     []api.Photo
 	photoCards []fyne.CanvasObject
 	page       int
@@ -52,8 +53,8 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 		p.photoCards[i] = card
 	}
 
-	gw := container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight), p.photoCards...)
-	scrollingGrid := container.NewScroll(gw)
+	p.gridWrap = container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight), p.photoCards...)
+	scrollingGrid := container.NewScroll(p.gridWrap)
 
 	p.container = container.NewStack(
 		container.NewStack(),
@@ -63,11 +64,11 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 }
 
 func (p *contactPhotos) loadNextPage() {
-	p.page++
-	p.loadPage()
-	gw := p.container.Objects[1].(*container.Scroll).Content.(*container.GridWrap)
-	gw.Objects = append(gw.Objects, p.photoCards[len(gw.Objects):]...)
-	gw.Refresh()
+	if p.page <= p.totalPages {
+		p.loadNextPage()
+		p.gridWrap.Objects = append(p.gridWrap.Objects, p.photoCards[len(p.gridWrap.Objects):]...)
+		p.gridWrap.Refresh()
+	}
 }
 
 type PhotoCard struct {
