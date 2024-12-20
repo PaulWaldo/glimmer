@@ -28,16 +28,47 @@ type contactPhotos struct {
 	container  *fyne.Container
 	title      *widget.Label
 	photoList  *fyne.Container
+	gridWrap   *fyne.Container
 	photos     []api.Photo
 	photoCards []fyne.CanvasObject
+	page       int
+	totalPages int
 }
 
 func (p *contactPhotos) makeUI() *fyne.Container {
 	p.title = widget.NewLabel("Contact Photos")
 
-	// Create cards for each photo
-	p.photoCards = make([]fyne.CanvasObject, len(p.photos))
-	for i, photo := range p.photos {
+	p.gridWrap = container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight), p.photoCards...)
+	scrollingGrid := container.NewScroll(p.gridWrap)
+	scrollingGrid.OnScrolled = func(pos fyne.Position) {
+		if pos.Y+scrollingGrid.Size().Height >= p.gridWrap.Size().Height {
+			p.loadNextPage()
+		}
+	}
+
+	p.container = container.NewStack(
+		container.NewStack(),
+		container.NewBorder(p.title, nil, nil, nil, scrollingGrid),
+	)
+	p.loadNextPage()
+	return p.container
+}
+
+func (p *contactPhotos) loadNextPage() {
+	p.page++
+	photos, err := api.GetContactPhotos(p.ma.client, p.page)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	p.photos = append(p.photos, photos.Photos.Photos...)
+	p.gridWrap.Objects = append(p.gridWrap.Objects, p.makePhotoCards(photos.Photos.Photos)...)
+	p.gridWrap.Refresh()
+}
+
+func (p *contactPhotos) makePhotoCards(photos []api.Photo) []fyne.CanvasObject {
+	cards := make([]fyne.CanvasObject, len(photos))
+	for i, photo := range photos {
 		card := NewPhotoCard(photo, p.ma.client, func() {
 			pv := &photoView{ma: p.ma, photo: photo}
 			cont, err := pv.makeUI()
@@ -47,17 +78,9 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 			}
 			p.ma.vs.Push(cont)
 		})
-		p.photoCards[i] = card
+		cards[i] = card
 	}
-
-	gw := container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight), p.photoCards...)
-	scrollingGrid := container.NewScroll(gw)
-
-	p.container = container.NewStack(
-		container.NewStack(),
-		container.NewBorder(p.title, nil, nil, nil, scrollingGrid),
-	)
-	return p.container
+	return cards
 }
 
 type PhotoCard struct {
