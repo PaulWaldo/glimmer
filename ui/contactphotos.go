@@ -77,7 +77,7 @@ func NewPhotoCard(photo api.Photo /*content fyne.CanvasObject,*/, client *flickr
 		Card: widget.Card{
 			Title:    photo.Title,
 			Subtitle: photo.Username,
-			Content:  canvas.NewRectangle(color.Black),
+			Content:  widget.NewProgressBarInfinite(),
 		},
 		tap:    onTapped,
 		photo:  photo,
