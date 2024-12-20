@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"image/color"
 	"sync"
 
 	"fyne.io/fyne/v2"
