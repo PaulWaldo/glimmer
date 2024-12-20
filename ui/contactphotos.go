@@ -55,8 +55,8 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 
 	p.gridWrap = container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight), p.photoCards...)
 	scrollingGrid := container.NewScroll(p.gridWrap)
-	scrollingGrid.OnScrolled = func(dy float32) {
-		if scrollingGrid.Offset.Y+scrollingGrid.Size().Height >= p.gridWrap.Size().Height {
+	scrollingGrid.OnScrolled = func(pos fyne.Position) {
+		if pos.Y+scrollingGrid.Size().Height >= p.gridWrap.Size().Height {
 			p.loadNextPage()
 		}
 	}
