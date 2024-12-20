@@ -38,7 +38,7 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 	// Create cards for each photo
 	p.photoCards = make([]fyne.CanvasObject, len(p.photos))
 	for i, photo := range p.photos {
-		card := NewPhotoCard(photo, p.ma.client, nil) /*func() {
+		card := NewPhotoCard(photo, p.ma.client, func() {
 			pv := &photoView{ma: p.ma, photo: photo}
 			cont, err := pv.makeUI()
 			if err != nil {
@@ -46,7 +46,7 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 				return
 			}
 			p.ma.vs.Push(cont)
-		})*/
+		})
 		p.photoCards[i] = card
 	}
 

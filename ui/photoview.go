@@ -70,7 +70,10 @@ func (p photoView) makeUI() (*fyne.Container, error) {
 	im.FillMode = canvas.ImageFillContain
 
 	closeButton := widget.NewButtonWithIcon("Close", theme.CancelIcon(), func() {
-		p.ma.vs.Pop()
+		_, err := p.ma.vs.Pop()
+		if err != nil {
+			fyne.LogError("popping photoView", err)
+		}
 	})
 	buttons := container.NewHBox(closeButton)
 
