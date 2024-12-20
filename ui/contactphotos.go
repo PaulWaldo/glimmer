@@ -38,21 +38,6 @@ type contactPhotos struct {
 func (p *contactPhotos) makeUI() *fyne.Container {
 	p.title = widget.NewLabel("Contact Photos")
 
-	// Create cards for each photo
-	p.photoCards = make([]fyne.CanvasObject, len(p.photos))
-	for i, photo := range p.photos {
-		card := NewPhotoCard(photo, p.ma.client, func() {
-			pv := &photoView{ma: p.ma, photo: photo}
-			cont, err := pv.makeUI()
-			if err != nil {
-				fyne.LogError("parsing url", err)
-				return
-			}
-			p.ma.vs.Push(cont)
-		})
-		p.photoCards[i] = card
-	}
-
 	p.gridWrap = container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight), p.photoCards...)
 	scrollingGrid := container.NewScroll(p.gridWrap)
 	scrollingGrid.OnScrolled = func(pos fyne.Position) {

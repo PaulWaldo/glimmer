@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/theme"
-	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
 )
 
@@ -82,15 +81,6 @@ func Run() {
 	}
 
 	cp := contactPhotos{ma: ma}
-	photos, err := api.GetContactPhotos(ma.client, 1)
-
-	if err != nil {
-		fmt.Println(err)
-		photos = &api.GetContactPhotosResponse{Photos: api.ContactPhotos{Photos: []api.Photo{}}}
-	}
-
-	cp.photos = photos.Photos.Photos
-	// ma.window.SetContent(cp.makeUI())
 	ma.vs.Push(cp.makeUI())
 	ma.window.Resize(fyne.Size{
 		Width:  GridSizeWidth*2 + theme.Padding()*3,
