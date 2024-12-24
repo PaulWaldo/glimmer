@@ -16,9 +16,10 @@ type MockFlickrClient struct {
 
 // DoGet overrides the original DoGet method to return a mock response.
 func (m *MockFlickrClient) DoGet(response interface{}) error {
-	resp := httptest.NewRecorder()
-	resp.Body = m.ResponseBody
-	return flickr.ParseResponse(resp.Result(), response)
+	resp := &http.Response{
+		Body: m.ResponseBody,
+	}
+	return flickr.ParseResponse(resp, response)
 }
 
 // TestGetGroups tests the GetGroups function.
@@ -35,7 +36,7 @@ func TestGetGroups(t *testing.T) {
 		ResponseBody: io.NopCloser(strings.NewReader(mockResponse)),
 	}
 
-	response, err := GetGroups(mockClient.FlickrClient, "12345678901@N01", "")
+	response, err := GetGroups(mockClient, "12345678901@N01", "")
 	if err != nil {
 		t.Errorf("GetGroups returned an error: %v", err)
 	}
@@ -90,7 +91,7 @@ func TestGetGroupsWithExtras(t *testing.T) {
 		ResponseBody: io.NopCloser(strings.NewReader(mockResponse)),
 	}
 
-	response, err := GetGroups(mockClient.FlickrClient, "12345678901@N01", "description")
+	response, err := GetGroups(mockClient, "12345678901@N01", "description")
 	if err != nil {
 		t.Errorf("GetGroups returned an error: %v", err)
 	}
