@@ -37,7 +37,6 @@ func (m *MockFlickrClient) SetEndpointUrl(url string) {
 func (m *MockFlickrClient) SetArgs(args map[string]string) {
 	// Mock implementation
 }
-}
 
 // TestGetGroups tests the GetGroups function.
 func TestGetGroups(t *testing.T) {
