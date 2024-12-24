@@ -2,9 +2,8 @@ package api
 
 import (
 	"testing"
-	"net/http"
 	"net/http/httptest"
-	"io/ioutil"
+	"io"
 	"strings"
 	"gopkg.in/masci/flickr.v3"
 )
@@ -12,13 +11,13 @@ import (
 // MockFlickrClient is a mock implementation of the FlickrClient for testing.
 type MockFlickrClient struct {
 	*flickr.FlickrClient
-	ResponseBody string
+	ResponseBody io.ReadCloser
 }
 
 // DoGet overrides the original DoGet method to return a mock response.
 func (m *MockFlickrClient) DoGet(response interface{}) error {
 	resp := httptest.NewRecorder()
-	resp.Body = ioutil.NopCloser(strings.NewReader(m.ResponseBody))
+	resp.Body = m.ResponseBody
 	return flickr.ParseResponse(resp.Result(), response)
 }
 
@@ -33,10 +32,10 @@ func TestGetGroups(t *testing.T) {
 
 	mockClient := &MockFlickrClient{
 		FlickrClient: &flickr.FlickrClient{},
-		ResponseBody: mockResponse,
+		ResponseBody: io.NopCloser(strings.NewReader(mockResponse)),
 	}
 
-	response, err := GetGroups(mockClient, "12345678901@N01", "")
+	response, err := GetGroups(mockClient.FlickrClient, "12345678901@N01", "")
 	if err != nil {
 		t.Errorf("GetGroups returned an error: %v", err)
 	}
@@ -88,10 +87,10 @@ func TestGetGroupsWithExtras(t *testing.T) {
 
 	mockClient := &MockFlickrClient{
 		FlickrClient: &flickr.FlickrClient{},
-		ResponseBody: mockResponse,
+		ResponseBody: io.NopCloser(strings.NewReader(mockResponse)),
 	}
 
-	response, err := GetGroups(mockClient, "12345678901@N01", "description")
+	response, err := GetGroups(mockClient.FlickrClient, "12345678901@N01", "description")
 	if err != nil {
 		t.Errorf("GetGroups returned an error: %v", err)
 	}

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"gopkg.in/masci/flickr.v3"
 )
 
