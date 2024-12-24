@@ -2,7 +2,7 @@ package api
 
 import (
 	"testing"
-	"net/http/httptest"
+	"net/http"
 	"io"
 	"strings"
 	"gopkg.in/masci/flickr.v3"
@@ -20,6 +20,23 @@ func (m *MockFlickrClient) DoGet(response interface{}) error {
 		Body: m.ResponseBody,
 	}
 	return flickr.ParseResponse(resp, response)
+}
+
+func (m *MockFlickrClient) Init() {
+	// Mock implementation
+}
+
+func (m *MockFlickrClient) OAuthSign() {
+	// Mock implementation
+}
+
+func (m *MockFlickrClient) SetEndpointUrl(url string) {
+	// Mock implementation
+}
+
+func (m *MockFlickrClient) SetArgs(args map[string]string) {
+	// Mock implementation
+}
 }
 
 // TestGetGroups tests the GetGroups function.
