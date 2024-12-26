@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/mock"
-	flickr "gopkg.in/masci/flickr.v3"
 )
 
 type MockFlickrClient struct {
@@ -19,11 +18,11 @@ func (m *MockFlickrClient) DoGet(response interface{}) error {
 	return args.Error(1)
 }
 
-func (m *MockFlickrClient) Init() {}
-func (m *MockFlickrClient) OAuthSign() {}
-func (m *MockFlickrClient) Args() map[string]string { return map[string]string{} }
-func (m *MockFlickrClient) SetArg(key, value string) {}
-func (m *MockFlickrClient) EndpointUrl() string { return "" }
+func (m *MockFlickrClient) Init()                     {}
+func (m *MockFlickrClient) OAuthSign()                {}
+func (m *MockFlickrClient) Args() map[string]string   { return map[string]string{} }
+func (m *MockFlickrClient) SetArg(key, value string)  {}
+func (m *MockFlickrClient) EndpointUrl() string       { return "" }
 func (m *MockFlickrClient) SetEndpointUrl(url string) {}
 
 func TestGetGroups(t *testing.T) {
