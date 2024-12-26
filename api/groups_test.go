@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/mock"
-
-	flickr "gopkg.in/masci/flickr.v3"
 )
 
 type MockFlickrClient struct {
