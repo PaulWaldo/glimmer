@@ -10,7 +10,7 @@ import (
 
 // MockFlickrClient is a mock implementation of the FlickrClient for testing.
 type MockFlickrClient struct {
-	*flickr.FlickrClient
+	flickr.FlickrClient
 	ResponseBody io.ReadCloser
 }
 
@@ -19,6 +19,10 @@ func (m *MockFlickrClient) DoGet(response interface{}) error {
 	resp := &http.Response{
 		Body: m.ResponseBody,
 	}
+	return m.ParseResponse(resp, response)
+}
+
+func (m *MockFlickrClient) ParseResponse(resp *http.Response, response interface{}) error {
 	return flickr.ParseResponse(resp, response)
 }
 
