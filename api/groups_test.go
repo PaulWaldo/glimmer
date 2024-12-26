@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/mock"
+	flickr "gopkg.in/masci/flickr.v3"
 )
 
 type MockFlickrClient struct {
@@ -12,7 +13,10 @@ type MockFlickrClient struct {
 
 func (m *MockFlickrClient) DoGet(response interface{}) error {
 	args := m.Called(response)
-	return args.Error(0)
+	if args.Get(0) != nil {
+		*response.(*GetGroupsResponse) = *args.Get(0).(*GetGroupsResponse)
+	}
+	return args.Error(1)
 }
 
 func TestGetGroups(t *testing.T) {
@@ -26,9 +30,16 @@ func TestGetGroups(t *testing.T) {
 		},
 	}
 
-	mockClient.On("DoGet", mock.Any()).Return(fakeGroups, nil)
+	mockClient.On("DoGet", mock.Anything).Return(fakeGroups, nil)
 
-	groups, err := GetGroups(mockClient, "some_user_id", "")
+	type mockFlickrClient struct {
+		flickr.FlickrClient
+		*MockFlickrClient
+	}
+
+	wrappedMockClient := &mockFlickrClient{MockFlickrClient: mockClient}
+
+	groups, err := GetGroups(wrappedMockClient, "some_user_id", "")
 
 	if err != nil {
 		t.Errorf("Expected no error, but got %v", err)
