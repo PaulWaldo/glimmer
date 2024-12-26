@@ -25,19 +25,29 @@ type GetGroupsResponse struct {
 	Groups Groups `xml:"groups"`
 }
 
-func GetGroups(client *flickr.FlickrClient, userId string, extras string) (*GetGroupsResponse, error) {
-	client.Init()
-	client.EndpointUrl = flickr.API_ENDPOINT
+type FlickrClientInterface interface {
+	DoGet(response interface{}) error
+	Init()
+	OAuthSign()
+	Args() map[string]string
+	SetArg(key, value string)
+	EndpointUrl() string
+	SetEndpointUrl(url string)
+}
 
-	client.Args.Set("method", "flickr.people.getGroups")
-	client.Args.Set("user_id", userId)
+func GetGroups(client FlickrClientInterface, userId string, extras string) (*GetGroupsResponse, error) {
+	client.Init()
+	client.SetEndpointUrl(flickr.API_ENDPOINT)
+
+	client.SetArg("method", "flickr.people.getGroups")
+	client.SetArg("user_id", userId)
 	if extras != "" {
-		client.Args.Set("extras", extras)
+		client.SetArg("extras", extras)
 	}
 
 	client.OAuthSign()
 	response := &GetGroupsResponse{}
-	err := flickr.DoGet(client, response)
+	err := client.DoGet(response)
 
 	if err != nil {
 		return nil, err

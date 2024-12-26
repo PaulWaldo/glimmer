@@ -19,6 +19,13 @@ func (m *MockFlickrClient) DoGet(response interface{}) error {
 	return args.Error(1)
 }
 
+func (m *MockFlickrClient) Init() {}
+func (m *MockFlickrClient) OAuthSign() {}
+func (m *MockFlickrClient) Args() map[string]string { return map[string]string{} }
+func (m *MockFlickrClient) SetArg(key, value string) {}
+func (m *MockFlickrClient) EndpointUrl() string { return "" }
+func (m *MockFlickrClient) SetEndpointUrl(url string) {}
+
 func TestGetGroups(t *testing.T) {
 	mockClient := &MockFlickrClient{}
 	fakeGroups := &GetGroupsResponse{
@@ -32,14 +39,7 @@ func TestGetGroups(t *testing.T) {
 
 	mockClient.On("DoGet", mock.Anything).Return(fakeGroups, nil)
 
-	type mockFlickrClient struct {
-		flickr.FlickrClient
-		*MockFlickrClient
-	}
-
-	wrappedMockClient := &mockFlickrClient{MockFlickrClient: mockClient}
-
-	groups, err := GetGroups(wrappedMockClient, "some_user_id", "")
+	groups, err := GetGroups(mockClient, "some_user_id", "")
 
 	if err != nil {
 		t.Errorf("Expected no error, but got %v", err)
