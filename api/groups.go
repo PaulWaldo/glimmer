@@ -4,7 +4,7 @@ import (
 	"github.com/your/flickr"
 )
 
-type GetPhotosResponse struct {
+type GetGroupPhotosResponse struct {
 	flickr.BasicResponse
 	Photos struct {
 		Page    int `xml:"page,attr"`
@@ -33,7 +33,7 @@ type GetPhotosResponse struct {
 	} `xml:"photos"`
 }
 
-func GetPhotos(client *flickr.FlickrClient, groupID string, params map[string]string) (*GetPhotosResponse, error) {
+func GetGroupPhotos(client *flickr.FlickrClient, groupID string, params map[string]string) (*GetGroupPhotosResponse, error) {
     client.Init()
     client.Args.Set("method", "flickr.groups.pools.getPhotos")
     client.Args.Set("group_id", groupID)
@@ -42,7 +42,7 @@ func GetPhotos(client *flickr.FlickrClient, groupID string, params map[string]st
     }
     client.ApiSign()
 
-    var response GetPhotosResponse
+    var response GetGroupPhotosResponse
     err := flickr.DoPost(client, &response)
     if err != nil {
         return nil, err
