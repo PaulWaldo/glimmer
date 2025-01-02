@@ -2,6 +2,7 @@ package api
 
 import (
 	"testing"
+	"github.com/masci/flickr/testutils"
 )
 
 func TestGetGroupPhotos(t *testing.T) {
@@ -13,7 +14,7 @@ func TestGetGroupPhotos(t *testing.T) {
 		</rsp>
 	`
 
-	mockServer, client := FlickrMock(200, getGroupPhotosSamplePayload, "text/xml")
+	mockServer, client := testutils.FlickrMock(200, getGroupPhotosSamplePayload, "text/xml")
 
 	defer mockServer.Close()
 
@@ -35,7 +36,7 @@ func TestGetGroupPhotos(t *testing.T) {
 }
 
 func TestGetGroupPhotosError(t *testing.T) {
-	mockServer, client := FlickrMock(500, "", "")
+	mockServer, client := testutils.FlickrMock(500, "", "")
 
 	defer mockServer.Close()
 
@@ -49,7 +50,7 @@ func TestGetGroupPhotosError(t *testing.T) {
 }
 
 func TestGetGroupPhotosInvalidXML(t *testing.T) {
-	mockServer, client := FlickrMock(200, " invalid xml ", "")
+	mockServer, client := testutils.FlickrMock(200, " invalid xml ", "")
 
 	defer mockServer.Close()
 
