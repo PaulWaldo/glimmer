@@ -2,20 +2,18 @@ package api
 
 import (
 	"testing"
-	"github.com/masci/flickr/testutils"
+	"github.com/PaulWaldo/glimmer/mocks"
+	"gopkg.in/masci/flickr.v3"
 )
 
 func TestGetGroupPhotos(t *testing.T) {
-	getGroupPhotosSamplePayload := `
+	mockServer, client := mocks.NewFlickrMock(200, `
 		<rsp stat="ok">
 			<photos page="1" pages="1" perpage="100" total="1">
 				<photo id="12345" owner="testuser" secret="abcdef" server="123" farm="1" title="Test Photo" ispublic="1" isfriend="0" isfamily="0" />
 			</photos>
 		</rsp>
-	`
-
-	mockServer, client := testutils.FlickrMock(200, getGroupPhotosSamplePayload, "text/xml")
-
+	`)
 	defer mockServer.Close()
 
 	groupID := "12345"
@@ -33,11 +31,18 @@ func TestGetGroupPhotos(t *testing.T) {
 	if len(response.Photos.Photo) != 1 {
 		t.Errorf("Expected 1 photo, got %d", len(response.Photos.Photo))
 	}
+
+	if response.Photos.Photo[0].ID != "12345" {
+		t.Errorf("Expected photo ID 12345, got %s", response.Photos.Photo[0].ID)
+	}
+
+	if response.Photos.Photo[0].Title != "Test Photo" {
+		t.Errorf("Expected photo title 'Test Photo', got %s", response.Photos.Photo[0].Title)
+	}
 }
 
 func TestGetGroupPhotosError(t *testing.T) {
-	mockServer, client := testutils.FlickrMock(500, "", "")
-
+	mockServer, client := mocks.NewFlickrMock(500, "")
 	defer mockServer.Close()
 
 	groupID := "12345"
@@ -50,8 +55,7 @@ func TestGetGroupPhotosError(t *testing.T) {
 }
 
 func TestGetGroupPhotosInvalidXML(t *testing.T) {
-	mockServer, client := testutils.FlickrMock(200, " invalid xml ", "")
-
+	mockServer, client := mocks.NewFlickrMock(200, " invalid xml ")
 	defer mockServer.Close()
 
 	groupID := "12345"
