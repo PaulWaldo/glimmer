@@ -1,0 +1,8 @@
+# model: openai/hf:Qwen/Qwen2.5-Coder-32B-Instruct
+model: openai/hf:meta-llama/Llama-3.1-405B-Instruct
+# model: openai/hf:meta-llama/Llama-3.3-70B-Instruct
+openai-api-base: https://glhf.chat/api/openai/v1
+map-tokens: 512
+attribute-committer: True
+attribute-commit-message-author: True
+attribute-author: True

@@ -2,3 +2,4 @@ tester/client.json
 .aider*
 .env
 .DS_Store
+!.aider.conf.yml
