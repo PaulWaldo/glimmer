@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/your/flickr"
+	"gopkg.in/masci/flickr.v3"
 )
 
 type GetGroupPhotosResponse struct {
