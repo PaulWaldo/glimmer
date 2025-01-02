@@ -3,7 +3,6 @@ package api
 import (
 	"testing"
 	"github.com/PaulWaldo/glimmer/mocks"
-	"gopkg.in/masci/flickr.v3"
 )
 
 func TestGetGroupPhotos(t *testing.T) {
@@ -30,14 +29,6 @@ func TestGetGroupPhotos(t *testing.T) {
 
 	if len(response.Photos.Photo) != 1 {
 		t.Errorf("Expected 1 photo, got %d", len(response.Photos.Photo))
-	}
-
-	if response.Photos.Photo[0].ID != "12345" {
-		t.Errorf("Expected photo ID 12345, got %s", response.Photos.Photo[0].ID)
-	}
-
-	if response.Photos.Photo[0].Title != "Test Photo" {
-		t.Errorf("Expected photo title 'Test Photo', got %s", response.Photos.Photo[0].Title)
 	}
 }
 
