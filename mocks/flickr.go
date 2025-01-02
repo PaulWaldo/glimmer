@@ -14,7 +14,7 @@ func NewFlickrMock(statusCode int, responseBody string) (*httptest.Server, *flic
 	}))
 
 	client := flickr.NewFlickrClient("api-key", "api-secret")
-	client.BaseURL = mockServer.URL
+	client.Args.Set("base_url", mockServer.URL)
 
 	return mockServer, client
 }
