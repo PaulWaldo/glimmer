@@ -1,7 +1,9 @@
-package api
+package api_test
 
 import (
 	"testing"
+
+	"github.com/PaulWaldo/glimmer/api"
 	"github.com/PaulWaldo/glimmer/mocks"
 )
 
@@ -18,7 +20,7 @@ func TestGetGroupPhotos(t *testing.T) {
 	groupID := "12345"
 	params := map[string]string{}
 
-	response, err := GetGroupPhotos(client, groupID, params)
+	response, err := api.GetGroupPhotos(client, groupID, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +41,7 @@ func TestGetGroupPhotosError(t *testing.T) {
 	groupID := "12345"
 	params := map[string]string{}
 
-	_, err := GetGroupPhotos(client, groupID, params)
+	_, err := api.GetGroupPhotos(client, groupID, params)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
@@ -52,7 +54,7 @@ func TestGetGroupPhotosInvalidXML(t *testing.T) {
 	groupID := "12345"
 	params := map[string]string{}
 
-	_, err := GetGroupPhotos(client, groupID, params)
+	_, err := api.GetGroupPhotos(client, groupID, params)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
