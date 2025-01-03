@@ -15,7 +15,7 @@ func TestGetGroupPhotos(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name:       "success",
+			name:       "returns valid group photos for valid input",
 			statusCode: 200,
 			response: `
 				<rsp stat="ok">
@@ -29,13 +29,13 @@ func TestGetGroupPhotos(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:       "error",
+			name:       "returns error for server error",
 			statusCode: 500,
 			response:   "",
 			wantErr:    true,
 		},
 		{
-			name:       "invalid xml",
+			name:       "returns error for invalid xml from server",
 			statusCode: 200,
 			response:   " invalid xml ",
 			wantErr:    true,
