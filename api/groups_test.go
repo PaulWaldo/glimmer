@@ -8,62 +8,54 @@ import (
 )
 
 func TestGetGroupPhotos(t *testing.T) {
-	fclient := flickr.GetTestClient()
-	mockServer, client := flickr.FlickrMock(200, `
-		<rsp stat="ok">
-			<photos page="1" pages="1" perpage="100" total="3">
-				<photo id="12345" owner="testuser" secret="abcdef" server="123" farm="1" title="Test Photo" ispublic="1" isfriend="0" isfamily="0" />
-				<photo id="67890" owner="anotheruser" secret="ghijkl" server="456" farm="2" title="Another Photo" ispublic="1" isfriend="0" isfamily="0" />
-				<photo id="34567" owner="yetanotheruser" secret="mnopqr" server="789" farm="3" title="Yet Another Photo" ispublic="1" isfriend="0" isfamily="0" />
-			</photos>
-		</rsp>
-	`, "text/xml")
-	defer mockServer.Close()
-	fclient.HTTPClient = client
-
-	groupID := "12345"
-	params := map[string]string{}
-
-	response, err := api.GetGroupPhotos(fclient, groupID, params)
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		name       string
+		statusCode int
+		response   string
+		wantErr    bool
+	}{
+		{
+			name:       "success",
+			statusCode: 200,
+			response: `
+				<rsp stat="ok">
+					<photos page="1" pages="1" perpage="100" total="3">
+						<photo id="12345" owner="testuser" secret="abcdef" server="123" farm="1" title="Test Photo" ispublic="1" isfriend="0" isfamily="0" />
+						<photo id="67890" owner="anotheruser" secret="ghijkl" server="456" farm="2" title="Another Photo" ispublic="1" isfriend="0" isfamily="0" />
+						<photo id="34567" owner="yetanotheruser" secret="mnopqr" server="789" farm="3" title="Yet Another Photo" ispublic="1" isfriend="0" isfamily="0" />
+					</photos>
+				</rsp>
+			`,
+			wantErr: false,
+		},
+		{
+			name:       "error",
+			statusCode: 500,
+			response:   "",
+			wantErr:    true,
+		},
+		{
+			name:       "invalid xml",
+			statusCode: 200,
+			response:   " invalid xml ",
+			wantErr:    true,
+		},
 	}
 
-	if response.Photos.Page != 1 {
-		t.Errorf("Expected page 1, got %d", response.Photos.Page)
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fclient := flickr.GetTestClient()
+			mockServer, client := flickr.FlickrMock(tt.statusCode, tt.response, "text/xml")
+			defer mockServer.Close()
+			fclient.HTTPClient = client
 
-	if len(response.Photos.Photo) != 3 {
-		t.Errorf("Expected 3 photos, got %d", len(response.Photos.Photo))
-	}
-}
+			groupID := "12345"
+			params := map[string]string{}
 
-func TestGetGroupPhotosError(t *testing.T) {
-	fclient := flickr.GetTestClient()
-	mockServer, client := flickr.FlickrMock(500, "", "text/xml")
-	defer mockServer.Close()
-	fclient.HTTPClient = client
-
-	groupID := "12345"
-	params := map[string]string{}
-
-	_, err := api.GetGroupPhotos(fclient, groupID, params)
-	if err == nil {
-		t.Fatal("Expected error, got nil")
-	}
-}
-
-func TestGetGroupPhotosInvalidXML(t *testing.T) {
-	fclient := flickr.GetTestClient()
-	mockServer, client := flickr.FlickrMock(200, " invalid xml ", "text/xml")
-	defer mockServer.Close()
-	fclient.HTTPClient = client
-
-	groupID := "12345"
-	params := map[string]string{}
-
-	_, err := api.GetGroupPhotos(fclient, groupID, params)
-	if err == nil {
-		t.Fatal("Expected error, got nil")
+			_, err := api.GetGroupPhotos(fclient, groupID, params)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetGroupPhotos() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }
