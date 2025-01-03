@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/PaulWaldo/glimmer/api"
-	"github.com/PaulWaldo/glimmer/mocks"
 	"gopkg.in/masci/flickr.v3"
 )
 
 func TestGetGroupPhotos(t *testing.T) {
+	fclient := flickr.GetTestClient()
 	mockServer, client := flickr.FlickrMock(200, `
 		<rsp stat="ok">
 			<photos page="1" pages="1" perpage="100" total="1">
@@ -17,11 +17,12 @@ func TestGetGroupPhotos(t *testing.T) {
 		</rsp>
 	`, "text/xml")
 	defer mockServer.Close()
+	fclient.HTTPClient = client
 
 	groupID := "12345"
 	params := map[string]string{}
 
-	response, err := api.GetGroupPhotos(client, groupID, params)
+	response, err := api.GetGroupPhotos(fclient, groupID, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,26 +37,30 @@ func TestGetGroupPhotos(t *testing.T) {
 }
 
 func TestGetGroupPhotosError(t *testing.T) {
+	fclient := flickr.GetTestClient()
 	mockServer, client := flickr.FlickrMock(500, "", "text/xml")
 	defer mockServer.Close()
+	fclient.HTTPClient = client
 
 	groupID := "12345"
 	params := map[string]string{}
 
-	_, err := api.GetGroupPhotos(client, groupID, params)
+	_, err := api.GetGroupPhotos(fclient, groupID, params)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
 }
 
 func TestGetGroupPhotosInvalidXML(t *testing.T) {
+	fclient := flickr.GetTestClient()
 	mockServer, client := flickr.FlickrMock(200, " invalid xml ", "text/xml")
 	defer mockServer.Close()
+	fclient.HTTPClient = client
 
 	groupID := "12345"
 	params := map[string]string{}
 
-	_, err := api.GetGroupPhotos(client, groupID, params)
+	_, err := api.GetGroupPhotos(fclient, groupID, params)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
