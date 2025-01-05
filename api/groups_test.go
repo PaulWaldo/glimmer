@@ -37,6 +37,9 @@ func TestGetGroupPhotos(t *testing.T) {
                  </rsp>
              `,
 			want: &api.GetGroupPhotosResponse{
+				BasicResponse: flickr.BasicResponse{
+					Status: "ok",
+				},
 				Photos: struct {
 					Page    int `xml:"page,attr"`
 					Pages   int `xml:"pages,attr"`
@@ -48,14 +51,14 @@ func TestGetGroupPhotos(t *testing.T) {
 					Pages:   1,
 					PerPage: 100,
 					Total:   3,
-					Photo: []api.Photo {
+					Photo: []api.Photo{
 						{
 							ID:       "12345",
 							Owner:    "testuser",
 							Secret:   "abcdef",
 							Server:   "123",
 							Farm:     "1",
-							Title:    "Test Photo",
+							Title:    "Te\n Photo",
 							IsPublic: 1,
 							IsFriend: 1,
 							IsFamily: 0,
