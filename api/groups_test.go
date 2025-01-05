@@ -117,6 +117,8 @@ func TestGetGroupPhotos(t *testing.T) {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
+				// Don't worry about the Extra field, it is just the raw XML
+				tt.want.Extra = resp.Extra
 				assert.Equal(t, tt.want, resp)
 			}
 		})

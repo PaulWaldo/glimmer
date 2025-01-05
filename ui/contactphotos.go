@@ -123,7 +123,7 @@ func CloneClient(orig *flickr.FlickrClient) *flickr.FlickrClient {
 
 func (c *PhotoCard) loadImage(callback func()) {
 	// Load the image...
-	resp, err := photos.GetInfo(c.client, c.photo.Id, c.photo.Secret)
+	resp, err := photos.GetInfo(c.client, c.photo.ID, c.photo.Secret)
 	if err != nil {
 		fyne.LogError("Failed to get photo info", err)
 		callback() // Release the semaphore slot

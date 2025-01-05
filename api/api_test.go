@@ -78,7 +78,7 @@ func TestGetContactPhotos(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, 3, len(resp.Photos.Photos), "Expected 3 contact photoss, but got %d", len(resp.Photos.Photos))
-	assert.Equal(t, "2801", resp.Photos.Photos[0].Id)
-	assert.Equal(t, "2499", resp.Photos.Photos[1].Id)
-	assert.Equal(t, "2437", resp.Photos.Photos[2].Id)
+	assert.Equal(t, "2801", resp.Photos.Photos[0].ID)
+	assert.Equal(t, "2499", resp.Photos.Photos[1].ID)
+	assert.Equal(t, "2437", resp.Photos.Photos[2].ID)
 }

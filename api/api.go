@@ -51,12 +51,24 @@ func GetContactList(client *flickr.FlickrClient) (*GetContactListResponse, error
 }
 
 type Photo struct {
-	Id       string `xml:"id,attr"`
-	Owner    string `xml:"owner,attr"`
-	Secret   string `xml:"secret,attr"`
-	Server   string `xml:"server,attr"`
-	Username string `xml:"username,attr"`
-	Title    string `xml:"title,attr"`
+	ID          string `xml:"id,attr"`
+	Owner       string `xml:"owner,attr"`
+	Secret      string `xml:"secret,attr"`
+	Server      string `xml:"server,attr"`
+	Username    string `xml:"username,attr"`
+	Title       string `xml:"title,attr"`
+	Farm        string `xml:"farm,attr"`
+	IsPublic    int    `xml:"ispublic,attr"`
+	IsFriend    int    `xml:"isfriend,attr"`
+	IsFamily    int    `xml:"isfamily,attr"`
+	Description string `xml:"description"`
+	Dates       struct {
+		Posted           int    `xml:"posted,attr"`
+		Taken            string `xml:"taken,attr"`
+		TakenGranularity int    `xml:"takengranularity,attr"`
+	} `xml:"dates"`
+	Views    int `xml:"views"`
+	Comments int `xml:"comments"`
 }
 
 func Feed(client *flickr.FlickrClient) (*GetContactPhotosResponse, error) {

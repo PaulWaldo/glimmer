@@ -20,7 +20,7 @@ type photoView struct {
 }
 
 func (p photoView) makeUI() (*fyne.Container, error) {
-	pai, err := photos.GetSizes(p.ma.client, p.photo.Id)
+	pai, err := photos.GetSizes(p.ma.client, p.photo.ID)
 	if err != nil {
 		fyne.LogError("getting sizes", err)
 		return nil, fmt.Errorf("getting sizes: %w", err)
