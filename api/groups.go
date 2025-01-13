@@ -50,3 +50,31 @@ func GetUserGroups(client *flickr.FlickrClient, userID string, params map[string
 
 	return &response, nil
 }
+
+type UsersGroupPhotos struct {
+	GroupID   string
+	GroupName string
+	Photos    []Photo
+}
+
+func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string) ([]UsersGroupPhotos, error) {
+	userGroups, err := GetUserGroups(client, userID, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var usersGroupPhotos []UsersGroupPhotos
+	for _, group := range userGroups.Groups {
+		groupPhotos, err := GetGroupPhotos(client, group.ID, nil)
+		if err != nil {
+			return nil, err
+		}
+		usersGroupPhotos = append(usersGroupPhotos, UsersGroupPhotos{
+			GroupID:   group.ID,
+			GroupName: group.Name,
+			Photos:    groupPhotos.Photos,
+		})
+	}
+
+	return usersGroupPhotos, nil
+}
