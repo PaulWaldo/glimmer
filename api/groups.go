@@ -2,17 +2,12 @@ package api
 
 import (
 	"gopkg.in/masci/flickr.v3"
+	"gopkg.in/masci/flickr.v3/groups"
 )
 
 type GetGroupPhotosResponse struct {
 	flickr.BasicResponse
-	Photos struct {
-		Page    int     `xml:"page,attr"`
-		Pages   int     `xml:"pages,attr"`
-		PerPage int     `xml:"perpage,attr"`
-		Total   int     `xml:"total,attr"`
-		Photo   []Photo `xml:"photo"`
-	} `xml:"photos"`
+	Photos []Photo `xml:"photos>photo"`
 }
 
 func GetGroupPhotos(client *flickr.FlickrClient, groupID string, params map[string]string) (*GetGroupPhotosResponse, error) {
@@ -35,9 +30,7 @@ func GetGroupPhotos(client *flickr.FlickrClient, groupID string, params map[stri
 
 type GetUserGroupsResponse struct {
 	flickr.BasicResponse
-	Groups struct {
-		Group []flickr.Group `xml:"group"`
-	} `xml:"groups"`
+	Groups []groups.Group `xml:"groups>group"`
 }
 
 func GetUserGroups(client *flickr.FlickrClient, userID string, params map[string]string) (*GetUserGroupsResponse, error) {
