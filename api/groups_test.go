@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/masci/flickr.v3"
+	"gopkg.in/masci/flickr.v3/groups"
 )
 
 func TestGetGroupPhotos(t *testing.T) {
@@ -40,51 +41,39 @@ func TestGetGroupPhotos(t *testing.T) {
 				BasicResponse: flickr.BasicResponse{
 					Status: "ok",
 				},
-				Photos: struct {
-					Page    int `xml:"page,attr"`
-					Pages   int `xml:"pages,attr"`
-					PerPage int `xml:"perpage,attr"`
-					Total   int `xml:"total,attr"`
-					Photo   []api.Photo `xml:"photo"`
-				}{
-					Page:    1,
-					Pages:   1,
-					PerPage: 100,
-					Total:   3,
-					Photo: []api.Photo{
-						{
-							ID:       "12345",
-							Owner:    "testuser",
-							Secret:   "abcdef",
-							Server:   "123",
-							Farm:     "1",
-							Title:    "Te\n Photo",
-							IsPublic: 1,
-							IsFriend: 1,
-							IsFamily: 0,
-						},
-						{
-							ID:       "67890",
-							Owner:    "anotheruser",
-							Secret:   "ghijkl",
-							Server:   "456",
-							Farm:     "2",
-							Title:    "Another Photo",
-							IsPublic: 1,
-							IsFriend: 0,
-							IsFamily: 1,
-						},
-						{
-							ID:       "34567",
-							Owner:    "yetanotheruser",
-							Secret:   "mnopqr",
-							Server:   "789",
-							Farm:     "3",
-							Title:    "Yet Another Photo",
-							IsPublic: 1,
-							IsFriend: 1,
-							IsFamily: 1,
-						},
+				Photos: []api.Photo{
+					{
+						ID:       "12345",
+						Owner:    "testuser",
+						Secret:   "abcdef",
+						Server:   "123",
+						Farm:     "1",
+						Title:    "Te\n Photo",
+						IsPublic: 1,
+						IsFriend: 1,
+						IsFamily: 0,
+					},
+					{
+						ID:       "67890",
+						Owner:    "anotheruser",
+						Secret:   "ghijkl",
+						Server:   "456",
+						Farm:     "2",
+						Title:    "Another Photo",
+						IsPublic: 1,
+						IsFriend: 0,
+						IsFamily: 1,
+					},
+					{
+						ID:       "34567",
+						Owner:    "yetanotheruser",
+						Secret:   "mnopqr",
+						Server:   "789",
+						Farm:     "3",
+						Title:    "Yet Another Photo",
+						IsPublic: 1,
+						IsFriend: 1,
+						IsFamily: 1,
 					},
 				},
 			},
@@ -152,28 +141,24 @@ func TestGetUserGroups(t *testing.T) {
 				BasicResponse: flickr.BasicResponse{
 					Status: "ok",
 				},
-				Groups: struct {
-					Group []flickr.Group `xml:"group"`
-				}{
-					Group: []flickr.Group{
-						{
-							ID:          "12345",
-							Name:        "Test Group",
-							Members:     10,
-							Privacy:     1,
-							Admin:       1,
-							Invitation:  0,
-							NeedsInvite: 0,
-						},
-						{
-							ID:          "67890",
-							Name:        "Another Group",
-							Members:     20,
-							Privacy:     2,
-							Admin:       0,
-							Invitation:  1,
-							NeedsInvite: 1,
-						},
+				Groups: []groups.Group{
+					{
+						ID:          "12345",
+						Name:        "Test Group",
+						Members:     10,
+						Privacy:     1,
+						Admin:       1,
+						Invitation:  0,
+						NeedsInvite: 0,
+					},
+					{
+						ID:          "67890",
+						Name:        "Another Group",
+						Members:     20,
+						Privacy:     2,
+						Admin:       0,
+						Invitation:  1,
+						NeedsInvite: 1,
 					},
 				},
 			},
