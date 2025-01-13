@@ -199,16 +199,15 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 	userID := "12345"
 
 	tests := []struct {
-		name       string
-		statusCode int
-		response   string
-		want       []api.UsersGroupPhotos
-		wantErr    bool
+		name           string
+		groupsResponse string
+		photosResponse map[string]string
+		want           []api.UsersGroupPhotos
+		wantErr        bool
 	}{
 		{
-			name:       "success",
-			statusCode: 200,
-			response: `
+			name: "success",
+			groupsResponse: `
 				<rsp stat="ok">
 					<groups>
 						<group id="12345" name="Test Group" member_count="10" privacy="1" admin="1" />
@@ -216,6 +215,22 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 					</groups>
 				</rsp>
 			`,
+			photosResponse: map[string]string{
+				"12345": `
+					<rsp stat="ok">
+						<photos page="1" pages="1" perpage="100" total="3">
+							<photo id="12345" owner="testuser" secret="abcdef" server="123" farm="1" title="Te\n Photo" ispublic="1" isfriend="1" isfamily="0" />
+						</photos>
+					</rsp>
+				`,
+				"67890": `
+					<rsp stat="ok">
+						<photos page="1" pages="1" perpage="100" total="3">
+							<photo id="67890" owner="anotheruser" secret="ghijkl" server="456" farm="2" title="Another Photo" ispublic="1" isfriend="0" isfamily="1" />
+						</photos>
+					</rsp>
+				`,
+			},
 			want: []api.UsersGroupPhotos{
 				{
 					GroupID:   "12345",
@@ -255,26 +270,52 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:       "error",
-			statusCode: 500,
-			response:   "",
-			want:       nil,
-			wantErr:    true,
+			name:           "error",
+			groupsResponse: "",
+			photosResponse: nil,
+			want:           nil,
+			wantErr:        true,
 		},
 		{
-			name:       "invalid xml",
-			statusCode: 200,
-			response:   " invalid xml ",
-			want:       nil,
-			wantErr:    true,
+			name:           "invalid xml",
+			groupsResponse: " invalid xml ",
+			photosResponse: nil,
+			want:           nil,
+			wantErr:        true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockServer, client := flickr.FlickrMock(tt.statusCode, tt.response, "text/xml")
-			defer mockServer.Close()
-			fclient.HTTPClient = client
+			groupsMockServer, groupsClient := flickr.FlickrMock(200, tt.groupsResponse, "text/xml")
+			defer groupsMockServer.Close()
+			fclient.HTTPClient = groupsClient
+
+			photosMockServers := make([]*flickr.MockServer, 0)
+			photosClients := make(map[string]*flickr.MockServer, 0)
+			for groupID, response := range tt.photosResponse {
+				mockServer, client := flickr.FlickrMock(200, response, "text/xml")
+				photosMockServers = append(photosMockServers, mockServer)
+				photosClients[groupID] = client
+			}
+			defer func() {
+				for _, server := range photosMockServers {
+					server.Close()
+				}
+			}()
+
+			var originalDoPost = flickr.DoPost
+			defer func() { flickr.DoPost = originalDoPost }()
+			flickr.DoPost = func(client *flickr.FlickrClient, response interface{}) error {
+				if client.Args.Get("method") == "flickr.people.getGroups" {
+					return originalDoPost(groupsClient, response)
+				}
+				groupID := client.Args.Get("group_id")
+				if client.Args.Get("method") == "flickr.groups.pools.getPhotos" {
+					return originalDoPost(photosClients[groupID], response)
+				}
+				return nil
+			}
 
 			resp, err := api.GetUsersGroupPhotos(fclient, userID)
 			if tt.wantErr {
