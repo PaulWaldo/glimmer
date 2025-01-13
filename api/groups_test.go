@@ -124,3 +124,91 @@ func TestGetGroupPhotos(t *testing.T) {
 		})
 	}
 }
+
+func TestGetUserGroups(t *testing.T) {
+	fclient := flickr.GetTestClient()
+	userID := "12345"
+	params := map[string]string{}
+
+	tests := []struct {
+		name       string
+		statusCode int
+		response   string
+		want       *api.GetUserGroupsResponse
+		wantErr    bool
+	}{
+		{
+			name:       "success",
+			statusCode: 200,
+			response: `
+				<rsp stat="ok">
+					<groups>
+						<group id="12345" name="Test Group" members="10" privacy="1" admin="1" invitation="0" needs_invite="0" />
+						<group id="67890" name="Another Group" members="20" privacy="2" admin="0" invitation="1" needs_invite="1" />
+					</groups>
+				</rsp>
+			`,
+			want: &api.GetUserGroupsResponse{
+				BasicResponse: flickr.BasicResponse{
+					Status: "ok",
+				},
+				Groups: struct {
+					Group []flickr.Group `xml:"group"`
+				}{
+					Group: []flickr.Group{
+						{
+							ID:          "12345",
+							Name:        "Test Group",
+							Members:     10,
+							Privacy:     1,
+							Admin:       1,
+							Invitation:  0,
+							NeedsInvite: 0,
+						},
+						{
+							ID:          "67890",
+							Name:        "Another Group",
+							Members:     20,
+							Privacy:     2,
+							Admin:       0,
+							Invitation:  1,
+							NeedsInvite: 1,
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:       "error",
+			statusCode: 500,
+			response:   "",
+			want:       nil,
+			wantErr:    true,
+		},
+		{
+			name:       "invalid xml",
+			statusCode: 200,
+			response:   " invalid xml ",
+			want:       nil,
+			wantErr:    true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockServer, client := flickr.FlickrMock(tt.statusCode, tt.response, "text/xml")
+			defer mockServer.Close()
+			fclient.HTTPClient = client
+
+			resp, err := api.GetUserGroups(fclient, userID, params)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				tt.want.Extra = resp.Extra
+				assert.Equal(t, tt.want, resp)
+			}
+		})
+	}
+}
