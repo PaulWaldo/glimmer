@@ -289,10 +289,10 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			groupsMockServer, groupsClient := flickr.FlickrMock(200, tt.groupsResponse, "text/xml")
 			defer groupsMockServer.Close()
-			fclient.HTTPClient = groupsClient
+			fclient.HTTPClient = groupsClient.HTTPClient
 
 			photosMockServers := make([]*flickr.MockServer, 0)
-			photosClients := make(map[string]*flickr.MockServer, 0)
+			photosClients := make(map[string]*flickr.FlickrClient, 0)
 			for groupID, response := range tt.photosResponse {
 				mockServer, client := flickr.FlickrMock(200, response, "text/xml")
 				photosMockServers = append(photosMockServers, mockServer)
