@@ -132,8 +132,8 @@ func TestGetUserGroups(t *testing.T) {
 			response: `
 				<rsp stat="ok">
 					<groups>
-						<group id="12345" name="Test Group" members="10" privacy="1" admin="1" invitation="0" needs_invite="0" />
-						<group id="67890" name="Another Group" members="20" privacy="2" admin="0" invitation="1" needs_invite="1" />
+						<group id="12345" name="Test Group" member_count="10" privacy="1" admin="1" />
+						<group id="67890" name="Another Group" member_count="20" privacy="2" admin="0" />
 					</groups>
 				</rsp>
 			`,
@@ -145,20 +145,16 @@ func TestGetUserGroups(t *testing.T) {
 					{
 						ID:          "12345",
 						Name:        "Test Group",
-						Members:     10,
-						Privacy:     1,
-						Admin:       1,
-						Invitation:  0,
-						NeedsInvite: 0,
+						MemberCount: "10",
+						Privacy:     "1",
+						Admin:       "1",
 					},
 					{
 						ID:          "67890",
 						Name:        "Another Group",
-						Members:     20,
-						Privacy:     2,
-						Admin:       0,
-						Invitation:  1,
-						NeedsInvite: 1,
+						MemberCount: "20",
+						Privacy:     "2",
+						Admin:       "0",
 					},
 				},
 			},
