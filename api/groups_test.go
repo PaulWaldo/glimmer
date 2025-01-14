@@ -340,13 +340,18 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
     }
 
     method := req.Form.Get("method")
-    groupID := req.Form.Get("group_id")
 
-    var response mockResponse
+    var key string
     if method == "flickr.people.getGroups" {
-        response = t.responses[method]
+        key = method
     } else if method == "flickr.groups.pools.getPhotos" {
-        response = t.responses[fmt.Sprintf("%s-%s", method, groupID)]
+        groupID := req.Form.Get("group_id")
+        key = fmt.Sprintf("%s-%s", method, groupID)
+    }
+
+    response, ok := t.responses[key]
+    if !ok {
+        return nil, fmt.Errorf("no mock response found for key %s", key)
     }
 
     return &http.Response{
