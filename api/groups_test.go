@@ -1,6 +1,10 @@
 package api_test
 
 import (
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/PaulWaldo/glimmer/api"
@@ -195,135 +199,159 @@ func TestGetUserGroups(t *testing.T) {
 }
 
 func TestGetUsersGroupPhotos(t *testing.T) {
-	fclient := flickr.GetTestClient()
-	userID := "12345"
+    fclient := flickr.GetTestClient()
+    userID := "12345"
 
-	tests := []struct {
-		name           string
-		groupsResponse string
-		photosResponse map[string]string
-		want           []api.UsersGroupPhotos
-		wantErr        bool
-	}{
-		{
-			name: "success",
-			groupsResponse: `
-				<rsp stat="ok">
-					<groups>
-						<group id="12345" name="Test Group" member_count="10" privacy="1" admin="1" />
-						<group id="67890" name="Another Group" member_count="20" privacy="2" admin="0" />
-					</groups>
-				</rsp>
-			`,
-			photosResponse: map[string]string{
-				"12345": `
-					<rsp stat="ok">
-						<photos page="1" pages="1" perpage="100" total="3">
-							<photo id="12345" owner="testuser" secret="abcdef" server="123" farm="1" title="Te\n Photo" ispublic="1" isfriend="1" isfamily="0" />
-						</photos>
-					</rsp>
-				`,
-				"67890": `
-					<rsp stat="ok">
-						<photos page="1" pages="1" perpage="100" total="3">
-							<photo id="67890" owner="anotheruser" secret="ghijkl" server="456" farm="2" title="Another Photo" ispublic="1" isfriend="0" isfamily="1" />
-						</photos>
-					</rsp>
-				`,
-			},
-			want: []api.UsersGroupPhotos{
-				{
-					GroupID:   "12345",
-					GroupName: "Test Group",
-					Photos: []api.Photo{
-						{
-							ID:       "12345",
-							Owner:    "testuser",
-							Secret:   "abcdef",
-							Server:   "123",
-							Farm:     "1",
-							Title:    "Te\n Photo",
-							IsPublic: 1,
-							IsFriend: 1,
-							IsFamily: 0,
-						},
-					},
-				},
-				{
-					GroupID:   "67890",
-					GroupName: "Another Group",
-					Photos: []api.Photo{
-						{
-							ID:       "67890",
-							Owner:    "anotheruser",
-							Secret:   "ghijkl",
-							Server:   "456",
-							Farm:     "2",
-							Title:    "Another Photo",
-							IsPublic: 1,
-							IsFriend: 0,
-							IsFamily: 1,
-						},
-					},
-				},
-			},
-			wantErr: false,
-		},
-		{
-			name:           "error",
-			groupsResponse: "",
-			photosResponse: nil,
-			want:           nil,
-			wantErr:        true,
-		},
-		{
-			name:           "invalid xml",
-			groupsResponse: " invalid xml ",
-			photosResponse: nil,
-			want:           nil,
-			wantErr:        true,
-		},
-	}
+    tests := []struct {
+        name           string
+        groupsResponse string
+        photosResponse map[string]string
+        want           []api.UsersGroupPhotos
+        wantErr        bool
+    }{
+        {
+            name: "success",
+            groupsResponse: `<?xml version="1.0" encoding="utf-8" ?>
+                <rsp stat="ok">
+                    <groups>
+                        <group nsid="12345" name="Test Group" members="10" privacy="1" iconserver="1" iconfarm="1" admin="1" />
+                        <group nsid="67890" name="Another Group" members="20" privacy="2" iconserver="2" iconfarm="2" admin="0" />
+                    </groups>
+                </rsp>`,
+            photosResponse: map[string]string{
+                "12345": `<?xml version="1.0" encoding="utf-8" ?>
+                    <rsp stat="ok">
+                        <photos page="1" pages="1" perpage="100" total="1">
+                            <photo id="12345" owner="testuser" secret="abcdef" server="123" farm="1" title="Test Photo" ispublic="1" isfriend="1" isfamily="0" />
+                        </photos>
+                    </rsp>`,
+                "67890": `<?xml version="1.0" encoding="utf-8" ?>
+                    <rsp stat="ok">
+                        <photos page="1" pages="1" perpage="100" total="1">
+                            <photo id="67890" owner="anotheruser" secret="ghijkl" server="456" farm="2" title="Another Photo" ispublic="1" isfriend="0" isfamily="1" />
+                        </photos>
+                    </rsp>`,
+            },
+            want: []api.UsersGroupPhotos{
+                {
+                    GroupID:   "12345",
+                    GroupName: "Test Group",
+                    Photos: []api.Photo{
+                        {
+                            ID:       "12345",
+                            Owner:    "testuser",
+                            Secret:   "abcdef",
+                            Server:   "123",
+                            Farm:     "1",
+                            Title:    "Test Photo",
+                            IsPublic: 1,
+                            IsFriend: 1,
+                            IsFamily: 0,
+                        },
+                    },
+                },
+                {
+                    GroupID:   "67890",
+                    GroupName: "Another Group",
+                    Photos: []api.Photo{
+                        {
+                            ID:       "67890",
+                            Owner:    "anotheruser",
+                            Secret:   "ghijkl",
+                            Server:   "456",
+                            Farm:     "2",
+                            Title:    "Another Photo",
+                            IsPublic: 1,
+                            IsFriend: 0,
+                            IsFamily: 1,
+                        },
+                    },
+                },
+            },
+            wantErr: false,
+        },
+        {
+            name: "error",
+            groupsResponse: `<?xml version="1.0" encoding="utf-8" ?>
+                <rsp stat="fail">
+                    <err code="1" msg="Group not found" />
+                </rsp>`,
+            photosResponse: nil,
+            want:          nil,
+            wantErr:       true,
+        },
+        {
+            name:           "invalid xml",
+            groupsResponse: "invalid xml",
+            photosResponse: nil,
+            want:          nil,
+            wantErr:       true,
+        },
+    }
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			groupsMockServer, groupsClient := flickr.FlickrMock(200, tt.groupsResponse, "text/xml")
-			defer groupsMockServer.Close()
-			fclient.HTTPClient = groupsClient.HTTPClient
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            transport := &mockTransport{
+                responses: make(map[string]mockResponse),
+            }
 
-			photosMockServers := make([]*flickr.MockServer, 0)
-			photosClients := make(map[string]*flickr.FlickrClient, 0)
-			for groupID, response := range tt.photosResponse {
-				mockServer, client := flickr.FlickrMock(200, response, "text/xml")
-				photosMockServers = append(photosMockServers, mockServer)
-				photosClients[groupID] = client
-			}
-			defer func() {
-				for _, server := range photosMockServers {
-					server.Close()
-				}
-			}()
+            // Add response for groups endpoint
+            transport.responses["flickr.people.getGroups"] = mockResponse{
+                statusCode: 200,
+                body:      tt.groupsResponse,
+            }
 
-			var originalDoPost = flickr.DoPost
-			defer func() { flickr.DoPost = originalDoPost }()
-			flickr.DoPost = func(client *flickr.FlickrClient, response interface{}) error {
-				if client.Args.Get("method") == "flickr.people.getGroups" {
-					return originalDoPost(groupsClient, response)
-				}
-				groupID := client.Args.Get("group_id")
-				if client.Args.Get("method") == "flickr.groups.pools.getPhotos" {
-					return originalDoPost(photosClients[groupID], response)
-				}
-				return nil
-			}
+            // Add responses for photos endpoints
+            for groupID, response := range tt.photosResponse {
+                transport.responses[fmt.Sprintf("flickr.groups.pools.getPhotos-%s", groupID)] = mockResponse{
+                    statusCode: 200,
+                    body:      response,
+                }
+            }
 
-			resp, err := api.GetUsersGroupPhotos(fclient, userID)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tt.want, resp)
-			}
-		})
-	}
+            fclient.HTTPClient = &http.Client{
+                Transport: transport,
+            }
+
+            resp, err := api.GetUsersGroupPhotos(fclient, userID)
+            if tt.wantErr {
+                require.Error(t, err)
+                return
+            }
+
+            require.NoError(t, err)
+            assert.Equal(t, tt.want, resp)
+        })
+    }
+}
+
+type mockTransport struct {
+    responses map[string]mockResponse
+}
+
+type mockResponse struct {
+    statusCode int
+    body       string
+}
+
+func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+    if err := req.ParseForm(); err != nil {
+        return nil, err
+    }
+
+    method := req.Form.Get("method")
+    groupID := req.Form.Get("group_id")
+
+    var response mockResponse
+    if method == "flickr.people.getGroups" {
+        response = t.responses[method]
+    } else if method == "flickr.groups.pools.getPhotos" {
+        response = t.responses[fmt.Sprintf("%s-%s", method, groupID)]
+    }
+
+    return &http.Response{
+        StatusCode: response.statusCode,
+        Body:       io.NopCloser(strings.NewReader(response.body)),
+        Header:     make(http.Header),
+    }, nil
 }
