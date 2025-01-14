@@ -65,12 +65,12 @@ func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string) ([]UsersGro
 
 	var usersGroupPhotos []UsersGroupPhotos
 	for _, group := range userGroups.Groups {
-		groupPhotos, err := GetGroupPhotos(client, group.ID, nil)
+		groupPhotos, err := GetGroupPhotos(client, group.NSID, nil)
 		if err != nil {
 			return nil, err
 		}
 		usersGroupPhotos = append(usersGroupPhotos, UsersGroupPhotos{
-			GroupID:   group.ID,
+			GroupID:   group.NSID,
 			GroupName: group.Name,
 			Photos:    groupPhotos.Photos,
 		})
