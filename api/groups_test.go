@@ -326,37 +326,35 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 }
 
 type mockTransport struct {
-    responses map[string]mockResponse
+	responses map[string]mockResponse
 }
 
 type mockResponse struct {
-    statusCode int
-    body       string
+	statusCode int
+	body       string
 }
 
 func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-    if err := req.ParseForm(); err != nil {
-        return nil, err
-    }
+	if err := req.ParseForm(); err != nil {
+		return nil, err
+	}
 
-    method := req.Form.Get("method")
+	method := req.Form.Get("method")
+	groupID := req.Form.Get("group_id")
 
-    var key string
-    if method == "flickr.people.getGroups" {
-        key = method
-    } else if method == "flickr.groups.pools.getPhotos" {
-        groupID := req.Form.Get("group_id")
-        key = fmt.Sprintf("%s-%s", method, groupID)
-    }
+	key := method
+	if method == "flickr.groups.pools.getPhotos" {
+		key = fmt.Sprintf("%s-%s", method, groupID)
+	}
 
-    response, ok := t.responses[key]
-    if !ok {
-        return nil, fmt.Errorf("no mock response found for key %s", key)
-    }
+	response, ok := t.responses[key]
+	if !ok {
+		return nil, fmt.Errorf("no mock response found for key %s", key)
+	}
 
-    return &http.Response{
-        StatusCode: response.statusCode,
-        Body:       io.NopCloser(strings.NewReader(response.body)),
-        Header:     make(http.Header),
-    }, nil
+	return &http.Response{
+		StatusCode: response.statusCode,
+		Body:       io.NopCloser(strings.NewReader(response.body)),
+		Header:     make(http.Header),
+	}, nil
 }
