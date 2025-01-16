@@ -353,7 +353,10 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	   }
 
 	method := req.MultipartForm.Value["method"][0]
-	groupID := req.MultipartForm.Value["group_id"][0]
+	groupID := ""
+	if _, ok := req.MultipartForm.Value["group_id"]; ok {
+		groupID = req.MultipartForm.Value["group_id"][0]
+	}
 
 	key := method
 	if method == "flickr.groups.pools.getPhotos" {
