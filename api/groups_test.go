@@ -340,19 +340,20 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
+	// Must read the body before calling ParseMultipartForm.
 	var b []byte
 	if req.Body != nil {
 		b, _ = io.ReadAll(req.Body)
 		req.Body = io.NopCloser(bytes.NewBuffer(b))
 	}
-	var bodyString string
-	if len(b) > 0 {
-		bodyString = string(b)
-	}
-	fmt.Println(bodyString)
-	
-	method := req.Form.Get("method")
-	groupID := req.Form.Get("group_id")
+
+	   err := req.ParseMultipartForm(1024 * 1024) // 1MB max memory
+	   if err != nil {
+	       return nil, err
+	   }
+
+	method := req.MultipartForm.Value["method"][0]
+	groupID := req.MultipartForm.Value["group_id"][0]
 
 	key := method
 	if method == "flickr.groups.pools.getPhotos" {
