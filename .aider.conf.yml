@@ -7,3 +7,5 @@ map-tokens: 512
 attribute-committer: True
 attribute-commit-message-author: True
 attribute-author: True
+test-cmd: go test ./...
+auto-test: True
