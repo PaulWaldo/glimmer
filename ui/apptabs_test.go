@@ -3,21 +3,22 @@ package ui
 import (
 	"testing"
 
+	"fyne.io/fyne/v2/container"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAppTabs_MakeUI(t *testing.T) {
-	ma := &myApp{} // You'll need to initialize myApp appropriately for the test
+	ma := &myApp{}
 	at := &apptabs{ma: ma}
 	ui := at.makeUI()
 
 	// This assertion will fail because makeUI doesn't use at.appTabs yet
-	assert.NotNil(t, at.appTabs, "at.appTabs should not be nil after makeUI") // Access the named field
+	ui := at.makeUI()
 
-	appTabs := ui.Objects[0].(*container.AppTabs)
+	assert.NotNil(t, at.appTabs, "at.appTabs should not be nil after makeUI")
 
-	assert.Equal(t, 2, len(appTabs.Items))
+	assert.Equal(t, 2, len(ui.Items))
 
-	assert.Equal(t, "Contacts", appTabs.Items[0].Text)
-	assert.Equal(t, "Groups", appTabs.Items[1].Text)
+	assert.Equal(t, "Contacts", ui.Items[0].Text)
+	assert.Equal(t, "Groups", ui.Items[1].Text)
 }
