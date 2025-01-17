@@ -3,7 +3,6 @@ package ui
 import (
 	"testing"
 
-	"fyne.io/fyne/v2/container" // Add this import
 	"github.com/stretchr/testify/assert"
 )
 
