@@ -8,6 +8,7 @@ name = "pypi"
 [dev-packages]
 aider-chat = "*"
 playwright = "*"
+google-generativeai = "*"
 
 [requires]
 python_version = "3.12"
