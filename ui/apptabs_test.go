@@ -14,12 +14,11 @@ func TestAppTabs_MakeUI(t *testing.T) {
 	// Assert that the returned UI element is an *fyne.Container (AppTabs)
 	assert.IsType(t, &fyne.Container{}, ui)
 
-	// Type assert to AppTabs to access its methods
+	// Type assert to AppTabs to access its methods and fields
 	appTabs := ui.(*fyne.Container).Objects[0].(*container.AppTabs)
 
     // Assert that the container has two children (the tabs)
 	assert.Equal(t, 2, len(appTabs.Items))
-
 
 	// Assert that the tab labels are correct
 	assert.Equal(t, "Contacts", appTabs.Items[0].Text)
