@@ -11,8 +11,8 @@ func TestAppTabs_MakeUI(t *testing.T) {
 	at := &apptabs{ma: ma}
 	ui := at.makeUI()
 
-	// This assertion will fail because makeUI doesn't use at.AppTabs yet
-	assert.NotNil(t, at.AppTabs, "at.AppTabs should not be nil after makeUI")
+	// This assertion will fail because makeUI doesn't use at.appTabs yet
+	assert.NotNil(t, at.appTabs, "at.appTabs should not be nil after makeUI") // Access the named field
 
 	appTabs := ui.Objects[0].(*container.AppTabs)
 
