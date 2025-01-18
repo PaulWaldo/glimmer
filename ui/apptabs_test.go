@@ -3,11 +3,10 @@ package ui
 import (
 	"testing"
 
-	"fyne.io/fyne/v2/container"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAppTabs_MakeUI(t *testing.T) {
+func TestAppTabs_MakeUI_CreatesContactsAndGroupsTags(t *testing.T) {
 	ma := &myApp{}
 	at := &apptabs{ma: ma}
 	at.makeUI() // Call makeUI to initialize at.appTabs

@@ -2,9 +2,9 @@ package mocks
 
 import (
 	"fmt"
+	"gopkg.in/masci/flickr.v3"
 	"net/http"
 	"net/http/httptest"
-	"gopkg.in/masci/flickr.v3"
 )
 
 func NewFlickrMock(statusCode int, responseBody string) (*httptest.Server, *flickr.FlickrClient) {

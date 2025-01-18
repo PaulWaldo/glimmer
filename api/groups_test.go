@@ -347,10 +347,10 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		req.Body = io.NopCloser(bytes.NewBuffer(b))
 	}
 
-	   err := req.ParseMultipartForm(1024 * 1024) // 1MB max memory
-	   if err != nil {
-	       return nil, err
-	   }
+	err := req.ParseMultipartForm(1024 * 1024) // 1MB max memory
+	if err != nil {
+		return nil, err
+	}
 
 	method := req.MultipartForm.Value["method"][0]
 	groupID := ""
