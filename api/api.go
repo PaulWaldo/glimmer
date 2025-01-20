@@ -7,6 +7,8 @@ import (
 func CloneClient(client *flickr.FlickrClient) *flickr.FlickrClient {
 	clone := flickr.NewFlickrClient(client.ApiKey, client.ApiSecret)
 	clone.OAuthToken = client.OAuthToken
+	clone.EndpointUrl = client.EndpointUrl
+	clone.HTTPVerb = client.HTTPVerb
 	clone.OAuthTokenSecret = client.OAuthTokenSecret
 	return clone
 }
