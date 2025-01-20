@@ -310,6 +310,24 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 				}
 			}
 
+			transport := &mockTransport{
+				responses: make(map[string]mockResponse),
+			}
+
+			// Add response for groups endpoint
+			groupsResponse := tt.groupsResponse
+			transport.responses["flickr.people.getGroups"] = mockResponse{
+				statusCode: 200,
+				body:       groupsResponse,
+			}
+
+			// Add responses for photos endpoints
+			for groupID, response := range tt.photosResponse {
+				transport.responses[fmt.Sprintf("flickr.groups.pools.getPhotos-%s", groupID)] = mockResponse{
+					statusCode: 200,
+					body:       response,
+				}
+			}
 			fclient.HTTPClient = &http.Client{
 				Transport: transport,
 			}
