@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"gopkg.in/masci/flickr.v3"
 )
 
@@ -14,7 +13,6 @@ func CloneClient(client *flickr.FlickrClient) *flickr.FlickrClient {
 	newClient.OAuthTokenSecret = client.OAuthTokenSecret
 	newClient.EndpointUrl = client.EndpointUrl
 	newClient.HTTPVerb = client.HTTPVerb
-	newClient.RetryOnErrorCodes = client.RetryOnErrorCodes
 
 	return newClient
 }
