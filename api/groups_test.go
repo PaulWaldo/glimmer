@@ -293,32 +293,13 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			transport := &mockTransport{
-				responses: make(map[string]mockResponse),
+				responses: make(map[string]mockResponse), // Initialize the responses map
 			}
 
 			// Add response for groups endpoint
 			transport.responses["flickr.people.getGroups"] = mockResponse{
 				statusCode: 200,
 				body:       tt.groupsResponse,
-			}
-
-			// Add responses for photos endpoints
-			for groupID, response := range tt.photosResponse {
-				transport.responses[fmt.Sprintf("flickr.groups.pools.getPhotos-%s", groupID)] = mockResponse{
-					statusCode: 200,
-					body:       response,
-				}
-			}
-
-			transport := &mockTransport{
-				responses: make(map[string]mockResponse),
-			}
-
-			// Add response for groups endpoint
-			groupsResponse := tt.groupsResponse
-			transport.responses["flickr.people.getGroups"] = mockResponse{
-				statusCode: 200,
-				body:       groupsResponse,
 			}
 
 			// Add responses for photos endpoints
