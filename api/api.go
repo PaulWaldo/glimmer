@@ -4,8 +4,15 @@ import (
 	"gopkg.in/masci/flickr.v3"
 )
 
+import (
+	"net/url"
+
+	"gopkg.in/masci/flickr.v3"
+)
+
 func CloneClient(client *flickr.FlickrClient) *flickr.FlickrClient {
 	newClient := &flickr.FlickrClient{}
+	newClient.Args = url.Values{}
 
 	newClient.ApiKey = client.ApiKey
 	newClient.ApiSecret = client.ApiSecret
