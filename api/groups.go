@@ -60,14 +60,16 @@ type UsersGroupPhotos struct {
 }
 
 func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string) ([]UsersGroupPhotos, error) {
-	userGroups, err := GetUserGroups(client, userID, nil)
+	clonedClient := CloneClient(client)
+	userGroups, err := GetUserGroups(clonedClient, userID, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var usersGroupPhotos []UsersGroupPhotos
 	for _, group := range userGroups.Groups {
-		groupPhotos, err := GetGroupPhotos(client, group.Nsid, nil)
+		clonedClient = CloneClient(client)
+		groupPhotos, err := GetGroupPhotos(clonedClient, group.Nsid, nil)
 		if err != nil {
 			return nil, err
 		}
