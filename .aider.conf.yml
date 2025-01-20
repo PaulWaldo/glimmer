@@ -1,3 +1,5 @@
+# aider --model ovenrouter/openai/o1-oreview --architect --editor-model ovenrouter/anthropic/claude
+# aider --model openai/hf:Qwen/Qwen2.5-Coder-72B-Instruct --architect --editor-model gemini/gemini-1.5-pro-latest
 model: gemini/gemini-1.5-pro-latest
 # model: openai/hf:Qwen/Qwen2.5-Coder-72B-Instruct
 # model: openai/hf:meta-llama/Llama-3.1-405B-Instruct
