@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/PaulWaldo/glimmer/api"
