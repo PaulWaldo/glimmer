@@ -82,15 +82,15 @@ func Run() {
 	)
 	ma.setAuthMenuStatus()
 	if ma.isLoggedIn() {
-		go func() {
-			var err error
-			ma.groupPhotos, err = api.GetUsersGroupPhotos(api.CloneClient(ma.client), ma.userNsID)
-			if err != nil {
-				fyne.LogError("getting users group photos", err)
-				return
-			}
-			fmt.Println("Group photos fetched:", len(ma.groupPhotos)) // Add this line for debugging
-		}()
+		// Fetch group photos synchronously
+		var err error
+		ma.groupPhotos, err = api.GetUsersGroupPhotos(api.CloneClient(ma.client), ma.userNsID)
+		if err != nil {
+			fyne.LogError("getting users group photos", err)
+			// Handle the error appropriately, e.g., display an error message
+			return // Or continue without group photos
+		}
+		fmt.Println("Group photos fetched:", len(ma.groupPhotos))
 	} else {
 		ma.authenticate()
 	}
