@@ -67,7 +67,11 @@ func (ma *myApp) isLoggedIn() bool {
 func Run() {
 	ma := &myApp{}
 	ma.app = app.NewWithID(AppID)
+
 	ma.prefs = NewPreferences(ma.app)
+	ma.userNsID, _ = ma.prefs.userNsID.Get()
+	ma.userName, _ = ma.prefs.userName.Get()
+
 	ma.client = NewClientFromPrefs(ma.prefs)
 	ma.window = ma.app.NewWindow("Glimmer")
 	ma.loginMenu = fyne.NewMenuItem("Log In", ma.authenticate)
@@ -79,7 +83,12 @@ func Run() {
 	ma.setAuthMenuStatus()
 	if ma.isLoggedIn() {
 		go func() {
-			ma.groupPhotos, _ = api.GetUsersGroupPhotos(ma.client, ma.userNsID)
+			var err error
+			ma.groupPhotos, err = api.GetUsersGroupPhotos(CloneClient(ma.client), ma.userNsID)
+			if err != nil {
+				fyne.LogError("getting users group photos", err)
+				return
+			}
 			fmt.Println("Group photos fetched:", len(ma.groupPhotos)) // Add this line for debugging
 		}()
 	} else {
@@ -87,7 +96,7 @@ func Run() {
 	}
 
 	cp := contactPhotos{ma: ma}
-    ma.vs.Push(cp.makeUI())
+	ma.vs.Push(cp.makeUI())
 	ma.window.Resize(fyne.Size{
 		Width:  GridSizeWidth*2 + theme.Padding()*3,
 		Height: GridSizeHeight*2 + theme.Padding()*3,
