@@ -9,6 +9,32 @@ import (
 	"gopkg.in/masci/flickr.v3"
 )
 
+func TestCloneClient(t *testing.T) {
+	originalClient := &flickr.FlickrClient{
+		ApiKey:            "testApiKey",
+		ApiSecret:         "testApiSecret",
+		OAuthToken:        "testOAuthToken",
+		OAuthTokenSecret:  "testOAuthTokenSecret",
+		EndpointUrl:       "testEndpointUrl",
+		HTTPClient:        nil, // Or create a mock HTTP client if needed
+		Args:              flickr.NewArgs(),
+		HTTPVerb:          "testHTTPVerb",
+		Logger:            nil, // Or create a mock logger if needed
+		RetryOnErrorCodes: []int{1, 2, 3},
+	}
+
+	clonedClient := api.CloneClient(originalClient)
+
+	assert.Equal(t, originalClient.ApiKey, clonedClient.ApiKey)
+	assert.Equal(t, originalClient.ApiSecret, clonedClient.ApiSecret)
+	assert.Equal(t, originalClient.OAuthToken, clonedClient.OAuthToken)
+	assert.Equal(t, originalClient.OAuthTokenSecret, clonedClient.OAuthTokenSecret)
+	assert.Equal(t, originalClient.EndpointUrl, clonedClient.EndpointUrl)
+	//assert.Equal(t, originalClient.HTTPClient, clonedClient.HTTPClient) // HTTPClient is intentionally not cloned
+	assert.Equal(t, originalClient.HTTPVerb, clonedClient.HTTPVerb)
+	assert.Equal(t, originalClient.RetryOnErrorCodes, clonedClient.RetryOnErrorCodes)
+}
+
 var contactListBody = `
 <?xml version="1.0" encoding="utf-8"?>
 	<rsp stat="ok">

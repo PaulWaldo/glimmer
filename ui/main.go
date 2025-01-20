@@ -84,7 +84,7 @@ func Run() {
 	if ma.isLoggedIn() {
 		go func() {
 			var err error
-			ma.groupPhotos, err = api.GetUsersGroupPhotos(CloneClient(ma.client), ma.userNsID)
+			ma.groupPhotos, err = api.GetUsersGroupPhotos(api.CloneClient(ma.client), ma.userNsID)
 			if err != nil {
 				fyne.LogError("getting users group photos", err)
 				return

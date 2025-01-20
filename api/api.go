@@ -1,8 +1,23 @@
 package api
 
 import (
+	"fmt"
 	"gopkg.in/masci/flickr.v3"
 )
+
+func CloneClient(client *flickr.FlickrClient) *flickr.FlickrClient {
+	newClient := &flickr.FlickrClient{}
+
+	newClient.ApiKey = client.ApiKey
+	newClient.ApiSecret = client.ApiSecret
+	newClient.OAuthToken = client.OAuthToken
+	newClient.OAuthTokenSecret = client.OAuthTokenSecret
+	newClient.EndpointUrl = client.EndpointUrl
+	newClient.HTTPVerb = client.HTTPVerb
+	newClient.RetryOnErrorCodes = client.RetryOnErrorCodes
+
+	return newClient
+}
 
 type Contact struct {
 	// <contact nsid="12037949629@N01" username="Eric" iconserver="1" realname="Eric Costello" friend="1" family="0" ignored="1" />
