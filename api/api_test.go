@@ -11,16 +11,14 @@ import (
 
 func TestCloneClient(t *testing.T) {
 	originalClient := &flickr.FlickrClient{
-		ApiKey:            "testApiKey",
-		ApiSecret:         "testApiSecret",
-		OAuthToken:        "testOAuthToken",
-		OAuthTokenSecret:  "testOAuthTokenSecret",
-		EndpointUrl:       "testEndpointUrl",
-		HTTPClient:        nil, // Or create a mock HTTP client if needed
-		Args:              flickr.NewArgs(),
-		HTTPVerb:          "testHTTPVerb",
-		Logger:            nil, // Or create a mock logger if needed
-		RetryOnErrorCodes: []int{1, 2, 3},
+		ApiKey:           "testApiKey",
+		ApiSecret:        "testApiSecret",
+		OAuthToken:       "testOAuthToken",
+		OAuthTokenSecret: "testOAuthTokenSecret",
+		EndpointUrl:      "testEndpointUrl",
+		HTTPClient:       nil, // Or create a mock HTTP client if needed
+		Args:             url.Values{},
+		HTTPVerb:         "testHTTPVerb",
 	}
 
 	clonedClient := api.CloneClient(originalClient)
@@ -32,7 +30,7 @@ func TestCloneClient(t *testing.T) {
 	assert.Equal(t, originalClient.EndpointUrl, clonedClient.EndpointUrl)
 	//assert.Equal(t, originalClient.HTTPClient, clonedClient.HTTPClient) // HTTPClient is intentionally not cloned
 	assert.Equal(t, originalClient.HTTPVerb, clonedClient.HTTPVerb)
-	assert.Equal(t, originalClient.RetryOnErrorCodes, clonedClient.RetryOnErrorCodes)
+
 }
 
 var contactListBody = `
