@@ -24,14 +24,14 @@ func TestCloneClient(t *testing.T) {
 
 	clonedClient := api.CloneClient(originalClient)
 
-	assert.Equal(t, originalClient.ApiKey, clonedClient.ApiKey)
-	assert.Equal(t, originalClient.ApiSecret, clonedClient.ApiSecret)
-	assert.Equal(t, originalClient.OAuthToken, clonedClient.OAuthToken)
-	assert.Equal(t, originalClient.OAuthTokenSecret, clonedClient.OAuthTokenSecret)
-	assert.Equal(t, originalClient.EndpointUrl, clonedClient.EndpointUrl)
+	assert.Equal(t, originalClient.ApiKey, clonedClient.ApiKey, "ApiKey: want %s, got %s", originalClient.ApiKey, clonedClient.ApiKey)
+	assert.Equal(t, originalClient.ApiSecret, clonedClient.ApiSecret, "ApiSecret: want %s, got %s", originalClient.ApiSecret, clonedClient.ApiSecret)
+	assert.Equal(t, originalClient.OAuthToken, clonedClient.OAuthToken, "OAuthToken: want %s, got %s", originalClient.OAuthToken, clonedClient.OAuthToken)
+	assert.Equal(t, originalClient.OAuthTokenSecret, clonedClient.OAuthTokenSecret, "OAuthTokenSecret: want %s, got %s", originalClient.OAuthTokenSecret, clonedClient.OAuthTokenSecret)
+	assert.Equal(t, originalClient.EndpointUrl, clonedClient.EndpointUrl, "EndpointUrl: want %s, got %s", originalClient.EndpointUrl, clonedClient.EndpointUrl)
 	//assert.Equal(t, originalClient.HTTPClient, clonedClient.HTTPClient) // HTTPClient is intentionally not cloned
-	assert.Equal(t, originalClient.HTTPVerb, clonedClient.HTTPVerb)
-	assert.NotNil(t, clonedClient.Args) // Check that Args is initialized
+	assert.NotNil(t, clonedClient.Args, "Args: want non-nil, got nil") // Check that Args is initialized
+	assert.Equal(t, originalClient.HTTPVerb, clonedClient.HTTPVerb, "HTTPVerb: want %s, got %s", originalClient.HTTPVerb, clonedClient.HTTPVerb)
 
 }
 
