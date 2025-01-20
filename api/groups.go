@@ -12,12 +12,13 @@ type GetGroupPhotosResponse struct {
 
 func GetGroupPhotos(client *flickr.FlickrClient, groupID string, params map[string]string) (*GetGroupPhotosResponse, error) {
 	client.Init()
+	client.EndpointUrl = flickr.API_ENDPOINT
 	client.Args.Set("method", "flickr.groups.pools.getPhotos")
 	client.Args.Set("group_id", groupID)
 	for k, v := range params {
 		client.Args.Set(k, v)
 	}
-	client.ApiSign()
+	client.OAuthSign()
 
 	var response GetGroupPhotosResponse
 	err := flickr.DoPost(client, &response)
@@ -35,12 +36,13 @@ type GetUserGroupsResponse struct {
 
 func GetUserGroups(client *flickr.FlickrClient, userID string, params map[string]string) (*GetUserGroupsResponse, error) {
 	client.Init()
+	client.EndpointUrl = flickr.API_ENDPOINT
 	client.Args.Set("method", "flickr.people.getGroups")
 	client.Args.Set("user_id", userID)
 	for k, v := range params {
 		client.Args.Set(k, v)
 	}
-	client.ApiSign()
+	client.OAuthSign()
 
 	var response GetUserGroupsResponse
 	err := flickr.DoPost(client, &response)
