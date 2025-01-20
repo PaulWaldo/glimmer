@@ -31,6 +31,7 @@ func TestCloneClient(t *testing.T) {
 	assert.Equal(t, originalClient.EndpointUrl, clonedClient.EndpointUrl)
 	//assert.Equal(t, originalClient.HTTPClient, clonedClient.HTTPClient) // HTTPClient is intentionally not cloned
 	assert.Equal(t, originalClient.HTTPVerb, clonedClient.HTTPVerb)
+	assert.NotNil(t, clonedClient.Args) // Check that Args is initialized
 
 }
 
