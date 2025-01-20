@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/theme"
+	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
 )
 
