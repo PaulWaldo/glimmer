@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"net/http"
 	"net/url"
 	"testing"
 
@@ -17,7 +18,7 @@ func TestCloneClient(t *testing.T) {
 		OAuthToken:       "testOAuthToken",
 		OAuthTokenSecret: "testOAuthTokenSecret",
 		EndpointUrl:      "testEndpointUrl",
-		HTTPClient:       nil, // Or create a mock HTTP client if needed
+		HTTPClient:       &http.Client{Transport: &mockTransport{}},
 		Args:             url.Values{},
 		HTTPVerb:         "testHTTPVerb",
 	}
@@ -29,7 +30,7 @@ func TestCloneClient(t *testing.T) {
 	assert.Equal(t, originalClient.OAuthToken, clonedClient.OAuthToken, "OAuthToken: want %s, got %s", originalClient.OAuthToken, clonedClient.OAuthToken)
 	assert.Equal(t, originalClient.OAuthTokenSecret, clonedClient.OAuthTokenSecret, "OAuthTokenSecret: want %s, got %s", originalClient.OAuthTokenSecret, clonedClient.OAuthTokenSecret)
 	assert.Equal(t, originalClient.EndpointUrl, clonedClient.EndpointUrl, "EndpointUrl: want %s, got %s", originalClient.EndpointUrl, clonedClient.EndpointUrl)
-	//assert.Equal(t, originalClient.HTTPClient, clonedClient.HTTPClient) // HTTPClient is intentionally not cloned
+	assert.Equal(t, originalClient.HTTPClient, clonedClient.HTTPClient)
 	assert.NotNil(t, clonedClient.Args, "Args: want non-nil, got nil") // Check that Args is initialized
 	assert.Equal(t, originalClient.HTTPVerb, clonedClient.HTTPVerb, "HTTPVerb: want %s, got %s", originalClient.HTTPVerb, clonedClient.HTTPVerb)
 
