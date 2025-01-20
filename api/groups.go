@@ -45,7 +45,7 @@ func GetUserGroups(client *flickr.FlickrClient, userID string, params map[string
 	client.OAuthSign()
 
 	var response GetUserGroupsResponse
-	err := flickr.DoPost(client, &response)
+	err := flickr.DoGet(client, &response)
 	if err != nil {
 		return nil, err
 	}

@@ -92,7 +92,7 @@ type PhotoCard struct {
 }
 
 func NewPhotoCard(photo api.Photo, client *flickr.FlickrClient, onTapped func()) *PhotoCard {
-	clone := CloneClient(client)
+	clone := api.CloneClient(client)
 	i := &PhotoCard{
 		Card: widget.Card{
 			Title:    photo.Title,
@@ -112,13 +112,6 @@ func NewPhotoCard(photo api.Photo, client *flickr.FlickrClient, onTapped func())
 		})
 	}()
 	return i
-}
-
-func CloneClient(orig *flickr.FlickrClient) *flickr.FlickrClient {
-	clone := flickr.NewFlickrClient(orig.ApiKey, orig.ApiSecret)
-	clone.OAuthToken = orig.OAuthToken
-	clone.OAuthTokenSecret = orig.OAuthTokenSecret
-	return clone
 }
 
 func (c *PhotoCard) loadImage(callback func()) {
