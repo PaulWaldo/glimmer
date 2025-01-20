@@ -21,6 +21,7 @@ type myApp struct {
 	userNsID              string
 	userName              string
 	fullName              string
+	groupPhotos           []api.UsersGroupPhotos
 }
 
 func (ma *myApp) logAuth(marker string) {
@@ -76,12 +77,16 @@ func Run() {
 	)
 	ma.setAuthMenuStatus()
 	if ma.isLoggedIn() {
+		go func() {
+			ma.groupPhotos, _ = api.GetUsersGroupPhotos(ma.client, ma.userNsID)
+			fmt.Println("Group photos fetched:", len(ma.groupPhotos)) // Add this line for debugging
+		}()
 	} else {
 		ma.authenticate()
 	}
 
 	cp := contactPhotos{ma: ma}
-	ma.vs.Push(cp.makeUI())
+    ma.vs.Push(cp.makeUI())
 	ma.window.Resize(fyne.Size{
 		Width:  GridSizeWidth*2 + theme.Padding()*3,
 		Height: GridSizeHeight*2 + theme.Padding()*3,
