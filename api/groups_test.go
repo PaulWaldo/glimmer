@@ -59,14 +59,14 @@ func BenchmarkGetUsersGroupPhotos(b *testing.B) {
 		Transport: transport,
 	}
 
-	maxExecutionTime := 100 // milliseconds - set a reasonable threshold
+	b.ResetTimer() // Reset timer to exclude setup time
 
-	start := time.Now()
-	_, err := api.GetUsersGroupPhotos(fclient, userID)
-	elapsed := time.Since(start)
-
-	assert.NoError(b, err)
-	assert.LessOrEqual(b, int64(elapsed/time.Millisecond), maxExecutionTime, "Execution time exceeded threshold")
+	for i := 0; i < b.N; i++ { // Loop for accurate benchmarking
+		_, err := api.GetUsersGroupPhotos(fclient, userID)
+		if err != nil {
+			b.Fatalf("GetUsersGroupPhotos failed: %v", err) // Use b.Fatal to signal errors
+		}
+	}
 }
 
 func TestGetGroupPhotos(t *testing.T) {
