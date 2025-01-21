@@ -393,37 +393,22 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	// Must read the body before calling ParseMultipartForm.
-	var b []byte
-	if req.Body != nil {
-		b, _ = io.ReadAll(req.Body)
-		req.Body = io.NopCloser(bytes.NewBuffer(b))
-	}
+    method := req.FormValue("method")
+    groupID := req.FormValue("group_id")
 
-	err := req.ParseMultipartForm(1024 * 1024) // 1MB max memory
-	if err != nil {
-		return nil, err
-	}
+    key := method
+    if method == "flickr.groups.pools.getPhotos" {
+        key = fmt.Sprintf("%s-%s", method, groupID)
+    }
 
-	method := req.MultipartForm.Value["method"][0]
-	groupID := ""
-	if _, ok := req.MultipartForm.Value["group_id"]; ok {
-		groupID = req.MultipartForm.Value["group_id"][0]
-	}
+    response, ok := t.responses[key]
+    if !ok {
+        return nil, fmt.Errorf("no mock response found for key %s", key)
+    }
 
-	key := method
-	if method == "flickr.groups.pools.getPhotos" {
-		key = fmt.Sprintf("%s-%s", method, groupID)
-	}
-
-	response, ok := t.responses[key]
-	if !ok {
-		return nil, fmt.Errorf("no mock response found for key %s", key)
-	}
-
-	return &http.Response{
-		StatusCode: response.statusCode,
-		Body:       io.NopCloser(strings.NewReader(response.body)),
-		Header:     make(http.Header),
-	}, nil
+    return &http.Response{
+        StatusCode: response.statusCode,
+        Body:       io.NopCloser(strings.NewReader(response.body)),
+        Header:     make(http.Header),
+    }, nil
 }
