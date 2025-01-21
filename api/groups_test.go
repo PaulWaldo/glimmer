@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert"
@@ -14,6 +15,59 @@ import (
 	"gopkg.in/masci/flickr.v3"
 	"gopkg.in/masci/flickr.v3/groups"
 )
+
+func TestGetUsersGroupPhotosPerformance(t *testing.T) {
+	fclient := flickr.GetTestClient()
+	userID := "12345"
+
+    // Set up mock responses for a large number of groups and photos
+    numGroups := 100 // Example: Simulate 100 groups
+
+    groupsResponse := `<?xml version="1.0" encoding="utf-8" ?>
+        <rsp stat="ok">
+            <groups>`
+    for i := 0; i < numGroups; i++ {
+        groupsResponse += fmt.Sprintf(`<group nsid="%d" name="Test Group %d" members="10" privacy="1" iconserver="1" iconfarm="1" admin="1" />`, i, i)
+    }
+    groupsResponse += `</groups>
+        </rsp>`
+
+    photosResponse := make(map[string]string)
+    for i := 0; i < numGroups; i++ {
+        photosResponse[fmt.Sprintf("%d", i)] = `<?xml version="1.0" encoding="utf-8" ?>
+            <rsp stat="ok">
+                <photos page="1" pages="1" perpage="100" total="1">
+                    <photo id="1" owner="testuser" secret="abcdef" server="123" farm="1" title="Test Photo" ispublic="1" isfriend="1" isfamily="0" />
+                </photos>
+            </rsp>`
+    }
+
+    transport := &mockTransport{
+        responses: make(map[string]mockResponse),
+    }
+    transport.responses["flickr.people.getGroups"] = mockResponse{
+        statusCode: 200,
+        body:       groupsResponse,
+    }
+    for groupID, response := range photosResponse {
+        transport.responses[fmt.Sprintf("flickr.groups.pools.getPhotos-%s", groupID)] = mockResponse{
+            statusCode: 200,
+            body:       response,
+        }
+    }
+    fclient.HTTPClient = &http.Client{
+        Transport: transport,
+    }
+
+	maxExecutionTime := 100 // milliseconds - set a reasonable threshold
+
+	start := time.Now()
+	_, err := api.GetUsersGroupPhotos(fclient, userID)
+	elapsed := time.Since(start)
+
+	assert.NoError(t, err)
+	assert.LessOrEqual(t, int64(elapsed/time.Millisecond), maxExecutionTime, "Execution time exceeded threshold")
+}
 
 func TestGetGroupPhotos(t *testing.T) {
 	fclient := flickr.GetTestClient()
