@@ -1,13 +1,11 @@
 package api_test
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert"
@@ -403,7 +401,7 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
     response, ok := t.responses[key]
     if !ok {
-        return nil, fmt.Errorf("no mock response found for key %s", key)
+		return nil, fmt.Errorf("no mock response found for key %q", key)
     }
 
     return &http.Response{
