@@ -20,13 +20,13 @@ func GetGroupPhotos(client *flickr.FlickrClient, groupID string, params map[stri
 	}
 	client.OAuthSign()
 
-	var response GetGroupPhotosResponse
-	err := flickr.DoPost(client, &response)
+	response := &GetGroupPhotosResponse{}
+	err := flickr.DoPost(client, response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &response, nil
+	return response, nil
 }
 
 type GetUserGroupsResponse struct {

@@ -345,7 +345,7 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			transport := &mockTransport{
-				responses: make(map[string]mockResponse), // Initialize the responses map
+				responses: make(map[string]mockResponse),
 			}
 
 			// Add response for groups endpoint
@@ -391,22 +391,22 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-    method := req.FormValue("method")
-    groupID := req.FormValue("group_id")
+	method := req.FormValue("method")
+	groupID := req.FormValue("group_id")
 
-    key := method
-    if method == "flickr.groups.pools.getPhotos" {
-        key = fmt.Sprintf("%s-%s", method, groupID)
-    }
+	key := method
+	if method == "flickr.groups.pools.getPhotos" {
+		key = fmt.Sprintf("%s-%s", method, groupID)
+	}
 
-    response, ok := t.responses[key]
-    if !ok {
+	response, ok := t.responses[key]
+	if !ok {
 		return nil, fmt.Errorf("no mock response found for key %q", key)
-    }
+	}
 
-    return &http.Response{
-        StatusCode: response.statusCode,
-        Body:       io.NopCloser(strings.NewReader(response.body)),
-        Header:     make(http.Header),
-    }, nil
+	return &http.Response{
+		StatusCode: response.statusCode,
+		Body:       io.NopCloser(strings.NewReader(response.body)),
+		Header:     make(http.Header),
+	}, nil
 }
