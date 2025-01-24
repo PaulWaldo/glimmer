@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/url"
+
 	"gopkg.in/masci/flickr.v3"
 )
 
@@ -11,6 +13,13 @@ func CloneClient(client *flickr.FlickrClient) *flickr.FlickrClient {
 	clone.HTTPVerb = client.HTTPVerb
 	clone.HTTPClient = client.HTTPClient
 	clone.OAuthTokenSecret = client.OAuthTokenSecret
+
+	// Create a deep copy of url.Values
+	clone.Args = url.Values{}
+	for k, v := range client.Args {
+		clone.Args[k] = v
+	}
+
 	return clone
 }
 
