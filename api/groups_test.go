@@ -3,6 +3,7 @@ package api_test
 import (
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"strings"
 	"testing"
@@ -393,6 +394,20 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	method := req.FormValue("method")
 	groupID := req.FormValue("group_id")
+
+	if method == "" && groupID == "" {
+		err := req.ParseMultipartForm(1024 * 1024) // Adjust limit as needed
+		if err != nil {
+			return nil, err
+		}
+
+		method = req.FormValue("method")
+		groupID = req.FormValue("group_id")
+
+		if method == "" || groupID == "" {
+			return nil, fmt.Errorf("method or group_id not found in multipart form")
+		}
+	}
 
 
 	key := method
