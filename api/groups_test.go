@@ -3,8 +3,10 @@ package api_test
 import (
 	"fmt"
 	"io"
+	"mime"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -395,7 +397,7 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	method := req.FormValue("method")
 	groupID := req.FormValue("group_id")
 
-	if method == "" && groupID == "" {
+	if req.Method == "POST" && method == "" && groupID == "" {
 		mediaType, params, err := mime.ParseMediaType(req.Header.Get("Content-Type"))
 		if err != nil {
 			return nil, fmt.Errorf("parsing media type: %w", err)
@@ -436,7 +438,6 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 			return nil, fmt.Errorf("method or group_id not found in multipart form")
 		}
 	}
-
 
 	key := method
 	if method == "flickr.groups.pools.getPhotos" {

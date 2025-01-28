@@ -4,6 +4,7 @@ model: gemini/gemini-1.5-pro-latest
 # model: openai/hf:Qwen/Qwen2.5-Coder-72B-Instruct
 # model: openai/hf:meta-llama/Llama-3.1-405B-Instruct
 # model: openai/hf:meta-llama/Llama-3.3-70B-Instruct
+# model: ollama_chat/deepseek-r1:14b
 openai-api-base: https://glhf.chat/api/openai/v1
 map-tokens: 512
 attribute-committer: True
