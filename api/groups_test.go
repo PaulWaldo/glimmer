@@ -394,6 +394,7 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	method := req.FormValue("method")
 	groupID := req.FormValue("group_id")
 
+
 	key := method
 	if method == "flickr.groups.pools.getPhotos" {
 		key = fmt.Sprintf("%s-%s", method, groupID)
