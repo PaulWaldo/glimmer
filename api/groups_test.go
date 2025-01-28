@@ -83,7 +83,7 @@ func TestGetGroupPhotos(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name:       "success",
+			name:       "success returns photos from a group",
 			statusCode: 200,
 			response: `
                  <rsp stat="ok">
@@ -140,14 +140,14 @@ func TestGetGroupPhotos(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:       "error",
+			name:       "server error returns error",
 			statusCode: 500,
 			response:   "",
 			want:       nil,
 			wantErr:    true,
 		},
 		{
-			name:       "invalid xml",
+			name:       "invalid xml returns error",
 			statusCode: 200,
 			response:   " invalid xml ",
 			want:       nil,
@@ -187,7 +187,7 @@ func TestGetUserGroups(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			name:       "success",
+			name:       "success returns user's groups",
 			statusCode: 200,
 			response: `
 				<rsp stat="ok">
@@ -221,14 +221,14 @@ func TestGetUserGroups(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:       "error",
+			name:       "server error returns error",
 			statusCode: 500,
 			response:   "",
 			want:       nil,
 			wantErr:    true,
 		},
 		{
-			name:       "invalid xml",
+			name:       "invalid server xml returns error",
 			statusCode: 200,
 			response:   " invalid xml ",
 			want:       nil,
@@ -266,7 +266,7 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 		wantErr        bool
 	}{
 		{
-			name: "success",
+			name: "success returns user's group photos",
 			groupsResponse: `<?xml version="1.0" encoding="utf-8" ?>
                 <rsp stat="ok">
                     <groups>
@@ -327,7 +327,7 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "error",
+			name: "server error returns error",
 			groupsResponse: `<?xml version="1.0" encoding="utf-8" ?>
                 <rsp stat="fail">
                     <err code="1" msg="Group not found" />
@@ -337,7 +337,7 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 			wantErr:        true,
 		},
 		{
-			name:           "invalid xml",
+			name:           "invalid server xml returns error",
 			groupsResponse: "invalid xml",
 			photosResponse: nil,
 			want:           nil,
