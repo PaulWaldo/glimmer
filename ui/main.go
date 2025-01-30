@@ -76,19 +76,22 @@ func Run() {
 	ma.window = ma.app.NewWindow("Glimmer")
 	ma.loginMenu = fyne.NewMenuItem("Log In", ma.authenticate)
 	ma.logoutMenu = fyne.NewMenuItem("Log Out", ma.forgetCredentials)
-	ma.vs = NewViewStack(ma.window)
+	ma.tabsUI = &apptabs{ma: ma}
+	ma.tabsUI.makeUI()
+
 	ma.window.SetMainMenu(fyne.NewMainMenu(
 		fyne.NewMenu("Server", ma.loginMenu, ma.logoutMenu)),
 	)
 	ma.setAuthMenuStatus()
+
 	if ma.isLoggedIn() {
-		// Fetch group photos synchronously
+		// Fetch group photos synchronously.  Consider making this asynchronous later.
 		var err error
 		ma.groupPhotos, err = api.GetUsersGroupPhotos(api.CloneClient(ma.client), ma.userNsID)
 		if err != nil {
 			fyne.LogError("getting users group photos", err)
-			// Handle the error appropriately, e.g., display an error message
-			return // Or continue without group photos
+			// Handle the error appropriately, e.g., display an error message.
+			// For now, we'll just log the error and continue.
 		}
 		fmt.Println("Group photos fetched:", len(ma.groupPhotos))
 	} else {
@@ -96,7 +99,11 @@ func Run() {
 	}
 
 	cp := contactPhotos{ma: ma}
-	ma.vs.Push(cp.makeUI())
+	ma.tabsUI.appTabs.SetItems([]*container.TabItem{
+		container.NewTabItem("Contacts", cp.makeUI()),
+		container.NewTabItem("Groups", widget.NewLabel("Group photos content will go here")),
+	})
+	ma.window.SetContent(ma.tabsUI.appTabs)
 	ma.window.Resize(fyne.Size{
 		Width:  GridSizeWidth*2 + theme.Padding()*3,
 		Height: GridSizeHeight*2 + theme.Padding()*3,
