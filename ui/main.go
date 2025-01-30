@@ -5,7 +5,9 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
 )
@@ -19,6 +21,7 @@ type myApp struct {
 	client                *flickr.FlickrClient
 	loginMenu, logoutMenu *fyne.MenuItem
 	vs                    *ViewStack
+	tabsUI                *apptabs
 	userNsID              string
 	userName              string
 	fullName              string
