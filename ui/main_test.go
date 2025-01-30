@@ -13,10 +13,10 @@ func TestTwoTabsExist(t *testing.T) {
 	ma.window = ma.app.NewWindow("Glimmer")
 
 	// Initialize apptabs and assign it to ma.at
-	ma.at = &apptabs{ma: ma}
-	ma.at.makeUI()
+	ma.tabsUI = &apptabs{ma: ma}
+	ma.tabsUI.makeUI()
 
-	tabItems := ma.at.appTabs.Items
+	tabItems := ma.tabsUI.appTabs.Items
 	expectedTitles := []string{"Contacts", "Groups"}
 
 	if len(tabItems) != len(expectedTitles) {
