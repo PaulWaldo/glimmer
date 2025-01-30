@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"reflect"
 	"testing"
 
 	"fyne.io/fyne/v2/app"
