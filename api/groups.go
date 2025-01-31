@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"gopkg.in/masci/flickr.v3"
 	"gopkg.in/masci/flickr.v3/groups"
 )
@@ -25,7 +27,7 @@ func GetGroupPhotos(client *flickr.FlickrClient, groupID string, params map[stri
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Printf("Got %d group photos\n", len(response.Photos))
 	return response, nil
 }
 
@@ -59,26 +61,33 @@ type UsersGroupPhotos struct {
 	Photos    []Photo
 }
 
-func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string) ([]UsersGroupPhotos, error) {
+func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string, params map[string]string) ([]UsersGroupPhotos, error) {
+	// Find all the groups the user belongs too
+	fmt.Println("Getting User Groups")
 	clonedClient := CloneClient(client)
 	userGroups, err := GetUserGroups(clonedClient, userID, nil)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("Done with User Groups")
 
-	var usersGroupPhotos []UsersGroupPhotos
-	for _, group := range userGroups.Groups {
+	// For each group, get photos for the group
+	var usersGroupPhotos = make([]UsersGroupPhotos, len(userGroups.Groups))
+	fmt.Printf("Getting %d user groups\n", len(userGroups.Groups))
+	for i, group := range userGroups.Groups {
+		fmt.Println(i)
 		clonedClient = CloneClient(client)
-		groupPhotos, err := GetGroupPhotos(clonedClient, group.Nsid, nil)
+		groupPhotos, err := GetGroupPhotos(clonedClient, group.Nsid, params)
 		if err != nil {
 			return nil, err
 		}
-		usersGroupPhotos = append(usersGroupPhotos, UsersGroupPhotos{
+		usersGroupPhotos[i] = UsersGroupPhotos{
 			GroupID:   group.Nsid,
 			GroupName: group.Name,
 			Photos:    groupPhotos.Photos,
-		})
+		}
 	}
+	fmt.Println("Done with group photos")
 
 	return usersGroupPhotos, nil
 }

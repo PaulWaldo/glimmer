@@ -63,7 +63,7 @@ func BenchmarkGetUsersGroupPhotos(b *testing.B) {
 	b.ResetTimer() // Reset timer to exclude setup time
 
 	for i := 0; i < b.N; i++ { // Loop for accurate benchmarking
-		_, err := api.GetUsersGroupPhotos(fclient, userID)
+		_, err := api.GetUsersGroupPhotos(fclient, userID, nil)
 		if err != nil {
 			b.Fatalf("GetUsersGroupPhotos failed: %v", err) // Use b.Fatal to signal errors
 		}
@@ -368,7 +368,7 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 				Transport: transport,
 			}
 
-			resp, err := api.GetUsersGroupPhotos(fclient, userID)
+			resp, err := api.GetUsersGroupPhotos(fclient, userID, nil)
 			if tt.wantErr {
 				require.Error(t, err)
 				return

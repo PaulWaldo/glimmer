@@ -2,12 +2,12 @@ package ui
 
 import (
 	"fmt"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
 )
@@ -92,14 +92,20 @@ func Run() {
 
 	if ma.isLoggedIn() {
 		// Fetch group photos synchronously.  Consider making this asynchronous later.
-		var err error
-		ma.groupPhotos, err = api.GetUsersGroupPhotos(api.CloneClient(ma.client), ma.userNsID)
-		if err != nil {
-			fyne.LogError("getting users group photos", err)
-			// Handle the error appropriately, e.g., display an error message.
-			// For now, we'll just log the error and continue.
-		}
-		fmt.Println("Group photos fetched:", len(ma.groupPhotos))
+		go func() {
+			var err error
+			fmt.Println("Starting fetching group photos")
+			client := api.CloneClient(ma.client)
+			client.Args.Set("per_page", strconv.Itoa(10))
+			params := map[string]string{"per_page": strconv.Itoa(10)}
+			ma.groupPhotos, err = api.GetUsersGroupPhotos(client, ma.userNsID, params)
+			if err != nil {
+				fyne.LogError("getting users group photos", err)
+				// Handle the error appropriately, e.g., display an error message.
+				// For now, we'll just log the error and continue.
+			}
+			fmt.Println("Group photos fetched:", len(ma.groupPhotos))
+		}()
 	} else {
 		ma.authenticate()
 	}
