@@ -81,6 +81,10 @@ func Run() {
 		fyne.NewMenu("Server", ma.loginMenu, ma.logoutMenu)),
 	)
 	ma.setAuthMenuStatus()
+
+	at := &apptabs{ma: ma}
+	at.makeUI()
+
 	if ma.isLoggedIn() {
 		// Fetch group photos synchronously
 		var err error
@@ -95,8 +99,7 @@ func Run() {
 		ma.authenticate()
 	}
 
-	cp := contactPhotos{ma: ma}
-	ma.vs.Push(cp.makeUI())
+	ma.vs.Push(at.appTabs)
 	ma.window.Resize(fyne.Size{
 		Width:  GridSizeWidth*2 + theme.Padding()*3,
 		Height: GridSizeHeight*2 + theme.Padding()*3,
