@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
@@ -99,7 +100,7 @@ func Run() {
 		ma.authenticate()
 	}
 
-	ma.vs.Push(at.appTabs)
+	ma.vs.Push(container.NewVBox(at.appTabs))
 	ma.window.Resize(fyne.Size{
 		Width:  GridSizeWidth*2 + theme.Padding()*3,
 		Height: GridSizeHeight*2 + theme.Padding()*3,
