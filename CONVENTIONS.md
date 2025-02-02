@@ -1,5 +1,17 @@
 # CONVENTIONS
 
+## Test-Driven Development (TDD) Workflow Enforcement
+
+I want to strictly follow **Test-Driven Development (TDD)**. Follow these rules without exception:
+
+1. **Write a failing unit test first.** Do not write any production code until we have a clear, failing test that defines the expected behavior.
+2. **Keep tests minimal and focused.** Each test should target a single behavior or requirement.
+3. **Run the test and confirm failure.** Do not assume failure—explicitly state why the test is failing.
+4. **Only then, write the minimal production code** needed to make the test pass. No extra features or optimizations.
+5. **Refactor if necessary.** Only refactor once the test passes, ensuring all tests remain green.
+
+At every step, **confirm with me before proceeding** to the next stage. **Never skip a step.**
+
 ## Test Driven Development
 
 * Act as an expert in Test Driven Development
