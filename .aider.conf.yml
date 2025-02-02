@@ -7,8 +7,12 @@ model: gemini/gemini-1.5-pro-latest
 # model: ollama_chat/deepseek-r1:14b
 openai-api-base: https://glhf.chat/api/openai/v1
 map-tokens: 512
+auto-commits: False
 attribute-committer: True
 attribute-commit-message-author: True
 attribute-author: True
 test-cmd: go test ./...
 auto-test: True
+cache-prompts: True
+# lint: True
+lint-cmd: golangci-lint run
