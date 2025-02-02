@@ -5,7 +5,10 @@ model: gemini/gemini-1.5-pro-latest
 # model: openai/hf:meta-llama/Llama-3.1-405B-Instruct
 # model: openai/hf:meta-llama/Llama-3.3-70B-Instruct
 # model: ollama_chat/deepseek-r1:14b
+# editor-model: gemini/gemini-1.5-pro-latest
 openai-api-base: https://glhf.chat/api/openai/v1
+read:
+  - CONVENTIONS.md
 map-tokens: 512
 auto-commits: False
 attribute-committer: True
