@@ -19,4 +19,4 @@ test-cmd: go test ./...
 auto-test: True
 cache-prompts: True
 # lint: True
-lint-cmd: golangci-lint run
+# lint-cmd: golangci-lint runn
