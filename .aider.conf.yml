@@ -10,6 +10,7 @@ openai-api-base: https://glhf.chat/api/openai/v1
 read:
   - CONVENTIONS.md
 map-tokens: 512
+architect: True
 auto-commits: False
 attribute-committer: True
 attribute-commit-message-author: True
