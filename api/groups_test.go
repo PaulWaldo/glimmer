@@ -63,7 +63,10 @@ func BenchmarkGetUsersGroupPhotos(b *testing.B) {
 	b.ResetTimer() // Reset timer to exclude setup time
 
 	for i := 0; i < b.N; i++ { // Loop for accurate benchmarking
-		_, err := api.GetUsersGroupPhotos(fclient, userID, nil)
+		var testUsersGroups []groups.Group
+		var testUsersGroupPhotos []api.UsersGroupPhotos
+
+		err := api.GetUsersGroupPhotos(fclient, userID, nil, &testUsersGroups, &testUsersGroupPhotos)
 		if err != nil {
 			b.Fatalf("GetUsersGroupPhotos failed: %v", err) // Use b.Fatal to signal errors
 		}
@@ -262,7 +265,8 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 		name           string
 		groupsResponse string
 		photosResponse map[string]string
-		want           []api.UsersGroupPhotos
+		wantGroups     []groups.Group
+		wantPhotos     []api.UsersGroupPhotos
 		wantErr        bool
 	}{
 		{
@@ -288,7 +292,23 @@ func TestGetUsersGroupPhotos(t *testing.T) {
                         </photos>
                     </rsp>`,
 			},
-			want: []api.UsersGroupPhotos{
+			wantGroups: []groups.Group{
+				{
+					Nsid:        "12345",
+					Name:        "Test Group",
+					MemberCount: "10",
+					Privacy:     "1",
+					Admin:       "1",
+				},
+				{
+					Nsid:        "67890",
+					Name:        "Another Group",
+					MemberCount: "20",
+					Privacy:     "2",
+					Admin:       "0",
+				},
+			},
+			wantPhotos: []api.UsersGroupPhotos{
 				{
 					GroupID:   "12345",
 					GroupName: "Test Group",
@@ -333,15 +353,28 @@ func TestGetUsersGroupPhotos(t *testing.T) {
                     <err code="1" msg="Group not found" />
                 </rsp>`,
 			photosResponse: nil,
-			want:           nil,
+			wantGroups:     []groups.Group{},
+			wantPhotos:     nil,
 			wantErr:        true,
 		},
 		{
 			name:           "invalid server xml returns error",
 			groupsResponse: "invalid xml",
 			photosResponse: nil,
-			want:           nil,
+			wantGroups:     []groups.Group{},
+			wantPhotos:     nil,
 			wantErr:        true,
+		},
+		{
+			name: "no groups returns empty list",
+			groupsResponse: `<?xml version="1.0" encoding="utf-8" ?>
+                <rsp stat="ok">
+                    <groups />
+                </rsp>`,
+			photosResponse: nil,
+			wantGroups:     []groups.Group{},
+			wantPhotos:     []api.UsersGroupPhotos{}, // Expect an empty list, not nil
+			wantErr:        false,                    // Expect no error
 		},
 	}
 
@@ -368,14 +401,25 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 				Transport: transport,
 			}
 
-			resp, err := api.GetUsersGroupPhotos(fclient, userID, nil)
+			testUsersGroups := []groups.Group{}
+			testUsersGroupPhotos := []api.UsersGroupPhotos{}
+
+			err := api.GetUsersGroupPhotos(fclient, userID, nil, &testUsersGroups, &testUsersGroupPhotos)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
-			}
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.wantPhotos, testUsersGroupPhotos)
 
-			require.NoError(t, err)
-			assert.Equal(t, tt.want, resp)
+				if tt.wantGroups != nil { // Only check groups if expected
+					assert.Equal(t, len(tt.wantGroups), len(testUsersGroups))
+					if len(tt.wantGroups) > 0 {
+						assert.Equal(t, tt.wantGroups[0], testUsersGroups[0])
+						assert.Equal(t, tt.wantGroups[1], testUsersGroups[1])
+					}
+				}
+			}
 		})
 	}
 }

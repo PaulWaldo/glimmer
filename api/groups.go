@@ -61,33 +61,35 @@ type UsersGroupPhotos struct {
 	Photos    []Photo
 }
 
-func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string, params map[string]string) ([]UsersGroupPhotos, error) {
+func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string, params map[string]string, groups *[]groups.Group, photos *[]UsersGroupPhotos) error {
 	// Find all the groups the user belongs too
 	fmt.Println("Getting User Groups")
 	clonedClient := CloneClient(client)
-	userGroups, err := GetUserGroups(clonedClient, userID, nil)
-	if err != nil {
-		return nil, err
+	userGroups, err := GetUserGroups(clonedClient, userID, params)
+        if err != nil {
+		return err
 	}
 	fmt.Println("Done with User Groups")
 
 	// For each group, get photos for the group
 	var usersGroupPhotos = make([]UsersGroupPhotos, len(userGroups.Groups))
 	fmt.Printf("Getting %d user groups\n", len(userGroups.Groups))
+        *groups = userGroups.Groups
 	for i, group := range userGroups.Groups {
 		fmt.Println(i)
 		clonedClient = CloneClient(client)
 		groupPhotos, err := GetGroupPhotos(clonedClient, group.Nsid, params)
-		if err != nil {
-			return nil, err
+                if err != nil {
+                        return err
 		}
 		usersGroupPhotos[i] = UsersGroupPhotos{
 			GroupID:   group.Nsid,
 			GroupName: group.Name,
 			Photos:    groupPhotos.Photos,
 		}
+                *photos = usersGroupPhotos
 	}
 	fmt.Println("Done with group photos")
 
-	return usersGroupPhotos, nil
+	return nil
 }

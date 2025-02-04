@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
+	"gopkg.in/masci/flickr.v3/groups"
 )
 
 const AppID = "com.github.PaulWaldo.glimmer"
@@ -25,7 +26,8 @@ type myApp struct {
 	userNsID              string
 	userName              string
 	fullName              string
-	groupPhotos           []api.UsersGroupPhotos
+	usersGroup            []groups.Group
+	usersGroupPhotos      []api.UsersGroupPhotos
 }
 
 func (ma *myApp) logAuth(marker string) {
@@ -98,13 +100,13 @@ func Run() {
 			client := api.CloneClient(ma.client)
 			client.Args.Set("per_page", strconv.Itoa(10))
 			params := map[string]string{"per_page": strconv.Itoa(10)}
-			ma.groupPhotos, err = api.GetUsersGroupPhotos(client, ma.userNsID, params)
+			err = api.GetUsersGroupPhotos(client, ma.userNsID, params, &ma.usersGroup, &ma.usersGroupPhotos)
 			if err != nil {
 				fyne.LogError("getting users group photos", err)
 				// Handle the error appropriately, e.g., display an error message.
 				// For now, we'll just log the error and continue.
 			}
-			fmt.Println("Group photos fetched:", len(ma.groupPhotos))
+			fmt.Println("Group photos fetched:", len(ma.usersGroupPhotos))
 		}()
 	} else {
 		ma.authenticate()
