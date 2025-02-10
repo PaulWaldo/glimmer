@@ -66,7 +66,7 @@ func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string, params map[
 	fmt.Println("Getting User Groups")
 	clonedClient := CloneClient(client)
 	userGroups, err := GetUserGroups(clonedClient, userID, params)
-        if err != nil {
+	if err != nil {
 		return err
 	}
 	fmt.Println("Done with User Groups")
@@ -74,20 +74,20 @@ func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string, params map[
 	// For each group, get photos for the group
 	var usersGroupPhotos = make([]UsersGroupPhotos, len(userGroups.Groups))
 	fmt.Printf("Getting %d user groups\n", len(userGroups.Groups))
-        *groups = userGroups.Groups
+	*groups = userGroups.Groups
 	for i, group := range userGroups.Groups {
 		fmt.Println(i)
 		clonedClient = CloneClient(client)
 		groupPhotos, err := GetGroupPhotos(clonedClient, group.Nsid, params)
-                if err != nil {
-                        return err
+		if err != nil {
+			return err
 		}
 		usersGroupPhotos[i] = UsersGroupPhotos{
 			GroupID:   group.Nsid,
 			GroupName: group.Name,
 			Photos:    groupPhotos.Photos,
 		}
-                *photos = usersGroupPhotos
+		*photos = usersGroupPhotos
 	}
 	fmt.Println("Done with group photos")
 
