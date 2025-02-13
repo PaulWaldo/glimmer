@@ -1,11 +1,13 @@
 # aider --model ovenrouter/openai/o1-oreview --architect --editor-model ovenrouter/anthropic/claude
 # aider --model openai/hf:Qwen/Qwen2.5-Coder-72B-Instruct --architect --editor-model gemini/gemini-1.5-pro-latest
-model: gemini/gemini-1.5-pro-latest
+# model: gemini/gemini-1.5-pro-latest
+# editor-model: gemini/gemini-1.5-pro-latest
 # model: openai/hf:Qwen/Qwen2.5-Coder-72B-Instruct
 # model: openai/hf:meta-llama/Llama-3.1-405B-Instruct
 # model: openai/hf:meta-llama/Llama-3.3-70B-Instruct
 # model: ollama_chat/deepseek-r1:14b
-# editor-model: gemini/gemini-1.5-pro-latest
+model: bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0
+
 openai-api-base: https://glhf.chat/api/openai/v1
 read:
   - CONVENTIONS.md
@@ -17,6 +19,6 @@ attribute-commit-message-author: True
 attribute-author: True
 test-cmd: go test ./...
 auto-test: True
-cache-prompts: True
+# cache-prompts: True
 # lint: True
 # lint-cmd: golangci-lint runn
