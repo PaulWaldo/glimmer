@@ -28,7 +28,7 @@ func BenchmarkGetUsersGroupPhotos(b *testing.B) {
         <rsp stat="ok">
             <groups>`
 	for i := 0; i < numGroups; i++ {
-		groupsResponse += fmt.Sprintf(`<group nsid="%d" name="Test Group %d" members="10" privacy="1" iconserver="1" iconfarm="1" admin="1" />`, i, i)
+		groupsResponse += fmt.Sprintf(`<group nsid="%d" name="Test Group %d" member_count="10" privacy="1" iconserver="1" iconfarm="1" admin="1" />`, i, i)
 	}
 	groupsResponse += `</groups>
         </rsp>`
@@ -274,8 +274,8 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 			groupsResponse: `<?xml version="1.0" encoding="utf-8" ?>
                 <rsp stat="ok">
                     <groups>
-                        <group nsid="12345" name="Test Group" members="10" privacy="1" iconserver="1" iconfarm="1" admin="1" />
-                        <group nsid="67890" name="Another Group" members="20" privacy="2" iconserver="2" iconfarm="2" admin="0" />
+                        <group nsid="12345" name="Test Group" member_count="10" privacy="1" iconserver="1" iconfarm="1" admin="1" />
+                        <group nsid="67890" name="Another Group" member_count="20" privacy="2" iconserver="2" iconfarm="2" admin="0" />
                     </groups>
                 </rsp>`,
 			photosResponse: map[string]string{
@@ -294,18 +294,22 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 			},
 			wantGroups: []groups.Group{
 				{
-					Nsid:        "12345",
-					Name:        "Test Group",
+					Nsid:       "12345",
+					Name:       "Test Group",
+					Privacy:    "1",
+					Admin:      "1",
+					Iconserver: "1",
+					Iconfarm:   "1",
 					MemberCount: "10",
-					Privacy:     "1",
-					Admin:       "1",
 				},
 				{
-					Nsid:        "67890",
-					Name:        "Another Group",
+					Nsid:       "67890",
+					Name:       "Another Group",
+					Privacy:    "2",
+					Admin:      "0",
+					Iconserver: "2",
+					Iconfarm:   "2",
 					MemberCount: "20",
-					Privacy:     "2",
-					Admin:       "0",
 				},
 			},
 			wantPhotos: []api.UsersGroupPhotos{
