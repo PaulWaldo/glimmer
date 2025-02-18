@@ -26,7 +26,6 @@ var (
 type contactPhotos struct {
 	ma         *myApp
 	container  *fyne.Container
-	title      *widget.Label
 	photoList  *fyne.Container
 	gridWrap   *fyne.Container
 	photos     []api.Photo
@@ -36,8 +35,6 @@ type contactPhotos struct {
 }
 
 func (p *contactPhotos) makeUI() *fyne.Container {
-	p.title = widget.NewLabel("Contact Photos")
-
 	p.gridWrap = container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight), p.photoCards...)
 	scrollingGrid := container.NewScroll(p.gridWrap)
 	scrollingGrid.OnScrolled = func(pos fyne.Position) {
@@ -46,10 +43,7 @@ func (p *contactPhotos) makeUI() *fyne.Container {
 		}
 	}
 
-	p.container = container.NewStack(
-		container.NewStack(),
-		container.NewBorder(p.title, nil, nil, nil, scrollingGrid),
-	)
+	p.container = container.NewStack(scrollingGrid)
 	p.loadNextPage()
 	return p.container
 }
