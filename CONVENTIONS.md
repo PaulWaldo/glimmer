@@ -13,4 +13,8 @@ I am strictly following **Test-Driven Development (TDD)**. You **must** obey the
 
 At every step, **wait for my confirmation before proceeding**. **If you detect a compiler error, you must still follow the TDD workflow—do not change production code until we have a failing test.**
 
-Now, let’s begin—what feature or function are we testing first?
+## Coding Style
+
+* All code must be idiomatic go code
+* All code should commented for go-doc
+* Before accepting any code, format it using `go fmt`
