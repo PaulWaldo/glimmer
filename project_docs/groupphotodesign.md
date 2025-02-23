@@ -16,7 +16,7 @@ At the bottom of each group card will be a tappable object titled "More...".  Wh
 ## Implementation Considerations
 
 * Group photo information can be obtained with the `api.GetUsersGroupPhotos` function
-* The UI must be kept responsive
+* The UI must be kept responsive.  Use `App.Lifecycle` to wait for the GUI to be fully drawn before starting any operations
 * Encapsulation and extensibility are key
 * The number of photos can be quite large, so downloading them should be done in batches.  The batch size should be configurable.
 
