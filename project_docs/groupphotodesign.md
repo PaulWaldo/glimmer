@@ -5,7 +5,7 @@
 The goal is to obtain and display photos from all of the Flickr groups to which the user belongs.
 Since the user may belong to a number of groups, the main organization will be these groups.  Each group is to be displayed as a series of cards in a scrollable pane.  The title of this card will be the group name.
 Within each group card, X number of photos will be displayed in a grid, where X is a configurable parameter.
-At the bottom of each group card will be a tappable object titled "More...".  When this object is tapped, additional photos from the group will be displayed.  There will also be a UI element that will allow the group to be collapsed.  There will still be a card with the group name, but the photos display will be collapsed.
+At the bottom of each group card will be a tappable object titled "More...".  When this object is tapped, a batch of additional photos from the group will be downloaded and displayed.  There will also be a UI element that will allow the group to be collapsed.  There will still be a card with the group name, but the photos display will be collapsed.  The images should be retained, just not shown.
 
 ## Requirements
 
@@ -46,3 +46,18 @@ At the bottom of each group card will be a tappable object titled "More...".  Wh
     * a checkbox for each story that we will use as we work to indicate what we have completed and what work is left to do.  This will enable us to take a break and come back later without forgetting what we have done.
 
 ## User Stories
+
+**Summary:** Display photos from the user's Flickr groups in a scrollable pane. Each group is represented by a card containing a grid of photos. Users can load more photos or collapse the group card.
+
+**Detailed Stories:**
+
+* [x] **Story 1: Initial UI Setup:** Create the main UI with two tabs: one for contact photos (placeholder) and one for group photos (initially an empty grid view).
+* [x] **Story 2: Fetch Group Photos:** Implement the background process to fetch the user's group photos using `api.GetUsersGroupPhotos`.
+* [ ] **Story 3: Create Group Cards:**  After fetching group data and waiting for the UI to be ready, create and display a card for each group.
+* [ ] **Story 4: Create Photo Cards:** Create photo cards for the first batch of photos in each group. Each card displays the photo title, author, and downloaded image.
+* [ ] **Story 5: Implement "More..." Functionality:** Implement the "More..." button to load and display additional photo batches for a group.
+* [ ] **Story 6: Implement Collapse/Expand Functionality:** Implement the collapse/expand feature for group cards. Collapsed cards should hide photos but retain them for redisplay.
+* [ ] **Story 7: Configure Batch Size and Downloads:** Implement configuration options for photo batch size and the number of simultaneous image downloads.
+* [ ] **Story 8: Handle Errors:** Implement error handling for network issues, API errors, and image downloads. Display user-friendly messages.
+* [ ] **Story 9: Write Unit Tests:** Write comprehensive unit tests for all implemented functionality, following TDD principles.
+
