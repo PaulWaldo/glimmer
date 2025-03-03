@@ -27,6 +27,7 @@ type myApp struct {
 	userName              string
 	fullName              string
 	usersGroup            []groups.Group
+	groupPhotosChan       chan struct{}
 	usersGroupPhotos      []api.UsersGroupPhotos
 }
 
