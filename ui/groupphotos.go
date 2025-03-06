@@ -3,6 +3,7 @@ package ui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 )
 
 type groupPhotos struct {
@@ -17,14 +18,18 @@ type groupPhotos struct {
 }
 
 func (p *groupPhotos) makeUI() *fyne.Container {
-	p.gridWrap = container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight), p.photoCards...)
-	scrollingGrid := container.NewScroll(p.gridWrap)
-	// scrollingGrid.OnScrolled = func(pos fyne.Position) {
-	// 	if pos.Y+scrollingGrid.Size().Height >= p.gridWrap.Size().Height {
-	// 		p.loadNextPage()
-	// 	}
-	// }
+	p.gridWrap = container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight)) // Initialize empty gridWrap
+	scrollingGrid := container.NewScroll(container.NewVBox())                       // Start with empty VBox in Scroll
 
-	// p.loadNextPage()
+	go func() {
+		<-p.ma.groupPhotosChan // Wait for signal
+		for _, group := range p.ma.usersGroups {
+			groupCard := container.NewVBox(widget.NewLabel(group.Name), widget.NewButton("More...", func() {}))
+			p.gridWrap.Objects = append(p.gridWrap.Objects, groupCard) // Add group card to gridWrap
+			// p.ma.window.Canvas().Refresh(p.ma.window)                  // Refresh UI to show changes
+		}
+		scrollingGrid.Content = p.gridWrap // Set gridWrap as content after it's populated
+	}()
+
 	return container.NewStack(scrollingGrid)
 }

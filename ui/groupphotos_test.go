@@ -5,17 +5,17 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/widget"
-	"github.com/PaulWaldo/glimmer/api"
-	"github.com/stretchr/testify/require"
-
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/masci/flickr.v3/groups" // Import groups package
 )
 
 func Test_groupPhotos_makeUI_createsGroupCardsAsync(t *testing.T) {
-	ma := &myApp{ // Initialize ma
-		groupPhotosChan:  make(chan struct{}),
-		usersGroupPhotos: make([]api.UsersGroupPhotos, 0),
+	ma := &myApp{
+		groupPhotosChan: make(chan struct{}),
+		// window:          ma.window, // Ensure ma.window is initialized
+		usersGroups:     make([]groups.Group, 0), // Initialize usersGroups
 	}
 	gp := groupPhotos{
 		ma: ma,
@@ -26,9 +26,9 @@ func Test_groupPhotos_makeUI_createsGroupCardsAsync(t *testing.T) {
 	grid := scroll.Content.(*fyne.Container)
 
 	go func() {
-		gp.ma.usersGroupPhotos = []api.UsersGroupPhotos{
-			{GroupName: "Group 1"},
-			{GroupName: "Group 2"},
+		gp.ma.usersGroups = []groups.Group{ // Populate usersGroups
+			{Name: "Group 1"},
+			{Name: "Group 2"},
 		}
 		close(gp.ma.groupPhotosChan)
 	}()
@@ -42,14 +42,14 @@ func Test_groupPhotos_makeUI_createsGroupCardsAsync(t *testing.T) {
 			t.Fatal("Timeout waiting for group cards")
 		default:
 			time.Sleep(10 * time.Millisecond)
-			// gp.ma.window.Canvas().Refresh(gp.ma.window.Canvas())
+			// gp.ma.window.Canvas().Refresh(gp.ma.window) // Correct Refresh call
 		}
 	}
 
 	require.Equal(t, 2, len(grid.Objects)) // Finally, there should be 2 group cards
 
-	// Check that each group card has a "More..." button and a label
-	for _, obj := range grid.Objects {
+	// Check that each group card has a "More..." button and a label with the correct group name
+	for i, obj := range grid.Objects {
 		groupCard := obj.(*fyne.Container)
 		require.Equal(t, 2, len(groupCard.Objects), "Group card should have 2 objects")
 
@@ -60,10 +60,8 @@ func Test_groupPhotos_makeUI_createsGroupCardsAsync(t *testing.T) {
 		label, ok := groupCard.Objects[0].(*widget.Label)
 		require.True(t, ok, "First object should be a *widget.Label")
 
-		group := gp.ma.usersGroupPhotos[0] // Access the group name from groupPhotos
-		if label != nil {
-			require.Equal(t, group.GroupName, label.Text) // Check label text
-		}
+		expectedGroupName := gp.ma.usersGroups[i].Name  // Access group name from usersGroups
+		require.Equal(t, expectedGroupName, label.Text) // Check label text
 	}
 }
 

@@ -26,7 +26,7 @@ type myApp struct {
 	userNsID              string
 	userName              string
 	fullName              string
-	usersGroup            []groups.Group
+	usersGroups           []groups.Group
 	groupPhotosChan       chan struct{}
 	usersGroupPhotos      []api.UsersGroupPhotos
 }
@@ -101,7 +101,7 @@ func Run() {
 			client := api.CloneClient(ma.client)
 			client.Args.Set("per_page", strconv.Itoa(10))
 			params := map[string]string{"per_page": strconv.Itoa(10)}
-			err = api.GetUsersGroupPhotos(client, ma.userNsID, params, &ma.usersGroup, &ma.usersGroupPhotos)
+			err = api.GetUsersGroupPhotos(client, ma.userNsID, params, &ma.usersGroups, &ma.usersGroupPhotos)
 			if err != nil {
 				fyne.LogError("getting users group photos", err)
 				// Handle the error appropriately, e.g., display an error message.
