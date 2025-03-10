@@ -15,7 +15,7 @@ func Test_groupPhotos_makeUI_createsGroupCardsAsync(t *testing.T) {
 	ma := &myApp{
 		groupPhotosChan: make(chan struct{}),
 		// window:          ma.window, // Ensure ma.window is initialized
-		usersGroups:     make([]groups.Group, 0), // Initialize usersGroups
+		usersGroups: make([]groups.Group, 0), // Initialize usersGroups
 	}
 	gp := groupPhotos{
 		ma: ma,
@@ -66,7 +66,7 @@ func Test_groupPhotos_makeUI_createsGroupCardsAsync(t *testing.T) {
 }
 
 func Test_groupPhotos_makeUI_containsEmptyGrid(t *testing.T) {
-	gp := groupPhotos{}
+	gp := groupPhotos{ma: &myApp{groupPhotosChan: make(chan struct{})}}
 	cont := gp.makeUI()
 	scroll := cont.Objects[0].(*container.Scroll)
 	grid := scroll.Content.(*fyne.Container)
@@ -80,6 +80,7 @@ func Test_groupPhotos_makeUI_createsGroupCards(t *testing.T) {
 	// Setup test data
 	gp := groupPhotos{
 		photoCards: make([]fyne.CanvasObject, 0),
+		ma:         &myApp{},
 	}
 
 	// Call makeUI
