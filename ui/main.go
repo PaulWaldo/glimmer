@@ -73,6 +73,7 @@ func (ma *myApp) isLoggedIn() bool {
 func Run() {
 	ma := &myApp{}
 	ma.app = app.NewWithID(AppID)
+	ma.groupPhotosChan = make(chan struct{})
 
 	ma.prefs = NewPreferences(ma.app)
 	ma.userNsID, _ = ma.prefs.userNsID.Get()
@@ -108,6 +109,7 @@ func Run() {
 				// For now, we'll just log the error and continue.
 			}
 			fmt.Println("Group photos fetched:", len(ma.usersGroupPhotos))
+			close(ma.groupPhotosChan)
 		}()
 	} else {
 		ma.authenticate()

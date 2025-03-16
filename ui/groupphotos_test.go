@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -35,15 +36,13 @@ func Test_groupPhotos_makeUI_createsGroupCardsAsync(t *testing.T) {
 
 	require.Equal(t, 0, len(grid.Objects)) // Initially, the grid should be empty
 
-	timeout := time.After(1 * time.Second)
-	for len(grid.Objects) != 2 { // Wait for 2 group cards
-		select {
-		case <-timeout:
-			t.Fatal("Timeout waiting for group cards")
-		default:
-			time.Sleep(10 * time.Millisecond)
-			// gp.ma.window.Canvas().Refresh(gp.ma.window) // Correct Refresh call
+	// Wait for the grid to be populated with a timeout
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		if len(grid.Objects) == 2 {
+			break
 		}
+		time.Sleep(10 * time.Millisecond)
 	}
 
 	require.Equal(t, 2, len(grid.Objects)) // Finally, there should be 2 group cards
@@ -93,4 +92,81 @@ func Test_groupPhotos_makeUI_createsGroupCards(t *testing.T) {
 	// This will fail because we haven't implemented group cards yet
 	require.Equal(t, 0, len(grid.Objects),
 		"Should start with empty grid")
+}
+
+func Test_groupPhotos_createPhotoCard(t *testing.T) {
+	// Setup test data
+	gp := groupPhotos{
+		ma: &myApp{},
+	}
+
+	photo := Photo{
+		Title:  "Test Photo",
+		Author: "Test Author",
+		URL:    "https://example.com/test.jpg",
+	}
+
+	// Create a photo card
+	card := gp.createPhotoCard(photo)
+
+	// Verify the card structure
+	container, ok := card.(*fyne.Container)
+	require.True(t, ok, "Photo card should be a container")
+
+	// Check that the container has the expected components
+	require.GreaterOrEqual(t, len(container.Objects), 3, "Photo card should have at least 3 components")
+
+	// Check title
+	title, ok := container.Objects[0].(*widget.Label)
+	require.True(t, ok, "First component should be a title label")
+	require.Equal(t, "Test Photo", title.Text)
+
+	// Check author
+	author, ok := container.Objects[1].(*widget.Label)
+	require.True(t, ok, "Second component should be an author label")
+	require.Equal(t, "By: Test Author", author.Text)
+
+	// The third component would be an image, but we can't easily test its content
+	_, ok = container.Objects[2].(*widget.Icon)
+	require.True(t, ok, "Third component should be an image placeholder")
+}
+
+func Test_groupPhotos_addPhotosToGroupCard(t *testing.T) {
+	// Setup test data
+	gp := groupPhotos{
+		ma: &myApp{},
+	}
+
+	// Create a group card
+	groupCard := container.NewVBox(
+		widget.NewLabel("Test Group"),
+		widget.NewButton("More...", func() {}),
+	)
+
+	// Create test photos
+	photos := []Photo{
+		{Title: "Photo 1", Author: "Author 1", URL: "https://example.com/1.jpg"},
+		{Title: "Photo 2", Author: "Author 2", URL: "https://example.com/2.jpg"},
+	}
+
+	// Add photos to the group card
+	gp.addPhotosToGroupCard(groupCard, photos)
+
+	// Verify the group card structure
+	require.Equal(t, 4, len(groupCard.Objects), "Group card should have 4 components (label + 2 photos + button)")
+
+	// Check that the photos were inserted before the "More..." button
+	moreButton, ok := groupCard.Objects[3].(*widget.Button)
+	require.True(t, ok, "Last component should be the More button")
+	require.Equal(t, "More...", moreButton.Text)
+
+	// Check the photo cards
+	for i := 0; i < 2; i++ {
+		photoCard, ok := groupCard.Objects[i+1].(*fyne.Container)
+		require.True(t, ok, fmt.Sprintf("Component %d should be a photo card container", i+1))
+
+		title, ok := photoCard.Objects[0].(*widget.Label)
+		require.True(t, ok, "First component of photo card should be a title label")
+		require.Equal(t, photos[i].Title, title.Text)
+	}
 }
