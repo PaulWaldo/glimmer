@@ -60,4 +60,3 @@ At the bottom of each group card will be a tappable object titled "More...".  Wh
 * [ ] **Story 6: Implement Collapse/Expand Functionality:** Implement the collapse/expand feature for group cards. Collapsed cards should hide photos but retain them for redisplay.
 * [ ] **Story 7: Configure Batch Size and Downloads:** Implement configuration options for photo batch size and the number of simultaneous image downloads.
 * [ ] **Story 8: Handle Errors:** Implement error handling for network issues, API errors, and image downloads. Display user-friendly messages.
-* [ ] **Story 9: Write Unit Tests:** Write comprehensive unit tests for all implemented functionality, following TDD principles.

@@ -113,7 +113,7 @@ func Run() {
 	}
 
 	cp := contactPhotos{ma: ma}
-	gp := &groupPhotos{ma: ma}
+	gp := &groupPhotosUI{ma: ma}
 	ma.tabsUI.appTabs.SetItems([]*container.TabItem{
 		container.NewTabItem("Contacts", cp.makeUI()),
 		container.NewTabItem("Groups", gp.makeUI()),

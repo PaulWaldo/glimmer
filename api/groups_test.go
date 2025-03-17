@@ -12,7 +12,6 @@ import (
 
 	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"gopkg.in/masci/flickr.v3"
 	"gopkg.in/masci/flickr.v3/groups"
 )
@@ -166,9 +165,9 @@ func TestGetGroupPhotos(t *testing.T) {
 
 			resp, err := api.GetGroupPhotos(fclient, groupID, params)
 			if tt.wantErr {
-				require.Error(t, err)
+				assert.Error(t, err)
 			} else {
-				require.NoError(t, err)
+				assert.NoError(t, err)
 				// Don't worry about the Extra field, it is just the raw XML
 				tt.want.Extra = resp.Extra
 				assert.Equal(t, tt.want, resp)
@@ -247,9 +246,9 @@ func TestGetUserGroups(t *testing.T) {
 
 			resp, err := api.GetUserGroups(fclient, userID, params)
 			if tt.wantErr {
-				require.Error(t, err)
+				assert.Error(t, err)
 			} else {
-				require.NoError(t, err)
+				assert.NoError(t, err)
 				tt.want.Extra = resp.Extra
 				assert.Equal(t, tt.want, resp)
 			}
@@ -410,10 +409,10 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 
 			err := api.GetUsersGroupPhotos(fclient, userID, nil, &testUsersGroups, &testUsersGroupPhotos)
 			if tt.wantErr {
-				require.Error(t, err)
+				assert.Error(t, err)
 				return
 			} else {
-				require.NoError(t, err)
+				assert.NoError(t, err)
 				assert.Equal(t, tt.wantPhotos, testUsersGroupPhotos)
 
 				if tt.wantGroups != nil { // Only check groups if expected
