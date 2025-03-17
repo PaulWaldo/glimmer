@@ -2,6 +2,8 @@ package ui
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -169,4 +171,39 @@ func Test_groupPhotos_addPhotosToGroupCard(t *testing.T) {
 		require.True(t, ok, "First component of photo card should be a title label")
 		require.Equal(t, photos[i].Title, title.Text)
 	}
+}
+
+func Test_groupPhotos_downloadAndSetImage(t *testing.T) {
+	// Setup test data
+	gp := groupPhotos{
+		ma: &myApp{},
+		maxConcurrentDownloads: 5,
+	}
+
+	// Create a mock icon widget
+	imgWidget := widget.NewIcon(nil)
+
+	// Create a test server that returns a simple image
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Return a small test image (1x1 transparent PNG)
+		w.Header().Set("Content-Type", "image/png")
+		w.Write([]byte{
+			0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
+			0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+			0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
+			0x0A, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+			0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
+			0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+		})
+	}))
+	defer testServer.Close()
+
+	// Call the method with the test server URL
+	gp.downloadAndSetImage(testServer.URL, imgWidget)
+
+	// Wait a short time for the download to complete
+	time.Sleep(100 * time.Millisecond)
+
+	// Verify that the icon now has a resource (no longer nil)
+	require.NotNil(t, imgWidget.Resource, "Image widget should have a resource after download")
 }

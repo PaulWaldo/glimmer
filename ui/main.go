@@ -91,9 +91,6 @@ func Run() {
 	)
 	ma.setAuthMenuStatus()
 
-	at := &apptabs{ma: ma}
-	at.makeUI()
-
 	if ma.isLoggedIn() {
 		// Fetch group photos synchronously.  Consider making this asynchronous later.
 		go func() {
@@ -116,9 +113,10 @@ func Run() {
 	}
 
 	cp := contactPhotos{ma: ma}
+	gp := &groupPhotos{ma: ma}
 	ma.tabsUI.appTabs.SetItems([]*container.TabItem{
 		container.NewTabItem("Contacts", cp.makeUI()),
-		container.NewTabItem("Groups", container.NewVBox(at.appTabs)),
+		container.NewTabItem("Groups", gp.makeUI()),
 	})
 	ma.window.SetContent(ma.tabsUI.appTabs)
 	ma.window.Resize(fyne.Size{

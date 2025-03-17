@@ -1,8 +1,6 @@
 package api
 
 import (
-	"fmt"
-
 	"gopkg.in/masci/flickr.v3"
 	"gopkg.in/masci/flickr.v3/groups"
 )
@@ -72,7 +70,6 @@ func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string, params map[
 	var usersGroupPhotos = make([]UsersGroupPhotos, len(userGroups.Groups))
 	*groups = userGroups.Groups
 	for i, group := range userGroups.Groups {
-		fmt.Println(i)
 		clonedClient = CloneClient(client)
 		groupPhotos, err := GetGroupPhotos(clonedClient, group.Nsid, params)
 		if err != nil {

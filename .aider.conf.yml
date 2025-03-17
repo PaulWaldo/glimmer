@@ -9,11 +9,16 @@
 # model: bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0
 model: bedrock/us.anthropic.claude-3-7-sonnet-20250219-v1:0
 
+alias:
+  - "claude37:bedrock/us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+  - "gemini:gemini/gemini-1.5-pro-latest"
+
 openai-api-base: https://glhf.chat/api/openai/v1
 read:
   - CONVENTIONS.md
 # map-tokens: 512
 architect: True
+auto-accept-architect: false
 auto-commits: False
 attribute-committer: True
 attribute-commit-message-author: True
