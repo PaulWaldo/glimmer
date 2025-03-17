@@ -118,6 +118,9 @@ func Run() {
 		container.NewTabItem("Contacts", cp.makeUI()),
 		container.NewTabItem("Groups", gp.makeUI()),
 	})
+
+	gp.setGroups(ma.usersGroups)
+
 	ma.window.SetContent(ma.tabsUI.appTabs)
 	ma.window.Resize(fyne.Size{
 		Width:  GridSizeWidth*2 + theme.Padding()*3,
