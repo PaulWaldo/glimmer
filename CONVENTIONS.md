@@ -18,3 +18,4 @@ At every step, **wait for my confirmation before proceeding**. **If you detect a
 * All code must be idiomatic go code
 * All code should commented for go-doc
 * Before accepting any code, format it using `go fmt`
+* Prefer the testify unit test framework
