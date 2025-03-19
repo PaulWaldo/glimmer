@@ -20,13 +20,14 @@ read:
   - project_docs/2025-03-15_summary.md
 # map-tokens: 512
 architect: True
-auto-accept-architect: false
+auto-accept-architect: False
 auto-commits: False
 attribute-committer: True
 attribute-commit-message-author: True
 attribute-author: True
 test-cmd: go test ./...
 auto-test: True
+show-diffs: True
 # reasoning-effort: 0.7
 # cache-prompts: True
 # lint: True
