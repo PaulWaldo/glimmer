@@ -27,8 +27,9 @@ type myApp struct {
 	userName              string
 	fullName              string
 	usersGroups           []groups.Group
-	groupPhotosChan       chan struct{}
 	usersGroupPhotos      []api.UsersGroupPhotos
+	groupPhotosContainer  *fyne.Container
+	groupsUI              *groupPhotosUI
 }
 
 func (ma *myApp) logAuth(marker string) {
@@ -73,7 +74,6 @@ func (ma *myApp) isLoggedIn() bool {
 func Run() {
 	ma := &myApp{}
 	ma.app = app.NewWithID(AppID)
-	ma.groupPhotosChan = make(chan struct{})
 
 	ma.prefs = NewPreferences(ma.app)
 	ma.userNsID, _ = ma.prefs.userNsID.Get()
@@ -92,7 +92,7 @@ func Run() {
 	ma.setAuthMenuStatus()
 
 	if ma.isLoggedIn() {
-		// Fetch group photos synchronously.  Consider making this asynchronous later.
+		// Fetch group photos asynchronously
 		go func() {
 			var err error
 			fmt.Println("Starting fetching group photos")
@@ -103,23 +103,27 @@ func Run() {
 			if err != nil {
 				fyne.LogError("getting users group photos", err)
 				// Handle the error appropriately, e.g., display an error message.
-				// For now, we'll just log the error and continue.
+				return
 			}
 			fmt.Println("Group photos fetched:", len(ma.usersGroupPhotos))
-			close(ma.groupPhotosChan)
+			
+			// Now that we have the groups, update the UI using the stored reference
+			if ma.groupsUI != nil {
+				ma.groupsUI.setGroups(ma.usersGroups)
+			}
 		}()
 	} else {
 		ma.authenticate()
 	}
 
 	cp := contactPhotos{ma: ma}
-	gp := &groupPhotosUI{ma: ma}
+	gp := &groupPhotosUI{ma: ma, cardByID: make(map[string]*fyne.CanvasObject)}
+	ma.groupsUI = gp // Store reference to the UI
+	ma.groupPhotosContainer = gp.makeUI() // Store the container
 	ma.tabsUI.appTabs.SetItems([]*container.TabItem{
 		container.NewTabItem("Contacts", cp.makeUI()),
-		container.NewTabItem("Groups", gp.makeUI()),
+		container.NewTabItem("Groups", ma.groupPhotosContainer),
 	})
-
-	gp.setGroups(ma.usersGroups)
 
 	ma.window.SetContent(ma.tabsUI.appTabs)
 	ma.window.Resize(fyne.Size{

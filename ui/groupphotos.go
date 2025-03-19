@@ -35,6 +35,9 @@ func (p *groupPhotosUI) makeUI() *fyne.Container {
 }
 
 func (p *groupPhotosUI) setGroups(groups []groups.Group) {
+	p.groupCards = make([]fyne.CanvasObject, 0, len(groups))
+	p.cardByID = make(map[string]*fyne.CanvasObject)
+	
 	for _, group := range groups {
 		card := &GroupCard{
 			Card: widget.Card{
@@ -46,6 +49,12 @@ func (p *groupPhotosUI) setGroups(groups []groups.Group) {
 		p.groupCards = append(p.groupCards, card)
 		cardObj := fyne.CanvasObject(card)
 		p.cardByID[group.ID] = &cardObj
+	}
+	
+	// Update the grid with the new cards
+	if p.gridWrap != nil {
+		p.gridWrap.Objects = p.groupCards
+		p.gridWrap.Refresh()
 	}
 }
 
