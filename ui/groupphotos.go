@@ -16,7 +16,8 @@ type GroupPhotos struct {
 
 type GroupCard struct {
 	widget.Card
-	ma *myApp
+	ma        *myApp
+	GroupName string
 }
 
 type groupPhotosUI struct {
@@ -34,11 +35,18 @@ func (p *groupPhotosUI) makeUI() *fyne.Container {
 }
 
 func (p *groupPhotosUI) setGroups(groups []groups.Group) {
-	// TODO: for each group,
-	// * create a group card, assigning the group name to the title
-	// * append it to p.groupCards
-	// * add the mapping of the group's ID to p.cardById
-
+	for _, group := range groups {
+		card := &GroupCard{
+			Card: widget.Card{
+				Title: group.Name,
+			},
+			ma:        p.ma,
+			GroupName: group.Name,
+		}
+		p.groupCards = append(p.groupCards, card)
+		cardObj := fyne.CanvasObject(card)
+		p.cardByID[group.ID] = &cardObj
+	}
 }
 
 // createPhotoCard creates a card for a single photo
