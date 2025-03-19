@@ -14,15 +14,15 @@ func TestSetGroups(t *testing.T) {
 		cardByID: make(map[string]*fyne.CanvasObject),
 	}
 	testGroups := []groups.Group{
-		{ID: "1", Name: "Group 1"},
-		{ID: "2", Name: "Group 2"},
+		{Nsid: "1", Name: "Group 1"},
+		{Nsid: "2", Name: "Group 2"},
 	}
 
 	p.setGroups(testGroups)
 
 	assert.Equal(t, len(testGroups), len(p.groupCards))
 	for _, group := range testGroups {
-		card := (*p.cardByID[group.ID]).(*GroupCard) // Type assertion
+		card := (*p.cardByID[group.Nsid]).(*GroupCard) // Type assertion
 		assert.NotNil(t, card)
 		assert.Equal(t, group.Name, card.Title)
 	}

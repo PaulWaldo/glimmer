@@ -48,7 +48,7 @@ func (p *groupPhotosUI) setGroups(groups []groups.Group) {
 		}
 		p.groupCards = append(p.groupCards, card)
 		cardObj := fyne.CanvasObject(card)
-		p.cardByID[group.ID] = &cardObj
+		p.cardByID[group.Nsid] = &cardObj
 	}
 	
 	// Update the grid with the new cards
