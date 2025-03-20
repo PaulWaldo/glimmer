@@ -31,7 +31,7 @@ type groupPhotosUI struct {
 }
 
 func (p *groupPhotosUI) makeUI() *fyne.Container {
-	p.gridWrap = container.NewGridWrap(fyne.NewSize(200, 200)) // Using hardcoded values for now
+	p.gridWrap = container.NewGridWrap(fyne.NewSize(GridSizeWidth, GridSizeHeight)) // Using same constants as contact photos
 	scrollingGrid := container.NewScroll(p.gridWrap)
 	return container.NewStack(scrollingGrid)
 }
