@@ -55,7 +55,7 @@ At the bottom of each group card will be a tappable object titled "More...".  Wh
 * [x] **Story 1: Initial UI Setup:** Create the main UI with two tabs: one for contact photos (placeholder) and one for group photos (initially an empty grid view).
 * [x] **Story 2: Fetch Group Photos:** Implement the background process to fetch the user's group photos using `api.GetUsersGroupPhotos`.
 * [x] **Story 3: Create Group Cards:** After fetching group data and waiting for the UI to be ready, create and display a card for each group.
-* [ ] **Story 4: Create Photo Cards:** Create photo cards for the first batch of photos in each group. Each card displays the photo title, author, and downloaded image.
+* [ ] **Story 4: Create Photo Cards:** Create photo cards for the first batch of photos in each group. Each card displays the photo title, author, and downloaded image.  The image download should be managed by the card itself and perform asynchronously.  Note the image should be downloaded just like in `func (c *PhotoCard) loadImage(callback func())` except there is no need for a semaphore or callback.
 * [ ] **Story 5: Implement "More..." Functionality:** Implement the "More..." button to load and display additional photo batches for a group.
 * [ ] **Story 6: Implement Collapse/Expand Functionality:** Implement the collapse/expand feature for group cards. Collapsed cards should hide photos but retain them for redisplay.
 * [ ] **Story 7: Configure Batch Size and Downloads:** Implement configuration options for photo batch size and the number of simultaneous image downloads.
