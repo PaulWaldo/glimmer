@@ -54,7 +54,7 @@ At the bottom of each group card will be a tappable object titled "More...".  Wh
 
 * [x] **Story 1: Initial UI Setup:** Create the main UI with two tabs: one for contact photos (placeholder) and one for group photos (initially an empty grid view).
 * [x] **Story 2: Fetch Group Photos:** Implement the background process to fetch the user's group photos using `api.GetUsersGroupPhotos`.
-* [ ] **Story 3: Create Group Cards:** After fetching group data and waiting for the UI to be ready, create and display a card for each group.
+* [x] **Story 3: Create Group Cards:** After fetching group data and waiting for the UI to be ready, create and display a card for each group.
 * [ ] **Story 4: Create Photo Cards:** Create photo cards for the first batch of photos in each group. Each card displays the photo title, author, and downloaded image.
 * [ ] **Story 5: Implement "More..." Functionality:** Implement the "More..." button to load and display additional photo batches for a group.
 * [ ] **Story 6: Implement Collapse/Expand Functionality:** Implement the collapse/expand feature for group cards. Collapsed cards should hide photos but retain them for redisplay.
