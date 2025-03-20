@@ -106,7 +106,7 @@ func Run() {
 				return
 			}
 			fmt.Println("Group photos fetched:", len(ma.usersGroupPhotos))
-			
+
 			// Now that we have the groups, update the UI using the stored reference
 			if ma.groupsUI != nil {
 				ma.groupsUI.setGroups(ma.usersGroups)
@@ -118,8 +118,8 @@ func Run() {
 
 	cp := contactPhotos{ma: ma}
 	gp := &groupPhotosUI{ma: ma, cardByID: make(map[string]*fyne.CanvasObject)}
-	ma.groupsUI = gp // Store reference to the UI
-	ma.groupPhotosContainer = gp.makeUI() // Store the container
+	ma.groupsUI = gp
+	ma.groupPhotosContainer = gp.makeUI()
 	ma.tabsUI.appTabs.SetItems([]*container.TabItem{
 		container.NewTabItem("Contacts", cp.makeUI()),
 		container.NewTabItem("Groups", ma.groupPhotosContainer),

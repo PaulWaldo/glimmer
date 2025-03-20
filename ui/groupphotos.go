@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -37,8 +39,10 @@ func (p *groupPhotosUI) makeUI() *fyne.Container {
 func (p *groupPhotosUI) setGroups(groups []groups.Group) {
 	p.groupCards = make([]fyne.CanvasObject, 0, len(groups))
 	p.cardByID = make(map[string]*fyne.CanvasObject)
-	
+
+	fmt.Println("User's group:")
 	for _, group := range groups {
+		fmt.Println(group.Name)
 		card := &GroupCard{
 			Card: widget.Card{
 				Title: group.Name,
@@ -50,7 +54,7 @@ func (p *groupPhotosUI) setGroups(groups []groups.Group) {
 		cardObj := fyne.CanvasObject(card)
 		p.cardByID[group.Nsid] = &cardObj
 	}
-	
+
 	// Update the grid with the new cards
 	if p.gridWrap != nil {
 		p.gridWrap.Objects = p.groupCards
@@ -62,4 +66,3 @@ func (p *groupPhotosUI) setGroups(groups []groups.Group) {
 func (p *groupPhotosUI) createPhotoCard(photo api.Photo) *PhotoCard {
 	return nil
 }
-
