@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert" // Added for assertions
+	"gopkg.in/masci/flickr.v3"
 	"gopkg.in/masci/flickr.v3/groups"
 )
 
@@ -31,7 +32,8 @@ func TestSetGroups(t *testing.T) {
 
 // TestNewGroupPhotoCard tests the creation of a photo card for group photos
 func TestNewGroupPhotoCard(t *testing.T) {
-	ma := &myApp{} // Initialize myApp
+	// Use the Flickr test client
+	client := flickr.GetTestClient()
 	
 	photo := api.Photo{
 		ID:       "12345",
@@ -42,7 +44,7 @@ func TestNewGroupPhotoCard(t *testing.T) {
 		Title:    "Test Photo",
 	}
 	
-	photoCard := NewGroupPhotoCard(photo, ma.client)
+	photoCard := NewGroupPhotoCard(photo, client)
 	
 	assert.NotNil(t, photoCard)
 	assert.Equal(t, photo.Title, photoCard.Title)

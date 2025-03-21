@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
+	"gopkg.in/masci/flickr.v3"
 	"gopkg.in/masci/flickr.v3/groups"
 )
 
@@ -64,5 +65,19 @@ func (p *groupPhotosUI) setGroups(groups []groups.Group) {
 
 // createPhotoCard creates a card for a single photo
 func (p *groupPhotosUI) createPhotoCard(photo api.Photo) *PhotoCard {
-	return nil
+	return NewGroupPhotoCard(photo, p.ma.client)
+}
+
+// NewGroupPhotoCard creates a new photo card for group photos
+func NewGroupPhotoCard(photo api.Photo, client *flickr.FlickrClient) *PhotoCard {
+	clone := api.CloneClient(client)
+	return &PhotoCard{
+		Card: widget.Card{
+			Title:    photo.Title,
+			Subtitle: photo.Username,
+			Content:  widget.NewProgressBarInfinite(),
+		},
+		photo:  photo,
+		client: clone,
+	}
 }
