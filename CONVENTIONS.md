@@ -1,18 +1,37 @@
 # CONVENTIONS
 
-## Strict Test-Driven Development (TDD) Workflow Enforcement
+## ⚠️ STRICT TEST-DRIVEN DEVELOPMENT (TDD) WORKFLOW ⚠️
 
-I am strictly following **Test-Driven Development (TDD)**. You **must** obey these rules at all times—no exceptions:
+This project follows **Test-Driven Development (TDD)** with ZERO exceptions. Follow this workflow precisely:
 
-1. **Write a failing unit test first.** Do not write, suggest, or even mention production code until we have a failing test.
-2. **Wait for confirmation of test failure.** After I run the test, I will confirm it fails and explain why.
-3. **Only after test failure is confirmed**, write the minimal production code needed to make the test pass.
-4. **One step at a time.** Do not suggest implementation and test fixes simultaneously.
-5. **No premature solutions.** Do not suggest how the implementation "should" work until we have a failing test.
-6. **No future planning.** Focus only on the current failing test, not on what we'll do next.
-7. **If a compiler error occurs**, still write a test first that would use the missing functionality.
+### TDD Cycle - The Only Acceptable Process
 
-## Process Flow - Follow Exactly
+1. **RED:** Write a failing test first
+   - Write only the test code
+   - Do not write or suggest any production code
+   - Do not even hint at implementation details
+
+2. **CONFIRMATION:** Wait for test failure confirmation
+   - The test must be run and confirmed to fail
+   - Understand why it fails before proceeding
+
+3. **GREEN:** Only after confirmed failure, write minimal production code
+   - Write only enough code to make the test pass
+   - Focus on simplicity, not perfection
+
+4. **REFACTOR:** Only after the test passes, consider refactoring
+   - Improve the code without changing behavior
+   - All tests must still pass after refactoring
+
+### Critical Rules - No Exceptions
+
+- **✋ NEVER suggest production code before a failing test exists and is confirmed**
+- **✋ NEVER combine test and implementation in the same step**
+- **✋ NEVER skip the confirmation of test failure**
+- **✋ NEVER write more implementation than needed to pass the current test**
+- **✋ NEVER plan multiple steps ahead - focus only on the current failing test**
+
+### Process Flow - Follow Exactly
 
 1. Write a single failing test for one specific behavior
 2. Wait for me to implement and run the test
