@@ -1,9 +1,15 @@
 package ui
 
 import (
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert" // Added for assertions
 	"gopkg.in/masci/flickr.v3"
@@ -34,7 +40,7 @@ func TestSetGroups(t *testing.T) {
 func TestNewGroupPhotoCard(t *testing.T) {
 	// Use the Flickr test client
 	client := flickr.GetTestClient()
-	
+
 	photo := api.Photo{
 		ID:       "12345",
 		Owner:    "owner123",
@@ -43,11 +49,90 @@ func TestNewGroupPhotoCard(t *testing.T) {
 		Username: "testuser",
 		Title:    "Test Photo",
 	}
-	
+
 	photoCard := NewGroupPhotoCard(photo, client)
-	
+
 	assert.NotNil(t, photoCard)
 	assert.Equal(t, photo.Title, photoCard.Title)
 	assert.Equal(t, photo.Username, photoCard.Subtitle)
 	assert.Equal(t, photo, photoCard.photo)
+}
+
+// TestGroupPhotoCardLoadsImage tests that a group photo card loads its image
+func TestGroupPhotoCardLoadsImage(t *testing.T) {
+	// Create a mock transport
+	transport := &mockTransport{
+		responses: make(map[string]mockResponse),
+	}
+	
+	// Add mock response for photos.getInfo
+	photoInfoResponse := `<?xml version="1.0" encoding="utf-8" ?>
+		<rsp stat="ok">
+			<photo id="12345" secret="secret123" server="server123" farm="1" title="Test Photo">
+				<owner nsid="owner123" username="testuser" />
+			</photo>
+		</rsp>`
+	
+	transport.responses["flickr.photos.getInfo"] = mockResponse{
+		statusCode: 200,
+		body: photoInfoResponse,
+	}
+	
+	// Create client with mock transport
+	client := flickr.GetTestClient()
+	client.HTTPClient = &http.Client{
+		Transport: transport,
+	}
+
+	photo := api.Photo{
+		ID:       "12345",
+		Owner:    "owner123",
+		Secret:   "secret123",
+		Server:   "server123",
+		Username: "testuser",
+		Title:    "Test Photo",
+	}
+
+	// Create a group photo card
+	photoCard := NewGroupPhotoCard(photo, client)
+
+	// Initially, the content should be a progress bar
+	_, isProgress := photoCard.Content.(*widget.ProgressBarInfinite)
+	assert.True(t, isProgress, "Initial content should be a progress bar")
+
+	// We expect the image to be loaded, which would change the content from a progress bar
+	assert.Eventually(t, func() bool {
+		// Check if the content has changed from a progress bar to an image
+		_, stillProgress := photoCard.Content.(*widget.ProgressBarInfinite)
+		return !stillProgress
+	}, 3*time.Second, 100*time.Millisecond, "Image should be loaded within timeout")
+}
+
+// mockTransport and mockResponse types for testing
+type mockTransport struct {
+	responses map[string]mockResponse
+}
+
+type mockResponse struct {
+	statusCode int
+	body       string
+}
+
+func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if err := req.ParseForm(); err != nil {
+		return nil, err
+	}
+
+	method := req.FormValue("method")
+	
+	response, ok := t.responses[method]
+	if !ok {
+		return nil, fmt.Errorf("no mock response found for method %q", method)
+	}
+
+	return &http.Response{
+		StatusCode: response.statusCode,
+		Body:       io.NopCloser(strings.NewReader(response.body)),
+		Header:     make(http.Header),
+	}, nil
 }
