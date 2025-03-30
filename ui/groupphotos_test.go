@@ -115,6 +115,13 @@ func TestNewGroupPhotoCard(t *testing.T) {
 	_, isProgress := photoCard.Content.(*widget.ProgressBarInfinite)
 	assert.True(t, isProgress, "Initial content should be a progress bar")
 
+	// Create a mock version of func canvas.NewImageFromURI(uri fyne.URI) *canvas.Image
+	mockNewImageFromURI := func(uri fyne.URI) *canvas.Image {
+		assert.Equal(t, "https://live.staticflickr.com/server123/12345_secret123_z.jpg", uri.String())
+		return canvas.NewImageFromReader(strings.NewReader(string(simpleJPEGImage())), "fakeImage.jpg")
+	}
+	NewImageFromURI = mockNewImageFromURI
+
 	// Wait for the image to load (which should happen quickly with the mock response)
 	assert.Eventually(t, func() bool {
 		_, isProgress := photoCard.Content.(*widget.ProgressBarInfinite)

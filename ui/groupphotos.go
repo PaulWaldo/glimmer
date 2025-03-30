@@ -54,6 +54,7 @@ func (p *groupPhotosUI) setGroups(groups []groups.Group) {
 			ma:        p.ma,
 			GroupName: group.Name,
 		}
+		// Get the photo info for each of the photos to be displayed in the group card from ma.
 		p.groupCards = append(p.groupCards, card)
 		cardObj := fyne.CanvasObject(card)
 		p.cardByID[group.Nsid] = &cardObj
@@ -75,6 +76,7 @@ type GroupPhotoCard struct {
 	tap    func()
 }
 
+var NewImageFromURI = canvas.NewImageFromURI
 
 // loadImage loads the image for a group photo card
 func (c *GroupPhotoCard) loadImage() {
@@ -93,7 +95,7 @@ func (c *GroupPhotoCard) loadImage() {
 		return
 	}
 
-	image := canvas.NewImageFromURI(uri)
+	image := NewImageFromURI(uri)
 	if image == nil || image.Resource == nil {
 		panic("Image is nil")
 	}
