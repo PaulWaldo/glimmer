@@ -38,51 +38,23 @@ func TestSetGroups(t *testing.T) {
 
 // TestNewGroupPhotoCard tests the creation of a photo card for group photos
 func TestNewGroupPhotoCard(t *testing.T) {
-	// Use the Flickr test client
-	client := flickr.GetTestClient()
-
-	photo := api.Photo{
-		ID:       "12345",
-		Owner:    "owner123",
-		Secret:   "secret123",
-		Server:   "server123",
-		Username: "testuser",
-		Title:    "Test Photo",
-	}
-
-	photoCard := NewGroupPhotoCard(photo, client)
-
-	assert.NotNil(t, photoCard)
-	assert.Equal(t, photo.Title, photoCard.Title)
-	assert.Equal(t, photo.Username, photoCard.Subtitle)
-	assert.Equal(t, photo, photoCard.photo)
-}
-
-// TestGroupPhotoCardLoadsImage tests that a group photo card loads its image
-func TestGroupPhotoCardLoadsImage(t *testing.T) {
 	// Create a mock transport
 	transport := &mockTransport{
 		responses: make(map[string]mockResponse),
 	}
-	
-	// Add mock response for photos.getInfo
+
+	// Add mock response for photos.getInfo (needed for loadImage)
 	photoInfoResponse := `<?xml version="1.0" encoding="utf-8" ?>
 		<rsp stat="ok">
 			<photo id="12345" secret="secret123" server="server123" farm="1" title="Test Photo">
 				<owner nsid="owner123" username="testuser" />
 			</photo>
 		</rsp>`
-	
-	transport.responses["flickr.photos.getInfo"] = mockResponse{
-		statusCode: 200,
-		body: photoInfoResponse,
-	}
-	
+	transport.responses["flickr.photos.getInfo"] = mockResponse{statusCode: 200, body: photoInfoResponse}
+
 	// Create client with mock transport
 	client := flickr.GetTestClient()
-	client.HTTPClient = &http.Client{
-		Transport: transport,
-	}
+	client.HTTPClient = &http.Client{Transport: transport}
 
 	photo := api.Photo{
 		ID:       "12345",
@@ -124,7 +96,7 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	method := req.FormValue("method")
-	
+
 	response, ok := t.responses[method]
 	if !ok {
 		return nil, fmt.Errorf("no mock response found for method %q", method)

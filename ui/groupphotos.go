@@ -4,11 +4,14 @@ import (
 	"fmt"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
 	"gopkg.in/masci/flickr.v3"
 	"gopkg.in/masci/flickr.v3/groups"
+	"gopkg.in/masci/flickr.v3/photos"
 )
 
 // GroupPhotos represents a collection of photos from a Flickr group
@@ -63,15 +66,45 @@ func (p *groupPhotosUI) setGroups(groups []groups.Group) {
 	}
 }
 
-// createPhotoCard creates a card for a single photo
-func (p *groupPhotosUI) createPhotoCard(photo api.Photo) *PhotoCard {
-	return NewGroupPhotoCard(photo, p.ma.client)
+// GroupPhotoCard represents a card displaying a photo from a group
+type GroupPhotoCard struct {
+	widget.Card
+	info   photos.PhotoInfo
+	photo  api.Photo
+	client *flickr.FlickrClient
+	tap    func()
+}
+
+
+// loadImage loads the image for a group photo card
+func (c *GroupPhotoCard) loadImage() {
+	// Load the image...
+	resp, err := photos.GetInfo(c.client, c.photo.ID, c.photo.Secret)
+	if err != nil {
+		fyne.LogError("Failed to get photo info", err)
+		return
+	}
+	c.info = resp.Photo
+	photoUrl := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s.jpg", c.info.Server, c.info.Id, c.info.Secret, "z")
+	uri, err := storage.ParseURI(photoUrl)
+	if err != nil {
+		fyne.LogError("parsing url", err)
+		c.Content = widget.NewLabel("Failed to load image")
+		return
+	}
+
+	image := canvas.NewImageFromURI(uri)
+	if image == nil || image.Resource == nil {
+		panic("Image is nil")
+	}
+	image.FillMode = canvas.ImageFillContain
+	c.SetContent(image)
 }
 
 // NewGroupPhotoCard creates a new photo card for group photos
-func NewGroupPhotoCard(photo api.Photo, client *flickr.FlickrClient) *PhotoCard {
+func NewGroupPhotoCard(photo api.Photo, client *flickr.FlickrClient) *GroupPhotoCard {
 	clone := api.CloneClient(client)
-	return &PhotoCard{
+	i := &GroupPhotoCard{
 		Card: widget.Card{
 			Title:    photo.Title,
 			Subtitle: photo.Username,
@@ -80,4 +113,9 @@ func NewGroupPhotoCard(photo api.Photo, client *flickr.FlickrClient) *PhotoCard 
 		photo:  photo,
 		client: clone,
 	}
+	i.ExtendBaseWidget(i)
+	go func() {
+		i.loadImage()  // Start loading the image in a goroutine
+	}()
+	return i
 }
