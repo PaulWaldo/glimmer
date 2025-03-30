@@ -27,7 +27,7 @@ type myApp struct {
 	userName              string
 	fullName              string
 	usersGroups           []groups.Group
-	usersGroupPhotos      []api.UsersGroupPhotos
+	usersGroupPhotos      api.UsersGroupPhotosByGroupId
 	groupPhotosContainer  *fyne.Container
 	groupsUI              *groupPhotosUI
 }

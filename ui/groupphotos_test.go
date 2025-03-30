@@ -16,6 +16,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/storage/repository"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert" // Added for assertions
@@ -43,20 +44,6 @@ func TestSetGroups(t *testing.T) {
 	}
 }
 
-// minimalJPEG represents a minimal valid 1x1 JPEG image
-var minimalJPEG = []byte{
-	0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01,
-	0x00, 0x01, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x08, 0x06, 0x06, 0x07, 0x06, 0x05, 0x08,
-	0x07, 0x07, 0x07, 0x09, 0x09, 0x08, 0x0a, 0x0c, 0x14, 0x0d, 0x0c, 0x0b, 0x0b, 0x0c, 0x19, 0x12,
-	0x13, 0x0f, 0x14, 0x1d, 0x1a, 0x1f, 0x1e, 0x1d, 0x1a, 0x1c, 0x1c, 0x20, 0x24, 0x2e, 0x27, 0x20,
-	0x22, 0x2c, 0x23, 0x1c, 0x1c, 0x28, 0x37, 0x29, 0x2c, 0x30, 0x31, 0x34, 0x34, 0x34, 0x1f, 0x27,
-	0x39, 0x3d, 0x38, 0x32, 0x3c, 0x2e, 0x33, 0x34, 0x32, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x01,
-	0x00, 0x01, 0x01, 0x01, 0x11, 0x00, 0xff, 0xc4, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0xff, 0xc4, 0x00, 0x14,
-	0x10, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f, 0x00, 0x7f, 0x00, 0xff, 0xd9,
-}
-
 func simpleJPEGImage() []byte {
 	simpleImage := image.NewGray(image.Rect(0, 0, 1, 1))
 	// Encode the grayscale image to JPEG
@@ -70,6 +57,31 @@ func simpleJPEGImage() []byte {
 	// buf.Bytes() now contains the JPEG encoded image data
 	return buf.Bytes()
 }
+
+type stringURIReadCloser struct {
+	b   []byte
+	uri fyne.URI
+}
+
+func (s stringURIReadCloser) URI() fyne.URI { return s.uri }
+
+type mockRepository struct {
+	expectedURI  string
+	expectedData []byte
+	readCloser   fyne.URIReadCloser
+	canRead      bool
+}
+
+func (r mockRepository) Exists(u fyne.URI) (bool, error) {
+	return u.String() != r.expectedURI, nil
+}
+func (r mockRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
+	return stringURIReadCloser{r.expectedData, }
+}
+func (r mockRepository) CanRead(u fyne.URI) (bool, error) {
+	return r.canRead, nil
+}
+func (r mockRepository) Destroy(string) {}
 
 // TestNewGroupPhotoCard tests the creation of a photo card for group photos
 func TestNewGroupPhotoCard(t *testing.T) {
@@ -109,18 +121,25 @@ func TestNewGroupPhotoCard(t *testing.T) {
 	}
 
 	// Create a group photo card
-	photoCard := NewGroupPhotoCard(photo, client)
+	photoCard := NewGroupPhotoCard(photo, "abcdef", client)
 
 	// Initially, the content should be a progress bar
 	_, isProgress := photoCard.Content.(*widget.ProgressBarInfinite)
 	assert.True(t, isProgress, "Initial content should be a progress bar")
 
 	// Create a mock version of func canvas.NewImageFromURI(uri fyne.URI) *canvas.Image
-	mockNewImageFromURI := func(uri fyne.URI) *canvas.Image {
-		assert.Equal(t, "https://live.staticflickr.com/server123/12345_secret123_z.jpg", uri.String())
-		return canvas.NewImageFromReader(strings.NewReader(string(simpleJPEGImage())), "fakeImage.jpg")
-	}
-	NewImageFromURI = mockNewImageFromURI
+	// mockNewImageFromURI := func(uri fyne.URI) *canvas.Image {
+	// 	assert.Equal(t, "https://live.staticflickr.com/server123/12345_secret123_z.jpg", uri.String())
+	// 	return canvas.NewImageFromReader(strings.NewReader(string(simpleJPEGImage())), "fakeImage.jpg")
+	// }
+	// NewImageFromURI = mockNewImageFromURI
+	// "OK, I see this is available `func Register(scheme string, repository Repository)`.  The schem"
+
+	repository.Register("https", mockRepository{
+		expectedURI: "https://live.staticflickr.com/server123/12345_secret123_z.jpg",
+		readCloser:  nil,
+		canRead:     true,
+	})
 
 	// Wait for the image to load (which should happen quickly with the mock response)
 	assert.Eventually(t, func() bool {

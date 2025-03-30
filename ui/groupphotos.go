@@ -54,7 +54,12 @@ func (p *groupPhotosUI) setGroups(groups []groups.Group) {
 			ma:        p.ma,
 			GroupName: group.Name,
 		}
-		// Get the photo info for each of the photos to be displayed in the group card from ma.
+		// Get the photo info for each of the photos to be displayed in the group card from ma.usersGroupPhotos
+		for groupID, photoInfo := range p.ma.usersGroupPhotos {
+			// For each photo info, create a NewGroupPhoto card, passing in the photo data.  The Group Photo card should be responsible for downloading the image and displaying it
+			photoCard := NewGroupPhotoCard(photoInfo.Photos[0], groupID, p.ma.client)
+			card.Content = photoCard
+		}
 		p.groupCards = append(p.groupCards, card)
 		cardObj := fyne.CanvasObject(card)
 		p.cardByID[group.Nsid] = &cardObj
@@ -70,13 +75,14 @@ func (p *groupPhotosUI) setGroups(groups []groups.Group) {
 // GroupPhotoCard represents a card displaying a photo from a group
 type GroupPhotoCard struct {
 	widget.Card
+	NSID   string
 	info   photos.PhotoInfo
 	photo  api.Photo
 	client *flickr.FlickrClient
 	tap    func()
 }
 
-var NewImageFromURI = canvas.NewImageFromURI
+// var NewImageFromURI = canvas.NewImageFromURI
 
 // loadImage loads the image for a group photo card
 func (c *GroupPhotoCard) loadImage() {
@@ -95,7 +101,7 @@ func (c *GroupPhotoCard) loadImage() {
 		return
 	}
 
-	image := NewImageFromURI(uri)
+	image := canvas.NewImageFromURI(uri)
 	if image == nil || image.Resource == nil {
 		panic("Image is nil")
 	}
@@ -104,7 +110,7 @@ func (c *GroupPhotoCard) loadImage() {
 }
 
 // NewGroupPhotoCard creates a new photo card for group photos
-func NewGroupPhotoCard(photo api.Photo, client *flickr.FlickrClient) *GroupPhotoCard {
+func NewGroupPhotoCard(photo api.Photo, groupID string, client *flickr.FlickrClient) *GroupPhotoCard {
 	clone := api.CloneClient(client)
 	i := &GroupPhotoCard{
 		Card: widget.Card{
@@ -112,6 +118,7 @@ func NewGroupPhotoCard(photo api.Photo, client *flickr.FlickrClient) *GroupPhoto
 			Subtitle: photo.Username,
 			Content:  widget.NewProgressBarInfinite(),
 		},
+		NSID:   groupID,
 		photo:  photo,
 		client: clone,
 	}

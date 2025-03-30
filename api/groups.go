@@ -53,12 +53,13 @@ func GetUserGroups(client *flickr.FlickrClient, userID string, params map[string
 }
 
 type UsersGroupPhotos struct {
-	GroupID   string
+	// GroupID   string
 	GroupName string
 	Photos    []Photo
 }
+type UsersGroupPhotosByGroupId = map[string]UsersGroupPhotos
 
-func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string, params map[string]string, groups *[]groups.Group, photos *[]UsersGroupPhotos) error {
+func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string, params map[string]string, groups *[]groups.Group, photos *UsersGroupPhotosByGroupId) error {
 	// Find all the groups the user belongs too
 	clonedClient := CloneClient(client)
 	userGroups, err := GetUserGroups(clonedClient, userID, params)
@@ -67,16 +68,16 @@ func GetUsersGroupPhotos(client *flickr.FlickrClient, userID string, params map[
 	}
 
 	// For each group, get photos for the group
-	var usersGroupPhotos = make([]UsersGroupPhotos, len(userGroups.Groups))
+	var usersGroupPhotos = make(map[string]UsersGroupPhotos, len(userGroups.Groups))
 	*groups = userGroups.Groups
-	for i, group := range userGroups.Groups {
+	for _, group := range userGroups.Groups {
 		clonedClient = CloneClient(client)
 		groupPhotos, err := GetGroupPhotos(clonedClient, group.Nsid, params)
 		if err != nil {
 			return err
 		}
-		usersGroupPhotos[i] = UsersGroupPhotos{
-			GroupID:   group.Nsid,
+		usersGroupPhotos[group.Nsid] = UsersGroupPhotos{
+			// GroupID:   group.Nsid,
 			GroupName: group.Name,
 			Photos:    groupPhotos.Photos,
 		}
