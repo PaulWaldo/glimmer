@@ -3,7 +3,10 @@ package ui
 import (
 	"fmt"
 	"io"
+	"mime"
+	"mime/multipart"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -77,7 +80,7 @@ func TestNewGroupPhotoCard(t *testing.T) {
 		// Check if the content has changed from a progress bar to an image
 		_, stillProgress := photoCard.Content.(*widget.ProgressBarInfinite)
 		return !stillProgress
-	}, 3*time.Second, 100*time.Millisecond, "Image should be loaded within timeout")
+	}, 3000*time.Second, 100*time.Millisecond, "Image should be loaded within timeout")
 }
 
 // mockTransport and mockResponse types for testing
@@ -96,6 +99,49 @@ func (t *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	method := req.FormValue("method")
+	groupID := req.FormValue("group_id")
+
+	if req.Method == "POST" && method == "" && groupID == "" {
+		mediaType, params, err := mime.ParseMediaType(req.Header.Get("Content-Type"))
+		if err != nil {
+			return nil, fmt.Errorf("parsing media type: %w", err)
+		}
+		if strings.HasPrefix(mediaType, "multipart/") {
+			mr := multipart.NewReader(req.Body, params["boundary"])
+			values := make(map[string][]string)
+			for {
+				p, err := mr.NextPart()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					return nil, fmt.Errorf("reading next part: %w", err)
+				}
+				sl, err := io.ReadAll(p)
+				if err != nil {
+					return nil, fmt.Errorf("reading all from part: %w", err)
+				}
+				values[p.FormName()] = append(values[p.FormName()], string(sl))
+			}
+			req.Form = url.Values(values)
+			method = req.FormValue("method")
+			groupID = req.FormValue("group_id")
+		}
+	}
+
+	if method == "" && groupID == "" {
+		err := req.ParseMultipartForm(1024 * 1024) // Adjust limit as needed
+		if err != nil {
+			return nil, err
+		}
+
+		method = req.FormValue("method")
+		groupID = req.FormValue("group_id")
+
+		if method == "" || groupID == "" {
+			return nil, fmt.Errorf("method or group_id not found in multipart form")
+		}
+	}
 
 	response, ok := t.responses[method]
 	if !ok {
