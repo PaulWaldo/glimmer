@@ -1,7 +1,10 @@
 package ui
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -12,6 +15,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert" // Added for assertions
@@ -53,6 +57,20 @@ var minimalJPEG = []byte{
 	0x00, 0x00, 0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f, 0x00, 0x7f, 0x00, 0xff, 0xd9,
 }
 
+func simpleJPEGImage() []byte {
+	simpleImage := image.NewGray(image.Rect(0, 0, 1, 1))
+	// Encode the grayscale image to JPEG
+	var buf bytes.Buffer                       // Use a buffer to store the encoded JPEG data
+	err := jpeg.Encode(&buf, simpleImage, nil) // Use nil for default JPEG options
+	if err != nil {
+		fyne.LogError("Failed to encode JPEG", err)
+		return []byte{}
+	}
+
+	// buf.Bytes() now contains the JPEG encoded image data
+	return buf.Bytes()
+}
+
 // TestNewGroupPhotoCard tests the creation of a photo card for group photos
 func TestNewGroupPhotoCard(t *testing.T) {
 	// Create a mock transport
@@ -73,7 +91,7 @@ func TestNewGroupPhotoCard(t *testing.T) {
 	imageURL := "https://live.staticflickr.com/server123/12345_secret123_z.jpg"
 	transport.responses[imageURL] = mockResponse{
 		statusCode: 200,
-		body:       string(minimalJPEG),
+		body:       string(simpleJPEGImage()),
 		isImage:    true,
 	}
 
@@ -96,6 +114,15 @@ func TestNewGroupPhotoCard(t *testing.T) {
 	// Initially, the content should be a progress bar
 	_, isProgress := photoCard.Content.(*widget.ProgressBarInfinite)
 	assert.True(t, isProgress, "Initial content should be a progress bar")
+
+	// Wait for the image to load (which should happen quickly with the mock response)
+	assert.Eventually(t, func() bool {
+		_, isProgress := photoCard.Content.(*widget.ProgressBarInfinite)
+		return !isProgress // The content should no longer be a progress bar
+	}, 2*time.Second, 10*time.Millisecond) // Adjust timeout as needed
+
+	// Assert that the content is now an image
+	assert.IsType(t, &canvas.Image{}, photoCard.Content)
 
 	// We expect the image to be loaded, which would change the content from a progress bar
 	assert.Eventually(t, func() bool {

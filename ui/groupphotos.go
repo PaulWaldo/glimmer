@@ -114,8 +114,6 @@ func NewGroupPhotoCard(photo api.Photo, client *flickr.FlickrClient) *GroupPhoto
 		client: clone,
 	}
 	i.ExtendBaseWidget(i)
-	go func() {
-		i.loadImage()  // Start loading the image in a goroutine
-	}()
+	go i.loadImage() // Start loading the image in a goroutine
 	return i
 }
