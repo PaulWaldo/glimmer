@@ -1,7 +1,10 @@
 package ui
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -13,6 +16,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/storage/repository"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
 	"github.com/stretchr/testify/assert" // Added for assertions
@@ -40,47 +44,44 @@ func TestSetGroups(t *testing.T) {
 	}
 }
 
-// TODO: All this commented code is to be able to test that `NewImageFromURI`
-// Uses the correct image.  Revisit later?
+func simpleJPEGImage() []byte {
+	simpleImage := image.NewGray(image.Rect(0, 0, 1, 1))
+	// Encode the grayscale image to JPEG
+	var buf bytes.Buffer                       // Use a buffer to store the encoded JPEG data
+	err := jpeg.Encode(&buf, simpleImage, nil) // Use nil for default JPEG options
+	if err != nil {
+		fyne.LogError("Failed to encode JPEG", err)
+		return []byte{}
+	}
 
-// func simpleJPEGImage() []byte {
-// 	simpleImage := image.NewGray(image.Rect(0, 0, 1, 1))
-// 	// Encode the grayscale image to JPEG
-// 	var buf bytes.Buffer                       // Use a buffer to store the encoded JPEG data
-// 	err := jpeg.Encode(&buf, simpleImage, nil) // Use nil for default JPEG options
-// 	if err != nil {
-// 		fyne.LogError("Failed to encode JPEG", err)
-// 		return []byte{}
-// 	}
+	// buf.Bytes() now contains the JPEG encoded image data
+	return buf.Bytes()
+}
 
-// 	// buf.Bytes() now contains the JPEG encoded image data
-// 	return buf.Bytes()
-// }
+type stringURIReadCloser struct {
+	b   []byte
+	uri fyne.URI
+}
 
-// type stringURIReadCloser struct {
-// 	b   []byte
-// 	uri fyne.URI
-// }
+func (s stringURIReadCloser) URI() fyne.URI { return s.uri }
 
-// func (s stringURIReadCloser) URI() fyne.URI { return s.uri }
+type mockRepository struct {
+	expectedURI  string
+	expectedData []byte
+	readCloser   fyne.URIReadCloser
+	canRead      bool
+}
 
-// type mockRepository struct {
-// 	expectedURI  string
-// 	expectedData []byte
-// 	readCloser   fyne.URIReadCloser
-// 	canRead      bool
-// }
-
-// func (r mockRepository) Exists(u fyne.URI) (bool, error) {
-// 	return u.String() != r.expectedURI, nil
-// }
-// func (r mockRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
-// 	return stringURIReadCloser{r.expectedData}
-// }
-// func (r mockRepository) CanRead(u fyne.URI) (bool, error) {
-// 	return r.canRead, nil
-// }
-// func (r mockRepository) Destroy(string) {}
+func (r mockRepository) Exists(u fyne.URI) (bool, error) {
+	return u.String() != r.expectedURI, nil
+}
+func (r mockRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
+	return stringURIReadCloser{r.expectedData, }
+}
+func (r mockRepository) CanRead(u fyne.URI) (bool, error) {
+	return r.canRead, nil
+}
+func (r mockRepository) Destroy(string) {}
 
 // TestNewGroupPhotoCard tests the creation of a photo card for group photos
 func TestNewGroupPhotoCard(t *testing.T) {
@@ -99,12 +100,12 @@ func TestNewGroupPhotoCard(t *testing.T) {
 	transport.responses["flickr.photos.getInfo"] = mockResponse{statusCode: 200, body: photoInfoResponse, isImage: false}
 
 	// Add mock response for the image URL
-	// imageURL := "https://live.staticflickr.com/server123/12345_secret123_z.jpg"
-	// transport.responses[imageURL] = mockResponse{
-	// 	statusCode: 200,
-	// 	body:       string(simpleJPEGImage()),
-	// 	isImage:    true,
-	// }
+	imageURL := "https://live.staticflickr.com/server123/12345_secret123_z.jpg"
+	transport.responses[imageURL] = mockResponse{
+		statusCode: 200,
+		body:       string(simpleJPEGImage()),
+		isImage:    true,
+	}
 
 	// Create client with mock transport
 	client := flickr.GetTestClient()
@@ -134,11 +135,11 @@ func TestNewGroupPhotoCard(t *testing.T) {
 	// NewImageFromURI = mockNewImageFromURI
 	// "OK, I see this is available `func Register(scheme string, repository Repository)`.  The schem"
 
-	// repository.Register("https", mockRepository{
-	// 	expectedURI: "https://live.staticflickr.com/server123/12345_secret123_z.jpg",
-	// 	readCloser:  nil,
-	// 	canRead:     true,
-	// })
+	repository.Register("https", mockRepository{
+		expectedURI: "https://live.staticflickr.com/server123/12345_secret123_z.jpg",
+		readCloser:  nil,
+		canRead:     true,
+	})
 
 	// Wait for the image to load (which should happen quickly with the mock response)
 	assert.Eventually(t, func() bool {
