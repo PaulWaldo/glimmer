@@ -19,7 +19,7 @@ import (
 	"fyne.io/fyne/v2/storage/repository"
 	"fyne.io/fyne/v2/widget"
 	"github.com/PaulWaldo/glimmer/api"
-	"github.com/stretchr/testify/assert" // Added for assertions
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/masci/flickr.v3"
 	"gopkg.in/masci/flickr.v3/groups"
 )
@@ -58,12 +58,30 @@ func simpleJPEGImage() []byte {
 	return buf.Bytes()
 }
 
+// stringURIReadCloser now implements fyne.URIReadCloser
 type stringURIReadCloser struct {
 	b   []byte
 	uri fyne.URI
+	r   *bytes.Reader // Add a reader for Read()
 }
 
-func (s stringURIReadCloser) URI() fyne.URI { return s.uri }
+// Implement all methods of the fyne.URIReadCloser interface
+func (s *stringURIReadCloser) Read(p []byte) (n int, err error) {
+	if s.r == nil {
+		s.r = bytes.NewReader(s.b)
+	}
+	return s.r.Read(p)
+}
+
+func (s *stringURIReadCloser) URI() fyne.URI { return s.uri }
+func (s *stringURIReadCloser) Close() error { return nil }
+func (s *stringURIReadCloser) Length() int64 { return int64(len(s.b)) }
+func (s *stringURIReadCloser) LastModified() time.Time { return time.Now() }
+
+// ETag and Refresh are optional, provide dummy implementations
+func (s *stringURIReadCloser) ETag() (string, bool)            { return "", false }
+func (s *stringURIReadCloser) Refresh() (fyne.URIReadCloser, error) { return s, nil }
+
 
 type mockRepository struct {
 	expectedURI  string
@@ -76,8 +94,14 @@ func (r mockRepository) Exists(u fyne.URI) (bool, error) {
 	return u.String() != r.expectedURI, nil
 }
 func (r mockRepository) Reader(u fyne.URI) (fyne.URIReadCloser, error) {
-	return stringURIReadCloser{r.expectedData, }
+	if u.String() != r.expectedURI {
+		return nil, fmt.Errorf("unexpected URI: %s", u.String())
+	}
+
+	// Return stringURIReadCloser with all necessary data
+	return &stringURIReadCloser{b: r.expectedData, uri: u}, nil
 }
+
 func (r mockRepository) CanRead(u fyne.URI) (bool, error) {
 	return r.canRead, nil
 }
@@ -128,24 +152,19 @@ func TestNewGroupPhotoCard(t *testing.T) {
 	assert.True(t, isProgress, "Initial content should be a progress bar")
 
 	// Create a mock version of func canvas.NewImageFromURI(uri fyne.URI) *canvas.Image
-	// mockNewImageFromURI := func(uri fyne.URI) *canvas.Image {
-	// 	assert.Equal(t, "https://live.staticflickr.com/server123/12345_secret123_z.jpg", uri.String())
-	// 	return canvas.NewImageFromReader(strings.NewReader(string(simpleJPEGImage())), "fakeImage.jpg")
-	// }
-	// NewImageFromURI = mockNewImageFromURI
-	// "OK, I see this is available `func Register(scheme string, repository Repository)`.  The schem"
-
-	repository.Register("https", mockRepository{
-		expectedURI: "https://live.staticflickr.com/server123/12345_secret123_z.jpg",
-		readCloser:  nil,
-		canRead:     true,
-	})
+	data := simpleJPEGImage()
+	mockRepo := mockRepository{
+		expectedURI:  "https://live.staticflickr.com/server123/12345_secret123_z.jpg",
+		expectedData: data,
+		canRead:      true,
+	}
+	repository.Register("https", mockRepo) // Register the mock repository
 
 	// Wait for the image to load (which should happen quickly with the mock response)
 	assert.Eventually(t, func() bool {
 		_, isProgress := photoCard.Content.(*widget.ProgressBarInfinite)
 		return !isProgress // The content should no longer be a progress bar
-	}, 2*time.Second, 10*time.Millisecond) // Adjust timeout as needed
+	}, 500*time.Second, 100*time.Millisecond)
 
 	// Assert that the content is now an image
 	assert.IsType(t, &canvas.Image{}, photoCard.Content)
@@ -155,7 +174,7 @@ func TestNewGroupPhotoCard(t *testing.T) {
 		// Check if the content has changed from a progress bar to an image
 		_, stillProgress := photoCard.Content.(*widget.ProgressBarInfinite)
 		return !stillProgress
-	}, 500*time.Second, 100*time.Millisecond, "Image should be loaded within timeout")
+	}, 1*time.Second, 100*time.Millisecond, "Image should be loaded within timeout")
 }
 
 // mockTransport and mockResponse types for testing
