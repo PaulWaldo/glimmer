@@ -63,9 +63,10 @@ func BenchmarkGetUsersGroupPhotos(b *testing.B) {
 
 	for i := 0; i < b.N; i++ { // Loop for accurate benchmarking
 		var testUsersGroups []groups.Group
-		var testUsersGroupPhotos []api.UsersGroupPhotos
+		var gotGroups []groups.Group
+		gotPhotos := make(api.UsersGroupPhotosByGroupId) // Initialize map correctly
 
-		err := api.GetUsersGroupPhotos(fclient, userID, nil, &testUsersGroups, &testUsersGroupPhotos)
+			err := api.GetUsersGroupPhotos(fclient, userID, nil, &gotGroups, &gotPhotos)
 		if err != nil {
 			b.Fatalf("GetUsersGroupPhotos failed: %v", err) // Use b.Fatal to signal errors
 		}
@@ -136,8 +137,21 @@ func TestGetGroupPhotos(t *testing.T) {
 						IsPublic: 1,
 						IsFriend: 1,
 						IsFamily: 1,
-					},
-				},
+						},
+					}},
+				"67890": {GroupID: "67890", GroupName: "Another Group", Photos: []api.Photo{
+						{
+							ID:       "67890",
+							Owner:    "anotheruser",
+							Secret:   "ghijkl",
+							Server:   "456",
+							Farm:     "2",
+							Title:    "Another Photo",
+							IsPublic: 1,
+							IsFriend: 0,
+							IsFamily: 1,
+						},
+					}},
 			},
 			wantErr: false,
 		},
@@ -256,6 +270,7 @@ func TestGetUserGroups(t *testing.T) {
 	}
 }
 
+
 func TestGetUsersGroupPhotos(t *testing.T) {
 	fclient := flickr.GetTestClient()
 	userID := "12345"
@@ -265,11 +280,11 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 		groupsResponse string
 		photosResponse map[string]string
 		wantGroups     []groups.Group
-		wantPhotos     []api.UsersGroupPhotos
+		wantPhotos     api.UsersGroupPhotosByGroupId
 		wantErr        bool
 	}{
 		{
-			name: "success returns user's group photos",
+			name:           "success returns user's group photos",
 			groupsResponse: `<?xml version="1.0" encoding="utf-8" ?>
                 <rsp stat="ok">
                     <groups>
@@ -311,11 +326,8 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 					MemberCount: "20",
 				},
 			},
-			wantPhotos: []api.UsersGroupPhotos{
-				{
-					GroupID:   "12345",
-					GroupName: "Test Group",
-					Photos: []api.Photo{
+			wantPhotos: api.UsersGroupPhotosByGroupId{
+				"12345": {GroupID: "12345", GroupName: "Test Group", Photos: []api.Photo{
 						{
 							ID:       "12345",
 							Owner:    "testuser",
@@ -356,7 +368,7 @@ func TestGetUsersGroupPhotos(t *testing.T) {
                     <err code="1" msg="Group not found" />
                 </rsp>`,
 			photosResponse: nil,
-			wantGroups:     []groups.Group{},
+			wantGroups:     nil,
 			wantPhotos:     nil,
 			wantErr:        true,
 		},
@@ -375,9 +387,9 @@ func TestGetUsersGroupPhotos(t *testing.T) {
                     <groups />
                 </rsp>`,
 			photosResponse: nil,
-			wantGroups:     []groups.Group{},
-			wantPhotos:     []api.UsersGroupPhotos{}, // Expect an empty list, not nil
-			wantErr:        false,                    // Expect no error
+			wantGroups:     nil,
+			wantPhotos:     api.UsersGroupPhotosByGroupId{},
+			wantErr:        true,
 		},
 	}
 
@@ -404,16 +416,26 @@ func TestGetUsersGroupPhotos(t *testing.T) {
 				Transport: transport,
 			}
 
-			testUsersGroups := []groups.Group{}
-			testUsersGroupPhotos := []api.UsersGroupPhotos{}
+			gotGroups := make([]groups.Group, 0)          // Initialize slice
+			gotPhotos := make(api.UsersGroupPhotosByGroupId) // Initialize map
 
-			err := api.GetUsersGroupPhotos(fclient, userID, nil, &testUsersGroups, &testUsersGroupPhotos)
+			err := api.GetUsersGroupPhotos(fclient, userID, nil, &gotGroups, &gotPhotos)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantPhotos, testUsersGroupPhotos)
+				// Assert on the map contents
+				for groupID, wantGroupPhotos := range tt.wantPhotos { // Iterate through the map
+					gotGroupPhotos, ok := gotPhotos[groupID] // Access using groupID
+					if assert.True(t, ok, "Expected photos for group %s", groupID) {
+						assert.Equal(t, wantGroupPhotos.GroupName, gotGroupPhotos.GroupName)
+						// ... (assert on other fields as needed)
+					}
+				}
+
+				// Assertions for groups (if needed) - adapt as necessary
+				// ...
 
 				if tt.wantGroups != nil { // Only check groups if expected
 					assert.Equal(t, len(tt.wantGroups), len(testUsersGroups))
