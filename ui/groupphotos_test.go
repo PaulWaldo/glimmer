@@ -73,15 +73,14 @@ func (s *stringURIReadCloser) Read(p []byte) (n int, err error) {
 	return s.r.Read(p)
 }
 
-func (s *stringURIReadCloser) URI() fyne.URI { return s.uri }
-func (s *stringURIReadCloser) Close() error { return nil }
-func (s *stringURIReadCloser) Length() int64 { return int64(len(s.b)) }
+func (s *stringURIReadCloser) URI() fyne.URI           { return s.uri }
+func (s *stringURIReadCloser) Close() error            { return nil }
+func (s *stringURIReadCloser) Length() int64           { return int64(len(s.b)) }
 func (s *stringURIReadCloser) LastModified() time.Time { return time.Now() }
 
 // ETag and Refresh are optional, provide dummy implementations
-func (s *stringURIReadCloser) ETag() (string, bool)            { return "", false }
+func (s *stringURIReadCloser) ETag() (string, bool)                 { return "", false }
 func (s *stringURIReadCloser) Refresh() (fyne.URIReadCloser, error) { return s, nil }
-
 
 type mockRepository struct {
 	expectedURI  string
