@@ -17,7 +17,8 @@ openai-api-base: https://glhf.chat/api/openai/v1
 read:
   - CONVENTIONS.md
   - project_docs/groupphotodesign.md
-  - project_docs/2025-03-15_summary.md
+  # - project_docs/2025-03-15_summary.md
+  - project_docs/2025-04-01_summary.md
 # map-tokens: 512
 architect: True
 auto-accept-architect: False
